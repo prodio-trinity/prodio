@@ -1,0 +1,15 @@
+### [Statistics] 월별 수주 통계
+GET http://localhost:8080/api/statistics/orders?year=2026&month=8
+Content-Type: application/json
+
+###
+
+### [Statistics] 클라이언트별 수주 통계
+GET http://localhost:8080/api/statistics/clients
+Content-Type: application/json
+
+###
+
+### [Statistics] 제품별 생산 통계
+GET http://localhost:8080/api/statistics/productions
+Content-Type: application/json

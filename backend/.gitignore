@@ -1,0 +1,20 @@
+# Local environment and secrets (.env 는 프로젝트 루트에 있다)
+**/*.pem
+**/*.key
+**/*.p12
+
+# Gradle / build output
+.gradle/
+build/
+out/
+bin/
+
+# IDE and operating system
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Runtime output
+logs/
+*.log

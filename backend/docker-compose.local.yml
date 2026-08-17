@@ -1,0 +1,22 @@
+# 로컬 개발용 DB. 각자 로컬에서 `docker compose -f docker-compose.local.yml up -d`로 띄운다.
+# 값은 src/main/resources/application-local.yaml 과 맞춰져 있다 — 바꾸면 같이 바꿀 것.
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: prodiodb
+      POSTGRES_USER: prodio
+      POSTGRES_PASSWORD: prodio
+    ports:
+      - "5432:5432"
+    volumes:
+      - prodio-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prodio -d prodiodb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  prodio-db-data:

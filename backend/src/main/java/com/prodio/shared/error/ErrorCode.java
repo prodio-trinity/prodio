@@ -1,0 +1,10 @@
+package com.prodio.shared.error;
+
+public enum ErrorCode {
+    INVALID_REQUEST,
+    AUTH_EMAIL_ALREADY_EXISTS,
+    AUTH_INVALID_CREDENTIALS,
+    ADMIN_MEMBER_NOT_FOUND,
+    ADMIN_ROLE_INVALID,
+    ADMIN_SELF_DEMOTION
+}

@@ -1,0 +1,18 @@
+server:
+  # nginx 가 TLS 를 종료하고 컨테이너엔 평문 HTTP 로 넘기므로, X-Forwarded-* 헤더를
+  # 신뢰하지 않으면 request.isSecure() 가 항상 false 로 보여 세션 쿠키에 Secure 가 안 붙는다.
+  forward-headers-strategy: framework
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: ${DB_DRIVER_CLASS_NAME}
+    hikari:
+      maximum-pool-size: 10
+
+logging:
+  structured:
+    format:
+      console: ${LOGGING_STRUCTURED_FORMAT_CONSOLE:ecs}

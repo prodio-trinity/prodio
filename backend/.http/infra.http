@@ -1,0 +1,24 @@
+### [Infra] AI 채팅
+POST http://localhost:8080/api/ai/chat
+Content-Type: application/json
+
+{
+  "message": "이번 달 수주 현황 요약해줘"
+}
+
+###
+
+### [Infra] AI 통계 요약
+GET http://localhost:8080/api/ai/summary
+Content-Type: application/json
+
+###
+
+### [Infra] SMS 발송 테스트
+POST http://localhost:8080/api/sms/send
+Content-Type: application/json
+
+{
+  "to": "010-1234-5678",
+  "message": "배송이 시작되었습니다."
+}

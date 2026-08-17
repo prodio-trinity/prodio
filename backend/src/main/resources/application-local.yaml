@@ -1,0 +1,8 @@
+# 로컬 개발용 DB 접속 정보. docker-compose.local.yml 의 값과 고정으로 맞춰져 있어
+# .env 없이도 그대로 동작한다 — 비밀번호도 로컬 전용 더미값이라 커밋해도 무방하다.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/prodiodb
+    username: prodio
+    password: prodio
+    driver-class-name: org.postgresql.Driver
