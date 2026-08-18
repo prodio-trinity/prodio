@@ -34,12 +34,16 @@ export function LoginForm() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
+      let roles: string[] = [];
       if (mode === "login") {
-        await login({ email, password }).unwrap();
+        const result = await login({ email, password }).unwrap();
+        roles = result.roles;
       } else {
-        await signup({ email, password, name }).unwrap();
+        const result = await signup({ email, password, name }).unwrap();
+        roles = result.roles;
       }
-      router.replace("/admin");
+      const destination = roles.includes("ADMIN") ? "/dashboard" : "/my-orders";
+      router.replace(destination);
     } catch {
       // 에러 메시지는 loginState/signupState.error 에서 표시한다.
     }
