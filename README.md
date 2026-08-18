@@ -64,6 +64,12 @@ cd backend
 
 ### 5. 프론트엔드 실행
 
+`frontend/.env.local` 파일 생성:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
+
 ```bash
 cd frontend
 npm install
@@ -71,7 +77,6 @@ npm run dev
 ```
 
 - 브라우저: `http://localhost:3000`
-- API URL은 기본값(`http://localhost:8080`)으로 자동 설정됨
 
 ---
 
