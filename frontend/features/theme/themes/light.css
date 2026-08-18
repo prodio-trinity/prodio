@@ -1,7 +1,7 @@
 :root,
 :root[data-theme="light"] {
-  --color-primary: #c93a35;
-  --color-primary-hover: #a82a25;
+  --color-primary: #5b67d8;
+  --color-primary-hover: #4556c8;
   --color-page-background: #f6f4f0;
   --color-content-background: #f7f6f2;
   --color-card-background: #ffffff;

@@ -16,8 +16,8 @@
   justify-content: space-between;
   width: 15rem;
   padding: 24px;
-  border-right: 1px solid #2c2a27;
-  background: #1c1a17;
+  border-right: 1px solid #1f2937;
+  background: #111827;
   color: #ffffff;
   transition: transform 200ms ease, width 200ms ease, padding 200ms ease;
 
@@ -64,7 +64,7 @@
     border: 1px solid rgb(255 255 255 / 0.08);
     border-radius: 12px;
     background: transparent;
-    color: #a8a7a5;
+    color: #9ca3af;
     cursor: pointer;
     transition: background-color 200ms ease, color 200ms ease;
 
@@ -116,7 +116,7 @@
     margin-top: 4px;
     font-size: 10px;
     font-weight: 700;
-    color: #817d76;
+    color: #6b7280;
   }
 
   .nav {
@@ -135,7 +135,7 @@
     border: none;
     border-radius: 12px;
     background: transparent;
-    color: #a8a7a5;
+    color: #9ca3af;
     font-size: 14px;
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -198,7 +198,7 @@
   .profileEmail {
     overflow: hidden;
     font-size: 10px;
-    color: #a8a7a5;
+    color: #9ca3af;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
