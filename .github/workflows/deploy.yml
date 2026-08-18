@@ -34,6 +34,9 @@ jobs:
           script: |
             cd ~/prodio
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose pull
+            docker compose pull db
+            docker compose pull backend
+            docker compose pull frontend
+            docker compose pull nginx
             docker compose up -d --remove-orphans
             docker image prune -f
