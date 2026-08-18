@@ -41,22 +41,28 @@ docker compose -f docker-compose.local.yml up -d
 - PostgreSQL이 `localhost:5432`로 뜸
 - DB/계정 정보는 `application-local.yaml`에 이미 세팅되어 있으니 별도 설정 불필요
 
-### 3. 백엔드 실행
+### 3. 환경변수 설정
 
-Gemini API 키 발급 → [aistudio.google.com](https://aistudio.google.com) (무료)
+`backend/.env` 파일 생성 후 슬랙에 공유된 값 붙여넣기:
+
+```
+GEMINI_API_KEY=슬랙_공유값
+```
+
+### 4. 백엔드 실행
 
 ```bash
 cd backend
-GEMINI_API_KEY=발급받은_키 ./gradlew bootRun
+./gradlew bootRun
 ```
 
-> IntelliJ 사용 시: Run Configuration → Environment Variables에 `GEMINI_API_KEY=발급받은_키` 추가
+> IntelliJ 사용 시: Run Configuration → Environment Variables에 `GEMINI_API_KEY=슬랙_공유값` 추가
 
 - 서버: `http://localhost:8080`
 - Flyway가 자동으로 DB 마이그레이션 실행 (V1, V2)
 - 초기 관리자 계정: `admin@prodio.com` / `admin1234`
 
-### 4. 프론트엔드 실행
+### 5. 프론트엔드 실행
 
 ```bash
 cd frontend
