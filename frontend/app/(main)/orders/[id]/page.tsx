@@ -1,10 +1,6 @@
-import styles from "./page.module.css";
+import { OrderDetail } from "@/features/orders/components/OrderDetail";
 
-export default function OrderDetailPage() {
-  return (
-    <div className={styles.shell}>
-      <h1 className={styles.title}>수주 상세</h1>
-      <p className={styles.placeholder}>수주 상세 정보 (구현 예정)</p>
-    </div>
-  );
+export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <OrderDetail id={id} />;
 }

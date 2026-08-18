@@ -11,4 +11,9 @@ public class OrderException extends RuntimeException {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
+
+    public OrderException(OrderErrorCode errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
 }
