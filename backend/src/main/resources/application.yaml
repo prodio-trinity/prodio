@@ -14,6 +14,7 @@ spring:
 
   flyway:
     enabled: ${SPRING_FLYWAY_ENABLED:true}
+    repair-on-migrate: true
 
   modulith:
     events:
