@@ -23,7 +23,7 @@ class ModuleBoundaryTest {
             new ClassFileImporter().importPackages("com.prodio");
 
     @Test
-    @DisplayName("catalog 모듈은 order/production/statistics/infra를 직접 참조할 수 없다")
+    @DisplayName("catalog 모듈은 order/production/stat/infra를 직접 참조할 수 없다")
     void catalog_should_not_depend_on_other_modules() {
         ArchRule rule = noClasses()
                 .that().resideInAPackage("com.prodio.catalog..")
@@ -31,30 +31,30 @@ class ModuleBoundaryTest {
                 .resideInAnyPackage(
                         "com.prodio.order..",
                         "com.prodio.production..",
-                        "com.prodio.statistics..",
+                        "com.prodio.stat..",
                         "com.prodio.infra.."
                 );
         rule.check(classes);
     }
 
     @Test
-    @DisplayName("order 모듈은 production/statistics를 직접 참조할 수 없다")
-    void order_should_not_depend_on_production_or_statistics() {
+    @DisplayName("order 모듈은 production/stat을 직접 참조할 수 없다")
+    void order_should_not_depend_on_production_or_stat() {
         ArchRule rule = noClasses()
                 .that().resideInAPackage("com.prodio.order..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(
                         "com.prodio.production..",
-                        "com.prodio.statistics.."
+                        "com.prodio.stat.."
                 );
         rule.check(classes);
     }
 
     @Test
-    @DisplayName("statistics 모듈은 다른 도메인 모듈을 직접 참조할 수 없다")
-    void statistics_should_not_depend_on_domain_modules() {
+    @DisplayName("stat 모듈은 다른 도메인 모듈을 직접 참조할 수 없다")
+    void stat_should_not_depend_on_domain_modules() {
         ArchRule rule = noClasses()
-                .that().resideInAPackage("com.prodio.statistics..")
+                .that().resideInAPackage("com.prodio.stat..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(
                         "com.prodio.catalog..",
