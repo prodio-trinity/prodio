@@ -20,7 +20,7 @@ public final class UserRoles {
                 if (code != null) normalized.add(code);
             }
         }
-        if (normalized.isEmpty()) normalized.add(UserRole.STAFF);
+        if (normalized.isEmpty()) normalized.add(UserRole.CLIENT);
         return new UserRoles(normalized);
     }
 
