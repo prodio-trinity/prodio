@@ -25,6 +25,12 @@ class StubCatalogSnapshotGateway implements CatalogOrderLookup {
     }
 
     @Override
+    public Optional<ClientSnapshot> findClientByAccountId(long accountId) {
+        // 실제 Catalog 구현에서는 계정-거래처 1:1 매핑을 조회한다.
+        return Optional.ofNullable(CLIENTS.get(accountId));
+    }
+
+    @Override
     public Optional<ProductSnapshot> findProduct(long productId) {
         return Optional.ofNullable(PRODUCTS.get(productId));
     }

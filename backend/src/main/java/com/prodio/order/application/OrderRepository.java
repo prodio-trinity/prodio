@@ -10,4 +10,5 @@ public interface OrderRepository {
     Optional<Order> findById(long id);
     Optional<Order> findByIdForUpdate(long id);
     OrderPage findAll(OrderStatus status, String query, int page, int size);
+    OrderPage findAllByClientId(long clientId, OrderStatus status, String query, int page, int size);
 }

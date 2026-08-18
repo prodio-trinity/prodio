@@ -44,11 +44,40 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderPage list(OrderStatus status, String query, int page, int size) {
+        validatePage(page, size);
+        return orderRepository.findAll(status, normalizeQuery(query), page, size);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderPage listMine(long accountId, OrderStatus status, String query, int page, int size) {
+        validatePage(page, size);
+        long clientId = findClientForAccount(accountId).id();
+        return orderRepository.findAllByClientId(clientId, status, normalizeQuery(query), page, size);
+    }
+
+    @Transactional(readOnly = true)
+    public Order getMine(long id, long accountId) {
+        Order order = get(id);
+        if (order.clientId() != findClientForAccount(accountId).id()) {
+            throw new OrderException(OrderErrorCode.ORDER_NOT_FOUND);
+        }
+        return order;
+    }
+
+    private CatalogOrderLookup.ClientSnapshot findClientForAccount(long accountId) {
+        return catalogOrderLookup.findClientByAccountId(accountId)
+                .orElseThrow(() -> new OrderException(OrderErrorCode.CLIENT_ACCOUNT_NOT_LINKED));
+    }
+
+    private void validatePage(int page, int size) {
         if (page < 0 || size < 1 || size > 100) {
             throw new OrderException(OrderErrorCode.INVALID_ORDER_REQUEST,
                     "페이지는 0 이상, 조회 크기는 1~100이어야 합니다.");
         }
-        return orderRepository.findAll(status, query == null ? "" : query.trim(), page, size);
+    }
+
+    private String normalizeQuery(String query) {
+        return query == null ? "" : query.trim();
     }
 
     @Transactional

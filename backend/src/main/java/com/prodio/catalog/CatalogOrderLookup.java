@@ -8,6 +8,8 @@ import java.util.Optional;
  */
 public interface CatalogOrderLookup {
     Optional<ClientSnapshot> findClient(long clientId);
+    /** 로그인 계정과 1:1로 연결된 거래처를 조회한다. */
+    Optional<ClientSnapshot> findClientByAccountId(long accountId);
     Optional<ProductSnapshot> findProduct(long productId);
 
     record ClientSnapshot(

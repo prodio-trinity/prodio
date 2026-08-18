@@ -42,7 +42,20 @@ class JpaOrderRepository implements OrderRepository {
 
     @Override
     public OrderPage findAll(OrderStatus status, String query, int page, int size) {
+        return search(null, status, query, page, size);
+    }
+
+    @Override
+    public OrderPage findAllByClientId(long clientId, OrderStatus status, String query, int page, int size) {
+        return search(clientId, status, query, page, size);
+    }
+
+    private OrderPage search(Long clientId, OrderStatus status, String query, int page, int size) {
         Specification<OrderEntity> specification = Specification.unrestricted();
+        if (clientId != null) {
+            specification = specification.and((root, criteria, builder) ->
+                    builder.equal(root.get("clientId"), clientId));
+        }
         if (status != null) {
             specification = specification.and((root, criteria, builder) ->
                     builder.equal(root.get("status"), status));
