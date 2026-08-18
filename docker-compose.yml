@@ -26,13 +26,13 @@ services:
       SERVER_FORWARD_HEADERS_STRATEGY: framework
     depends_on:
       - db
-    mem_limit: 512m
+    mem_limit: 384m
     restart: unless-stopped
 
   frontend:
     image: ghcr.io/${GITHUB_REPO}/prodio-frontend:latest
     container_name: prodio-frontend
-    mem_limit: 256m
+    mem_limit: 192m
     restart: unless-stopped
 
   nginx:
