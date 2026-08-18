@@ -104,4 +104,4 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_FRONTEND }}:latest
           build-args: |
-            NEXT_PUBLIC_API_URL=https://prodio.songkyeongyong.xyz
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
