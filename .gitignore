@@ -9,3 +9,6 @@
 .env
 .env.*
 !.env.example
+
+# SSL 인증서 (서버에서만 관리)
+nginx/certs/*.pem
