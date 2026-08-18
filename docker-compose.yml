@@ -21,6 +21,9 @@ services:
       SPRING_DATASOURCE_USERNAME: prodio
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PRODIO_CORS_ALLOWED_ORIGINS: https://prodio.songkyeongyong.xyz
+      PRODIO_CSRF_SECURE_COOKIE: "true"
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
     depends_on:
       - db
     mem_limit: 512m
