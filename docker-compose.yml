@@ -24,7 +24,7 @@ services:
       PRODIO_CORS_ALLOWED_ORIGINS: https://prodio.songkyeongyong.xyz
       PRODIO_CSRF_SECURE_COOKIE: "true"
       SERVER_FORWARD_HEADERS_STRATEGY: framework
-      JAVA_TOOL_OPTIONS: "-Xmx256m -XX:MaxMetaspaceSize=96m"
+      JAVA_TOOL_OPTIONS: "-Xmx256m"
     depends_on:
       - db
     mem_limit: 384m
