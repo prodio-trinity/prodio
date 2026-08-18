@@ -1,8 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { ClientOption, ProductOption } from "../../types/order";
 import styles from "./DummyCatalogSelectors.module.css";
+
+interface ClientOption {
+  id: number;
+  name: string;
+  contact: string;
+}
+
+interface ProductOption {
+  id: number;
+  name: string;
+  unitPrice: number;
+  specification: string;
+}
 
 export const DUMMY_CLIENTS: ClientOption[] = [
   { id: 1, name: "ABC 제조", contact: "김담당 · 010-1234-5678" },

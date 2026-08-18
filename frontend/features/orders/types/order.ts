@@ -45,16 +45,3 @@ export interface CreateOrderCommand {
   deliveryAddress?: string;
   note?: string;
 }
-
-export interface ClientOption {
-  id: number;
-  name: string;
-  contact: string;
-}
-
-export interface ProductOption {
-  id: number;
-  name: string;
-  unitPrice: number;
-  specification: string;
-}

@@ -1,5 +1,6 @@
 package com.prodio.order.application;
 
+import com.prodio.catalog.CatalogOrderLookup;
 import com.prodio.order.OrderCreated;
 import com.prodio.order.domain.Order;
 import com.prodio.order.domain.OrderStatus;
@@ -17,15 +18,15 @@ import java.time.OffsetDateTime;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final CatalogSnapshotGateway catalogSnapshotGateway;
+    private final CatalogOrderLookup catalogOrderLookup;
     private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
 
     @Transactional
     public Order create(CreateOrderCommand command) {
-        CatalogSnapshotGateway.ClientSnapshot client = catalogSnapshotGateway.findClient(command.clientId())
+        CatalogOrderLookup.ClientSnapshot client = catalogOrderLookup.findClient(command.clientId())
                 .orElseThrow(() -> new OrderException(OrderErrorCode.CLIENT_NOT_FOUND));
-        CatalogSnapshotGateway.ProductSnapshot product = catalogSnapshotGateway.findProduct(command.productId())
+        CatalogOrderLookup.ProductSnapshot product = catalogOrderLookup.findProduct(command.productId())
                 .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_NOT_FOUND));
         OffsetDateTime now = OffsetDateTime.now(clock);
         Order order = Order.place(client.id(), client.companyName(), client.phone(),
