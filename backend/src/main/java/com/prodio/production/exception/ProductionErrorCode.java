@@ -1,9 +1,11 @@
 package com.prodio.production.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public enum ProductionErrorCode {
-
+    ALREADY_EXISTS_ORDER(HttpStatus.BAD_REQUEST, "이미 등록된 주문 입니다."),
     PRODUCTION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 생산 기록입니다."),
     INVALID_PRODUCTION_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 생산 상태입니다.");
 
@@ -15,6 +17,4 @@ public enum ProductionErrorCode {
         this.message = message;
     }
 
-    public HttpStatus getStatus() { return status; }
-    public String getMessage() { return message; }
 }
