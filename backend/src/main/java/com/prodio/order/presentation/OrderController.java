@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ class OrderController {
     private final UserDirectory userDirectory;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     ApiResponse<OrderPageResponse> list(@RequestParam(required = false) String status,
             @RequestParam(defaultValue = "") String q,
             @RequestParam(defaultValue = "0") int page,
@@ -37,17 +39,35 @@ class OrderController {
         return ApiResponse.success(OrderPageResponse.from(orderService.list(parsedStatus, q, page, size)));
     }
 
+    @GetMapping("/mine")
+    ApiResponse<OrderPageResponse> listMine(@RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            Authentication authentication) {
+        UserRef creator = currentUser(authentication);
+        return ApiResponse.success(OrderPageResponse.from(
+                orderService.listMine(creator.id(), parseStatus(status), q, page, size)));
+    }
+
+    @GetMapping("/mine/{id}")
+    ApiResponse<OrderResponse> getMine(@PathVariable String id, Authentication authentication) {
+        UserRef creator = currentUser(authentication);
+        return ApiResponse.success(OrderResponse.from(orderService.getMine(parseId(id), creator.id())));
+    }
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     ApiResponse<OrderResponse> get(@PathVariable String id) {
         return ApiResponse.success(OrderResponse.from(orderService.get(parseId(id))));
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('CLIENT', 'STAFF', 'ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     ApiResponse<OrderResponse> create(@Valid @RequestBody CreateOrderRequest request,
             Authentication authentication) {
-        UserRef creator = userDirectory.findActiveByEmail(authentication.getName())
-                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_CREATOR_NOT_FOUND));
+        UserRef creator = currentUser(authentication);
         CreateOrderCommand command = new CreateOrderCommand(parseId(request.clientId()),
                 parseId(request.productId()), request.quantity(), request.vatIncluded(),
                 request.dueDate(), request.deliveryAddress(), request.note(), creator.id());
@@ -55,12 +75,14 @@ class OrderController {
     }
 
     @PatchMapping("/{id}/start-production")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     ApiResponse<OrderResponse> startProduction(@PathVariable String id) {
         return ApiResponse.success("생산을 시작했습니다.",
                 OrderResponse.from(orderService.startProduction(parseId(id))));
     }
 
     @PatchMapping("/{id}/payment")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     ApiResponse<OrderResponse> updatePayment(@PathVariable String id,
             @Valid @RequestBody PaymentRequest request) {
         return ApiResponse.success("입금 상태를 변경했습니다.",
@@ -75,6 +97,11 @@ class OrderController {
         } catch (NumberFormatException exception) {
             throw new OrderException(OrderErrorCode.INVALID_ORDER_REQUEST, "식별자가 올바르지 않습니다.");
         }
+    }
+
+    private UserRef currentUser(Authentication authentication) {
+        return userDirectory.findActiveByEmail(authentication.getName())
+                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_CREATOR_NOT_FOUND));
     }
 
     private OrderStatus parseStatus(String value) {

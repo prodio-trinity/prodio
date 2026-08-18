@@ -48,8 +48,21 @@ export const orderService = {
     return request<OrderPage>(`/api/orders?${params.toString()}`);
   },
 
+  listMine(filters: OrderFilters = {}) {
+    const params = new URLSearchParams();
+    if (filters.status) params.set("status", filters.status);
+    if (filters.q) params.set("q", filters.q);
+    params.set("page", String(filters.page ?? 0));
+    params.set("size", String(filters.size ?? 10));
+    return request<OrderPage>(`/api/orders/mine?${params.toString()}`);
+  },
+
   get(id: string) {
     return request<Order>(`/api/orders/${id}`);
+  },
+
+  getMine(id: string) {
+    return request<Order>(`/api/orders/mine/${id}`);
   },
 
   create(command: CreateOrderCommand) {
