@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: prodio-db-local
+    environment:
+      POSTGRES_DB: prodiodb
+      POSTGRES_USER: prodio
+      POSTGRES_PASSWORD: prodio
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_local_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_local_data:
