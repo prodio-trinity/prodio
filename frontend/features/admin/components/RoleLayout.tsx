@@ -17,6 +17,8 @@ interface RoleLayoutProps {
   navItems: SidebarNavItem[];
   /** ADMIN 권한이 있을 때만 추가로 노출할 메뉴. */
   adminNavItems?: SidebarNavItem[];
+  /** CLIENT 권한일 때 노출할 메뉴. */
+  clientNavItems?: SidebarNavItem[];
   /** 사이드바 접힘 상태를 저장할 localStorage 키. 화면마다 따로 기억하도록 구분한다. */
   storageKey: string;
   /** 권한이 없을 때 돌려보낼 경로. */
@@ -33,6 +35,7 @@ export function RoleLayout({
   brandSub,
   navItems,
   adminNavItems,
+  clientNavItems,
   storageKey,
   deniedRedirect = "/",
 }: RoleLayoutProps) {
@@ -45,14 +48,25 @@ export function RoleLayout({
   const hasRequiredRole = user?.roles.some((role) => requiredRoles.includes(role)) ?? false;
   const isAdmin = user?.roles.includes("ADMIN") ?? false;
 
+  // 현재 경로가 CLIENT 영역인지 판단
+  const clientPrefixes = (clientNavItems ?? []).map((item) => item.href);
+  const isInClientArea = clientPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+
   // 현재 경로가 관리자 전용 영역인지 판단
   const adminPrefixes = (adminNavItems ?? []).map((item) => item.href);
   const isInAdminArea = adminPrefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 
-  // 관리자 영역이면 adminNavItems만, 아니면 navItems만 표시
-  const activeNavItems = isAdmin && isInAdminArea && adminNavItems ? adminNavItems : navItems;
+  // 경로 기준으로 사이드바 결정: CLIENT 영역 → clientNavItems, 그 외 → navItems
+  const activeNavItems =
+    isInClientArea && clientNavItems
+      ? clientNavItems
+      : isAdmin && isInAdminArea && adminNavItems
+        ? adminNavItems
+        : navItems;
 
   useEffect(() => {
     if (authStatus === "unauthenticated") router.replace("/login");

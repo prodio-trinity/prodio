@@ -17,15 +17,21 @@ interface RoleDestination {
 }
 
 const ROLE_DESTINATIONS: Record<string, RoleDestination> = {
+  CLIENT: {
+    label: "거래처",
+    href: "/my-orders",
+    activeWhen: ["/my-orders", "/orders/new"],
+  },
+  // V4 role 리네임 전까지 STAFF → CLIENT와 동일하게 처리
   STAFF: {
-    label: "직원",
-    href: "/dashboard",
-    activeWhen: ["/dashboard", "/orders", "/production", "/catalog"],
+    label: "거래처",
+    href: "/my-orders",
+    activeWhen: ["/my-orders", "/orders/new"],
   },
   ADMIN: {
     label: "관리자",
-    href: "/admin/members",
-    activeWhen: ["/statistics", "/admin"],
+    href: "/dashboard",
+    activeWhen: ["/dashboard", "/orders", "/production", "/catalog", "/statistics", "/admin"],
   },
 };
 
@@ -47,18 +53,30 @@ export function ModeSwitcher({ roles, compact = false }: ModeSwitcherProps) {
 
   if (buttons.length < 1) return null;
 
+  // CLIENT/STAFF 경로가 매칭되면 ADMIN은 active 아님 (경로 겹침 방지)
+  const clientButton = buttons.find((b) => b.role === "CLIENT" || b.role === "STAFF");
+  const isClientArea = clientButton
+    ? isAreaActive(pathname, clientButton.destination.activeWhen)
+    : false;
+
   return (
     <nav aria-label="화면 전환" className={styles.switcher} data-compact={compact}>
-      {buttons.map(({ role, destination }) => (
-        <Link
-          key={role}
-          href={destination.href}
-          aria-current={isAreaActive(pathname, destination.activeWhen) ? "page" : undefined}
-          className={styles.link}
-        >
-          {destination.label}
-        </Link>
-      ))}
+      {buttons.map(({ role, destination }) => {
+        const isAdmin = role === "ADMIN";
+        const active = isAdmin
+          ? !isClientArea && isAreaActive(pathname, destination.activeWhen)
+          : isAreaActive(pathname, destination.activeWhen);
+        return (
+          <Link
+            key={role}
+            href={destination.href}
+            aria-current={active ? "page" : undefined}
+            className={styles.link}
+          >
+            {destination.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

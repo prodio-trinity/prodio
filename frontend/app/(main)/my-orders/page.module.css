@@ -1,0 +1,13 @@
+.shell {
+  composes: shell from "@/features/shared/styles/pageShell.module.css";
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.placeholder {
+  color: var(--color-text-secondary);
+}

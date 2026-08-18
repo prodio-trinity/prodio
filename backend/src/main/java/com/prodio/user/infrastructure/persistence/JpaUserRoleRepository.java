@@ -18,8 +18,8 @@ class JpaUserRoleRepository implements UserRoleRepository {
     public void assignDefaultRole(long userId) {
         UserAccountEntity user = userAccounts.findWithRolesById(userId)
                 .orElseThrow(() -> new IllegalStateException("기본 권한을 부여할 사용자를 찾을 수 없습니다."));
-        UserRoleEntity defaultRole = roleCodes.findByCode(UserRole.STAFF)
-                .orElseThrow(() -> new IllegalStateException("기본 STAFF 역할 코드가 없습니다."));
+        UserRoleEntity defaultRole = roleCodes.findByCode(UserRole.CLIENT)
+                .orElseThrow(() -> new IllegalStateException("기본 CLIENT 역할 코드가 없습니다."));
         user.addRole(defaultRole);
     }
 
