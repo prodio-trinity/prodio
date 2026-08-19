@@ -50,6 +50,7 @@ class ProductionRecordEntity {
 
     static ProductionRecordEntity from(ProductionRecord domain){
         ProductionRecordEntity entity = new ProductionRecordEntity();
+        entity.id = domain.id();
         entity.orderId = domain.orderId();
         entity.productionStatus = domain.status();
         entity.memo = domain.memo();

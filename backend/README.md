@@ -77,4 +77,7 @@ http://localhost:8080/actuator/health
 | `DB_PASSWORD` | DB 비밀번호 |
 | `DB_DRIVER_CLASS_NAME` | `org.postgresql.Driver` |
 | `GEMINI_API_KEY` | Google AI Studio API 키 |
+| `COOLSMS_API_KEY` | Coolsms API 키 |
+| `COOLSMS_API_SECRET` | Coolsms API 시크릿 |
+| `COOLSMS_SENDER_NUMBER` | Coolsms에 등록된 발신번호 |
 | `SPRING_PROFILES_ACTIVE` | `prod` |
