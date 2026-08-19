@@ -45,6 +45,13 @@ class CatalogSubCategoryEntity {
         return entity;
     }
 
+    /** 편집 가능한 필드만 갱신 */
+    void update(CatalogSubCategory domain) {
+        this.name = domain.name();
+        this.active = domain.active();
+        this.updatedAt = Instant.now();
+    }
+
     CatalogSubCategory toDomain() {
         return new CatalogSubCategory(id, subCategoryCode, name, topCategory, active);
     }

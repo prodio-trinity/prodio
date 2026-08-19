@@ -30,6 +30,12 @@ public class CatalogCategoryService {
         return subCategoryRepository.save(subCategory);
     }
 
+    @Transactional
+    public CatalogSubCategory updateSubCategory(Long id, String subCategoryName, boolean isActive) {
+        return subCategoryRepository.update(id, subCategoryName, isActive)
+                .orElseThrow(() -> new CatalogException(CatalogErrorCode.CATEGORY_NOT_FOUND));
+    }
+
     private TopCategory parseTopCategory(String parentCode) {
         try {
             return TopCategory.valueOf(parentCode);

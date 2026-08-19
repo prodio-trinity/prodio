@@ -11,4 +11,6 @@ public interface CatalogSubCategoryRepository {
     List<CatalogSubCategory> findAll(Boolean isActive);
 
     CatalogSubCategory save(CatalogSubCategory subCategory);
+
+    Optional<CatalogSubCategory> update(Long id, String name, boolean active);
 }
