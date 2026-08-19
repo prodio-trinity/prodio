@@ -6,5 +6,7 @@ public interface ProductionRepository {
     ProductionRecord save(ProductionRecord productionRecord);
     boolean existsByOrderId(Long orderId);
 
-    ShipInfo updateShipInfo(Long productionId);
+    ProductionRecord markShipped(Long productionId);
+
+    ProductionRecord markCompleted(Long productionId);
 }

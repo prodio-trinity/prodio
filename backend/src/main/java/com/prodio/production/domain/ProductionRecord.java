@@ -35,4 +35,11 @@ public record ProductionRecord(
         return new ProductionRecord(id, orderId, ProductionStatus.IN_DELIVERY, memo, phone,
                 startedAt, LocalDateTime.now(), completedAt);
     }
+    public ProductionRecord markCompleted() {
+        if (status != ProductionStatus.IN_DELIVERY) {
+            throw new ProductionException(ProductionErrorCode.INVALID_PRODUCTION_STATUS);
+        }
+        return new ProductionRecord(id, orderId, ProductionStatus.COMPLETED, memo, phone,
+                startedAt, shippedAt, LocalDateTime.now());
+    }
 }
