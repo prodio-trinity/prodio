@@ -136,4 +136,11 @@ export const orderService = {
       body: JSON.stringify({ reason }),
     });
   },
+
+  cancelMine(id: string, reason: string) {
+    return request<Order>(`/api/orders/mine/${id}/cancel`, {
+      method: "PATCH",
+      body: JSON.stringify({ reason }),
+    });
+  },
 };

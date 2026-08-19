@@ -3,7 +3,6 @@ package com.prodio.order.domain;
 import com.prodio.order.exception.OrderException;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,34 +13,35 @@ class OrderTest {
 
     @Test
     void vatIncludedAmountIsRoundedToWon() {
-        Order order = Order.place(1, "거래처", "010",
+        Order order = Order.place(1, "거래처", "010", null,
                 java.util.List.of(OrderItem.of(2, "품목", 15_001, 3)), true,
-                LocalDate.parse("2026-09-01"), delivery(), "메모", 1, NOW);
+                delivery(), "메모", 1, NOW);
 
         assertThat(order.totalAmount()).isEqualTo(49_503);
     }
 
     @Test
     void pendingOrderCanBeUpdatedAndTotalIsRecalculated() {
-        Order order = Order.place(1, "거래처", "010",
+        Order order = Order.place(1, "거래처", "010", "설비 주문",
                 java.util.List.of(OrderItem.of(2, "품목", 15_000, 10)), false,
-                LocalDate.parse("2026-09-01"), delivery(), "", 1, NOW);
+                delivery(), "", 1, NOW);
 
-        order.update(java.util.List.of(
+        order.update("변경된 주문서", java.util.List.of(
                         OrderItem.of(3, "변경 품목", 20_000, 2),
                         OrderItem.of(4, "추가 품목", 10_000, 1)), true,
-                LocalDate.parse("2026-09-10"), delivery(), "새 메모", NOW.plusHours(1));
+                delivery(), "새 메모", NOW.plusHours(1));
 
         assertThat(order.items()).hasSize(2);
+        assertThat(order.orderName()).isEqualTo("변경된 주문서");
         assertThat(order.totalAmount()).isEqualTo(55_000);
         assertThat(order.status()).isEqualTo(OrderStatus.PENDING_PAYMENT);
     }
 
     @Test
     void confirmedOrderCannotBeChangedAgain() {
-        Order order = Order.place(1, "거래처", "010",
+        Order order = Order.place(1, "거래처", "010", null,
                 java.util.List.of(OrderItem.of(2, "품목", 15_000, 10)), false,
-                LocalDate.parse("2026-09-01"), delivery(), "", 1, NOW);
+                delivery(), "", 1, NOW);
 
         order.confirm(NOW.plusMinutes(1));
 
@@ -52,9 +52,9 @@ class OrderTest {
 
     @Test
     void cancellationRequiresAReasonAndLocksTheOrder() {
-        Order order = Order.place(1, "거래처", "010",
+        Order order = Order.place(1, "거래처", "010", null,
                 java.util.List.of(OrderItem.of(2, "품목", 15_000, 10)), false,
-                LocalDate.parse("2026-09-01"), delivery(), "", 1, NOW);
+                delivery(), "", 1, NOW);
 
         assertThatThrownBy(() -> order.cancel(" ", NOW.plusMinutes(1)))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -63,8 +63,8 @@ class OrderTest {
 
         assertThat(order.status()).isEqualTo(OrderStatus.CANCELLED);
         assertThat(order.cancellationReason()).isEqualTo("고객 요청");
-        assertThatThrownBy(() -> order.update(java.util.List.of(OrderItem.of(3, "변경", 1, 1)), false,
-                LocalDate.parse("2026-09-02"), delivery(), "", NOW.plusMinutes(3)))
+        assertThatThrownBy(() -> order.update(null, java.util.List.of(OrderItem.of(3, "변경", 1, 1)), false,
+                delivery(), "", NOW.plusMinutes(3)))
                 .isInstanceOf(OrderException.class);
     }
 

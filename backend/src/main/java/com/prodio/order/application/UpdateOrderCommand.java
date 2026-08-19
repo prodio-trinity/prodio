@@ -1,8 +1,7 @@
 package com.prodio.order.application;
 
-import java.time.LocalDate;
 import java.util.List;
 
-public record UpdateOrderCommand(List<OrderItemCommand> items, boolean vatIncluded,
-        LocalDate dueDate, DeliveryCommand delivery, String note) {
+public record UpdateOrderCommand(String orderName, List<OrderItemCommand> items, boolean vatIncluded,
+        DeliveryCommand delivery, String note) {
 }

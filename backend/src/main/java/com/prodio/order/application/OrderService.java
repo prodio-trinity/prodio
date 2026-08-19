@@ -37,7 +37,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(OrderErrorCode.CLIENT_NOT_FOUND));
         OffsetDateTime now = OffsetDateTime.now(clock);
         Order order = Order.place(client.id(), client.companyName(), client.phone(),
-                resolveItems(command.items()), command.vatIncluded(), command.dueDate(),
+                command.orderName(), resolveItems(command.items()), command.vatIncluded(),
                 resolveDelivery(client.id(), command.delivery()),
                 command.note(), command.createdBy(), now);
         Order saved = orderRepository.save(order);
@@ -139,7 +139,7 @@ public class OrderService {
     }
 
     private Order updateOrder(Order order, UpdateOrderCommand command) {
-        order.update(resolveItems(command.items()), command.vatIncluded(), command.dueDate(),
+        order.update(command.orderName(), resolveItems(command.items()), command.vatIncluded(),
                 resolveDelivery(order.clientId(), command.delivery()), command.note(),
                 OffsetDateTime.now(clock));
         Order saved = orderRepository.save(order);
@@ -184,6 +184,19 @@ public class OrderService {
     @Transactional
     public Order cancel(long id, String reason) {
         Order order = findForUpdate(id);
+        return cancelOrder(order, reason);
+    }
+
+    @Transactional
+    public Order cancelMine(long id, long accountId, String reason) {
+        Order order = findForUpdate(id);
+        if (order.clientId() != findClientForAccount(accountId).id()) {
+            throw new OrderException(OrderErrorCode.ORDER_NOT_FOUND);
+        }
+        return cancelOrder(order, reason);
+    }
+
+    private Order cancelOrder(Order order, String reason) {
         order.cancel(reason, OffsetDateTime.now(clock));
         Order saved = orderRepository.save(order);
         eventPublisher.publishEvent(OrderCancelledEvent.from(saved));
