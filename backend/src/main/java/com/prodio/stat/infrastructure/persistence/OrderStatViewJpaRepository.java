@@ -10,6 +10,7 @@ import java.util.List;
 
 interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, Long> {
     List<OrderStatViewEntity> findAllByOrderId(long orderId);
+    void deleteAllByOrderId(long orderId);
 
     @Query("""
             select v.status as status, count(v) as count

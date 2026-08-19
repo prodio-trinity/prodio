@@ -89,7 +89,7 @@ class OrderStatViewEntity {
     static OrderStatViewEntity from(OrderStatView view) {
         return new OrderStatViewEntity(view);
     }
-    
+
     void markProductionStarted(OffsetDateTime startedAt) {
         if (isTerminal()) return;
         this.status = OrderViewStatus.IN_PRODUCTION;

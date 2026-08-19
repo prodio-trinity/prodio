@@ -44,6 +44,11 @@ class JpaOrderStatViewRepository implements OrderStatViewRepository {
     }
 
     @Override
+    public void deleteAllByOrderId(long orderId) {
+        orderStatViews.deleteAllByOrderId(orderId);
+    }
+
+    @Override
     public List<OrderStatView> findAllByOrderId(long orderId) {
         return orderStatViews.findAllByOrderId(orderId).stream().map(OrderStatViewEntity::toDomain).toList();
     }
