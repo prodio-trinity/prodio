@@ -37,8 +37,8 @@ class OrderStatViewEntity {
     @Column(nullable = false)
     private int quantity;
 
-    @Column(name = "total_amount", nullable = false)
-    private long totalAmount;
+    @Column(name = "line_amount", nullable = false)
+    private long lineAmount;
 
     @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
@@ -79,7 +79,7 @@ class OrderStatViewEntity {
         productId = view.productId();
         productName = view.productName();
         quantity = view.quantity();
-        totalAmount = view.totalAmount();
+        lineAmount = view.lineAmount();
         dueDate = view.dueDate();
         status = OrderViewStatus.PENDING;
         paymentConfirmed = false;
@@ -118,7 +118,7 @@ class OrderStatViewEntity {
 
     OrderStatView toDomain() {
         return new OrderStatView(id, orderId, clientId, clientName, productId, productName,
-                quantity, totalAmount, dueDate, status, paymentConfirmed, onTime,
+                quantity, lineAmount, dueDate, status, paymentConfirmed, onTime,
                 orderCreatedAt, productionStartedAt, shippedAt, completedAt,
                 cancellationReason, cancelledAt);
     }

@@ -3,12 +3,15 @@ package com.prodio.stat.application;
 import com.prodio.stat.SampleOrderCancelledEvent;
 import com.prodio.stat.SampleOrderCompletedEvent;
 import com.prodio.stat.SampleOrderCreatedEvent;
+import com.prodio.stat.SampleOrderItem;
 import com.prodio.stat.SampleOrderShippedEvent;
 import com.prodio.stat.SampleOrderStartedEvent;
 import com.prodio.stat.domain.OrderStatView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -18,9 +21,11 @@ public class StatListener {
 
     @ApplicationModuleListener
     public void handle(SampleOrderCreatedEvent event) {
-        repository.create(OrderStatView.create(event.orderId(), event.clientId(), event.clientName(),
-                event.productId(), event.productName(), event.quantity(), event.totalAmount(),
-                event.dueDate(), event.createdAt()));
+        for (SampleOrderItem item : event.items()) {
+            repository.create(OrderStatView.create(event.orderId(), event.clientId(), event.clientName(),
+                    item.productId(), item.productName(), item.quantity(), item.lineAmount(),
+                    event.dueDate(), event.createdAt()));
+        }
     }
 
     @ApplicationModuleListener
@@ -35,9 +40,11 @@ public class StatListener {
 
     @ApplicationModuleListener
     public void handle(SampleOrderCompletedEvent event) {
-        OrderStatView view = repository.findByOrderId(event.orderId())
-                .orElseThrow(() -> new IllegalStateException("OrderStatView를 찾을 수 없습니다. orderId=" + event.orderId()));
-        boolean onTime = !event.completedAt().toLocalDate().isAfter(view.dueDate());
+        List<OrderStatView> views = repository.findAllByOrderId(event.orderId());
+        if (views.isEmpty()) {
+            throw new IllegalStateException("OrderStatView를 찾을 수 없습니다. orderId=" + event.orderId());
+        }
+        boolean onTime = !event.completedAt().toLocalDate().isAfter(views.get(0).dueDate());
 
         repository.markCompleted(event.orderId(), event.completedAt(), onTime);
     }

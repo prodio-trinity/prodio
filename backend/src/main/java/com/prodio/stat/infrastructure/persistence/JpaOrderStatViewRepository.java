@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,38 +20,42 @@ class JpaOrderStatViewRepository implements OrderStatViewRepository {
 
     @Override
     public void markProductionStarted(long orderId, OffsetDateTime startedAt) {
-        findEntity(orderId).markProductionStarted(startedAt);
+        findEntities(orderId).forEach(entity -> entity.markProductionStarted(startedAt));
     }
 
     @Override
     public void markShipped(long orderId, OffsetDateTime shippedAt) {
-        findEntity(orderId).markShipped(shippedAt);
+        findEntities(orderId).forEach(entity -> entity.markShipped(shippedAt));
     }
 
     @Override
     public void markCompleted(long orderId, OffsetDateTime completedAt, boolean onTime) {
-        findEntity(orderId).markCompleted(completedAt, onTime);
+        findEntities(orderId).forEach(entity -> entity.markCompleted(completedAt, onTime));
     }
 
     @Override
     public void markCancelled(long orderId, String cancellationReason, OffsetDateTime cancelledAt) {
-        findEntity(orderId).markCancelled(cancellationReason, cancelledAt);
+        findEntities(orderId).forEach(entity -> entity.markCancelled(cancellationReason, cancelledAt));
     }
 
     @Override
     public void confirmPayment(long orderId) {
-        findEntity(orderId).confirmPayment();
+        findEntities(orderId).forEach(OrderStatViewEntity::confirmPayment);
     }
 
     @Override
-    public Optional<OrderStatView> findByOrderId(long orderId) {
-        return orderStatViews.findByOrderId(orderId).map(OrderStatViewEntity::toDomain);
+    public List<OrderStatView> findAllByOrderId(long orderId) {
+        return orderStatViews.findAllByOrderId(orderId).stream().map(OrderStatViewEntity::toDomain).toList();
     }
 
     /** 호출부(@ApplicationModuleListener)가 연 트랜잭션 안에서 실행되므로, 조회한 영속 엔티티를
-     * 변경해두면 별도 save() 없이 커밋 시점에 반영된다(JPA dirty checking). */
-    private OrderStatViewEntity findEntity(long orderId) {
-        return orderStatViews.findByOrderId(orderId)
-                .orElseThrow(() -> new IllegalStateException("OrderStatView를 찾을 수 없습니다. orderId=" + orderId));
+     * 변경해두면 별도 save() 없이 커밋 시점에 반영된다(JPA dirty checking).
+     * 한 주문에 품목마다 row가 있어서, 상태 전이는 그 주문에 속한 row 전부에 적용한다. */
+    private List<OrderStatViewEntity> findEntities(long orderId) {
+        List<OrderStatViewEntity> entities = orderStatViews.findAllByOrderId(orderId);
+        if (entities.isEmpty()) {
+            throw new IllegalStateException("OrderStatView를 찾을 수 없습니다. orderId=" + orderId);
+        }
+        return entities;
     }
 }
