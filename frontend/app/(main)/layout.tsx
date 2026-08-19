@@ -10,6 +10,8 @@ import {
   BarChart2,
   Users,
   PlusCircle,
+  Home,
+  Building2,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -26,13 +28,19 @@ const CLIENT_NAV_ITEMS = [
   { href: "/my-orders", label: "내 수주 현황", icon: ClipboardList },
 ];
 
+const UNREGISTERED_CLIENT_NAV_ITEMS = [
+  { href: "/welcome", label: "홈", icon: Home },
+  { href: "/client-registration", label: "거래처 등록", icon: Building2 },
+];
+
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
     <RoleLayout
-      requiredRoles={["STAFF", "CLIENT", "ADMIN"]}
+      requiredRoles={["STAFF", "UNREGISTERED_CLIENT", "CLIENT", "ADMIN"]}
       brandSub="생산관리"
       navItems={NAV_ITEMS}
       clientNavItems={CLIENT_NAV_ITEMS}
+      unregisteredClientNavItems={UNREGISTERED_CLIENT_NAV_ITEMS}
       storageKey="prodio-sidebar-collapsed"
     >
       {children}

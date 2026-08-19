@@ -1,9 +1,13 @@
 import { getCsrfToken } from "@/features/shared/api/csrf";
 import type {
   CreateOrderCommand,
+  DeliveryAddress,
+  DeliveryContext,
   Order,
   OrderFilters,
+  OrderFormContext,
   OrderPage,
+  OrderClientContext,
   UpdateOrderCommand,
 } from "../types/order";
 
@@ -66,6 +70,15 @@ export const orderService = {
     return request<Order>(`/api/orders/mine/${id}`);
   },
 
+  getClientContext() {
+    return request<OrderClientContext>("/api/orders/client-context");
+  },
+
+  getFormContext(clientId?: string) {
+    const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : "";
+    return request<OrderFormContext>(`/api/orders/form-context${query}`);
+  },
+
   create(command: CreateOrderCommand) {
     return request<Order>("/api/orders", {
       method: "POST",
@@ -77,6 +90,37 @@ export const orderService = {
     return request<Order>(`/api/orders/${id}`, {
       method: "PUT",
       body: JSON.stringify(command),
+    });
+  },
+
+  updateMine(id: string, command: UpdateOrderCommand) {
+    return request<Order>(`/api/orders/mine/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(command),
+    });
+  },
+
+  getDeliveryContext(clientId: string) {
+    return request<DeliveryContext>(`/api/orders/delivery?clientId=${encodeURIComponent(clientId)}`);
+  },
+
+  createDeliveryAddress(clientId: string, delivery: DeliveryAddress) {
+    return request<DeliveryAddress>("/api/orders/delivery/addresses", {
+      method: "POST",
+      body: JSON.stringify({ clientId, delivery }),
+    });
+  },
+
+  updateDeliveryAddress(id: string, delivery: DeliveryAddress) {
+    return request<DeliveryAddress>(`/api/orders/delivery/addresses/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(delivery),
+    });
+  },
+
+  deleteDeliveryAddress(id: string) {
+    return request<null>(`/api/orders/delivery/addresses/${id}`, {
+      method: "DELETE",
     });
   },
 

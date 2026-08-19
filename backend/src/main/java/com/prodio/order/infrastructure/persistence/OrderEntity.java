@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -21,14 +23,19 @@ class OrderEntity {
     @Column(name = "client_id", nullable = false) private long clientId;
     @Column(name = "client_name_snapshot", nullable = false) private String clientNameSnapshot;
     @Column(name = "client_phone_snapshot") private String clientPhoneSnapshot;
-    @Column(name = "product_id", nullable = false) private long productId;
-    @Column(name = "product_name_snapshot", nullable = false) private String productNameSnapshot;
-    @Column(name = "unit_price_snapshot", nullable = false) private long unitPriceSnapshot;
-    @Column(nullable = false) private int quantity;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
+    private List<OrderItemEntity> items = new ArrayList<>();
     @Column(name = "vat_included", nullable = false) private boolean vatIncluded;
     @Column(name = "total_amount", nullable = false) private long totalAmount;
     @Column(name = "due_date", nullable = false) private LocalDate dueDate;
     @Column(name = "delivery_address") private String deliveryAddress;
+    @Column(name = "delivery_address_id") private Long deliveryAddressId;
+    @Column(name = "delivery_name_snapshot", nullable = false) private String deliveryNameSnapshot;
+    @Column(name = "delivery_recipient_name_snapshot", nullable = false) private String deliveryRecipientNameSnapshot;
+    @Column(name = "delivery_recipient_phone_snapshot", nullable = false) private String deliveryRecipientPhoneSnapshot;
+    @Column(name = "delivery_postal_code_snapshot", nullable = false) private String deliveryPostalCodeSnapshot;
+    @Column(name = "delivery_address_detail_snapshot", nullable = false) private String deliveryAddressDetailSnapshot;
     @Column private String note;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false) private OrderStatus status;
@@ -47,14 +54,18 @@ class OrderEntity {
         clientId = order.clientId();
         clientNameSnapshot = order.clientNameSnapshot();
         clientPhoneSnapshot = order.clientPhoneSnapshot();
-        productId = order.productId();
-        productNameSnapshot = order.productNameSnapshot();
-        unitPriceSnapshot = order.unitPriceSnapshot();
-        quantity = order.quantity();
+        items.clear();
+        items.addAll(order.items().stream().map(item -> OrderItemEntity.from(this, item)).toList());
         vatIncluded = order.vatIncluded();
         totalAmount = order.totalAmount();
         dueDate = order.dueDate();
         deliveryAddress = order.deliveryAddress();
+        deliveryAddressId = order.delivery().addressId();
+        deliveryNameSnapshot = order.delivery().name();
+        deliveryRecipientNameSnapshot = order.delivery().recipientName();
+        deliveryRecipientPhoneSnapshot = order.delivery().recipientPhone();
+        deliveryPostalCodeSnapshot = order.delivery().postalCode();
+        deliveryAddressDetailSnapshot = order.delivery().addressLine2();
         note = order.note();
         status = order.status();
         cancellationReason = order.cancellationReason();
@@ -65,8 +76,12 @@ class OrderEntity {
 
     Order toDomain() {
         return Order.reconstitute(id, clientId, clientNameSnapshot, clientPhoneSnapshot,
-                productId, productNameSnapshot, unitPriceSnapshot, quantity, vatIncluded,
-                totalAmount, dueDate, deliveryAddress, note, status, cancellationReason,
+                items.stream().map(OrderItemEntity::toDomain).toList(), vatIncluded,
+                totalAmount, dueDate, new com.prodio.order.domain.DeliverySnapshot(
+                        deliveryAddressId, deliveryNameSnapshot, deliveryRecipientNameSnapshot,
+                        deliveryRecipientPhoneSnapshot, deliveryPostalCodeSnapshot,
+                        deliveryAddress, deliveryAddressDetailSnapshot),
+                note, status, cancellationReason,
                 createdBy, createdAt, updatedAt);
     }
 }

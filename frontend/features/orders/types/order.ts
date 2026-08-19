@@ -11,20 +11,76 @@ export interface Order {
   clientId: string;
   clientName: string;
   clientPhone: string | null;
-  productId: string;
-  productName: string;
-  unitPrice: number;
-  quantity: number;
+  items: OrderItem[];
   vatIncluded: boolean;
   totalAmount: number;
   dueDate: string;
-  deliveryAddress: string | null;
+  delivery: DeliveryAddress;
   note: string | null;
   status: OrderStatus;
   cancellationReason: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface OrderItem {
+  productId: string;
+  productName: string;
+  unitPrice: number;
+  quantity: number;
+  lineAmount: number;
+}
+
+export interface DeliveryAddress {
+  addressId: string | null;
+  name: string;
+  recipientName: string;
+  recipientPhone: string;
+  postalCode: string;
+  addressLine1: string;
+  addressLine2: string;
+}
+
+export interface DeliveryContext {
+  clientId: string;
+  clientName: string;
+  headquarters: DeliveryAddress | null;
+  recent: DeliveryAddress | null;
+  savedAddresses: DeliveryAddress[];
+}
+
+export interface OrderClientContext {
+  clientId: string;
+  clientCode: string;
+  companyName: string;
+  representative: string;
+  businessRegistrationNumber: string;
+  defaultAddress: string;
+  phone: string;
+  managerName: string;
+  memo: string;
+}
+
+export interface OrderProductContext {
+  productId: string;
+  productCode: string;
+  name: string;
+  subCategoryId: string;
+  unit: string;
+  description: string;
+  memo: string;
+  unitPrice: number;
+}
+
+export interface OrderFormContext {
+  client: OrderClientContext;
+  products: OrderProductContext[];
+}
+
+export interface OrderItemCommand {
+  productId: string;
+  quantity: number;
 }
 
 export interface OrderPage {
@@ -44,19 +100,17 @@ export interface OrderFilters {
 
 export interface CreateOrderCommand {
   clientId: string;
-  productId: string;
-  quantity: number;
+  items: OrderItemCommand[];
   vatIncluded: boolean;
   dueDate: string;
-  deliveryAddress?: string;
+  delivery: DeliveryAddress;
   note?: string;
 }
 
 export interface UpdateOrderCommand {
-  productId: string;
-  quantity: number;
+  items: OrderItemCommand[];
   vatIncluded: boolean;
   dueDate: string;
-  deliveryAddress?: string;
+  delivery: DeliveryAddress;
   note?: string;
 }

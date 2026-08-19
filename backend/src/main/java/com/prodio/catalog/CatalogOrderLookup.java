@@ -1,5 +1,6 @@
 package com.prodio.catalog;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -11,17 +12,29 @@ public interface CatalogOrderLookup {
     /** 로그인 계정과 1:1로 연결된 거래처를 조회한다. */
     Optional<ClientSnapshot> findClientByAccountId(long accountId);
     Optional<ProductSnapshot> findProduct(long productId);
+    /** 주문 화면에 표시할 활성 품목 전체를 조회한다. */
+    List<ProductSnapshot> findActiveProducts();
 
     record ClientSnapshot(
             long id,
+            String clientCode,
             String companyName,
             String representative,
+            String businessRegistrationNumber,
             String defaultAddress,
-            String phone) {}
+            String phone,
+            String managerName,
+            String memo,
+            boolean active) {}
 
     record ProductSnapshot(
             long id,
+            String productCode,
             String name,
+            long subCategoryId,
+            String unit,
             String description,
-            long unitPrice) {}
+            String memo,
+            long unitPrice,
+            boolean active) {}
 }

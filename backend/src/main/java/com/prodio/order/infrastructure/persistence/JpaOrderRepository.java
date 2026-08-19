@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.JoinType;
 import org.springframework.stereotype.Repository;
 
 import java.util.Locale;
@@ -62,9 +63,13 @@ class JpaOrderRepository implements OrderRepository {
         }
         if (query != null && !query.isBlank()) {
             String pattern = "%" + query.toLowerCase(Locale.ROOT) + "%";
-            specification = specification.and((root, criteria, builder) -> builder.or(
-                    builder.like(builder.lower(root.get("clientNameSnapshot")), pattern),
-                    builder.like(builder.lower(root.get("productNameSnapshot")), pattern)));
+            specification = specification.and((root, criteria, builder) -> {
+                criteria.distinct(true);
+                var items = root.join("items", JoinType.LEFT);
+                return builder.or(
+                        builder.like(builder.lower(root.get("clientNameSnapshot")), pattern),
+                        builder.like(builder.lower(items.get("productNameSnapshot")), pattern));
+            });
         }
         var result = orders.findAll(specification,
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));

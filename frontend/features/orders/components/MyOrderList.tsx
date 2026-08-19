@@ -44,8 +44,8 @@ export function MyOrderList() {
       {loading ? <p className={styles.empty}>불러오는 중...</p> : data.orders.length === 0 ? <p className={styles.empty}>등록한 주문이 없습니다.</p> :
         <div className={styles.tableWrap}><table><thead><tr><th>주문번호</th><th>품목</th><th>수량</th><th>주문 금액</th><th>납기일</th><th>진행 상태</th><th>결제</th></tr></thead>
           <tbody>{data.orders.map((order) => <tr key={order.id}>
-            <td><Link href={`/my-orders/${order.id}`}>#{order.id}</Link></td><td><strong>{order.productName}</strong><span>{order.clientName}</span></td>
-            <td>{order.quantity.toLocaleString()}</td><td>{order.totalAmount.toLocaleString()}원</td><td>{order.dueDate}</td>
+            <td><Link href={`/my-orders/${order.id}`}>#{order.id}</Link></td><td><strong>{order.items.map((item) => item.productName).join(", ")}</strong><span>{order.clientName}</span></td>
+            <td>{order.items.reduce((sum, item) => sum + item.quantity, 0).toLocaleString()}</td><td>{order.totalAmount.toLocaleString()}원</td><td>{order.dueDate}</td>
             <td><span className={styles.badge}>{ORDER_STATUS_LABELS[order.status]}</span></td><td>{order.status === "CONFIRMED" ? "확인" : order.status === "CANCELLED" ? "취소" : "미확인"}</td>
           </tr>)}</tbody></table></div>}
       <div className={styles.pagination}><button type="button" disabled={page === 0} onClick={() => setPage(page - 1)}>이전</button><span>{data.totalPages === 0 ? 0 : page + 1} / {data.totalPages}</span><button type="button" disabled={page + 1 >= data.totalPages} onClick={() => setPage(page + 1)}>다음</button></div>

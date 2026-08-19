@@ -4,13 +4,15 @@ import com.prodio.order.domain.Order;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 public record OrderUpdatedEvent(long orderId, long clientId, String clientName,
-        long productId, String productName, int quantity, long totalAmount,
-        LocalDate dueDate, OffsetDateTime updatedAt) {
+        List<OrderItemEventData> items, long totalAmount,
+        LocalDate dueDate, OrderDeliveryEventData delivery, OffsetDateTime updatedAt) {
     public static OrderUpdatedEvent from(Order order) {
         return new OrderUpdatedEvent(order.id(), order.clientId(), order.clientNameSnapshot(),
-                order.productId(), order.productNameSnapshot(), order.quantity(),
-                order.totalAmount(), order.dueDate(), order.updatedAt());
+                order.items().stream().map(OrderItemEventData::from).toList(),
+                order.totalAmount(), order.dueDate(), OrderDeliveryEventData.from(order.delivery()),
+                order.updatedAt());
     }
 }

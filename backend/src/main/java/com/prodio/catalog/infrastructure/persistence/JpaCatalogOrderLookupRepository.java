@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -31,13 +32,23 @@ class JpaCatalogOrderLookupRepository implements CatalogOrderLookup {
                 .map(JpaCatalogOrderLookupRepository::toProductSnapshot);
     }
 
+    @Override
+    public List<ProductSnapshot> findActiveProducts() {
+        return springDataCatalogProductRepository.findAllByActiveTrueOrderByProductNameAsc().stream()
+                .map(JpaCatalogOrderLookupRepository::toProductSnapshot)
+                .toList();
+    }
+
     private static ClientSnapshot toClientSnapshot(CatalogClientEntity entity) {
-        return new ClientSnapshot(entity.getId(), entity.getCompanyName(), entity.getCeoName(),
-                entity.getAddress(), entity.getPhone());
+        return new ClientSnapshot(entity.getId(), entity.getClientCode(), entity.getCompanyName(),
+                entity.getCeoName(), entity.getBusinessRegNo(), entity.getAddress(), entity.getPhone(),
+                entity.getManagerName(), entity.getMemo(), entity.isActive());
     }
 
     private static ProductSnapshot toProductSnapshot(CatalogProductEntity entity) {
         long unitPrice = entity.getUnitPrice().setScale(0, RoundingMode.HALF_UP).longValueExact();
-        return new ProductSnapshot(entity.getId(), entity.getProductName(), entity.getDescription(), unitPrice);
+        return new ProductSnapshot(entity.getId(), entity.getProductCode(), entity.getProductName(),
+                entity.getSubCategoryId(), entity.getUnit().name(), entity.getDescription(),
+                entity.getMemo(), unitPrice, entity.isActive());
     }
 }
