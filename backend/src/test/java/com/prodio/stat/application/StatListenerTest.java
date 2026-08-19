@@ -5,6 +5,7 @@ import com.prodio.order.OrderConfirmedEvent;
 import com.prodio.order.OrderCreatedEvent;
 import com.prodio.order.OrderDeliveryEventData;
 import com.prodio.order.OrderItemEventData;
+import com.prodio.order.OrderUpdatedEvent;
 import com.prodio.production.event.OrderCompleted;
 import com.prodio.production.event.OrderShipped;
 import com.prodio.stat.domain.OrderStatView;
@@ -20,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -116,6 +118,36 @@ class StatListenerTest {
         listener.handle(new OrderCancelledEvent(ORDER_ID, "고객 요청", cancelledAt));
 
         verify(repository).markCancelled(ORDER_ID, "고객 요청", cancelledAt);
+    }
+
+    @Test
+    @DisplayName("수정 이벤트를 받으면 기존 row를 지우고 새 items로 orderCreatedAt을 보존한 채 다시 만든다")
+    void updatedEventReplacesRowsPreservingOrderCreatedAt() {
+        OffsetDateTime orderCreatedAt = OffsetDateTime.parse("2026-08-18T10:00:00+09:00");
+        when(repository.findAllByOrderId(ORDER_ID)).thenReturn(List.of(view()));
+        LocalDate newDueDate = DUE_DATE.plusDays(3);
+        OrderItemEventData bolt = new OrderItemEventData(5L, "볼트", 120L, 100, 12_000L);
+        OrderUpdatedEvent event = new OrderUpdatedEvent(ORDER_ID, 2L, "거래처",
+                List.of(bolt), 12_000L, newDueDate, delivery(), OffsetDateTime.parse("2026-08-21T09:00:00+09:00"));
+
+        listener.handle(event);
+
+        verify(repository).deleteAllByOrderId(ORDER_ID);
+        verify(repository).create(OrderStatView.create(ORDER_ID, 2L, "거래처",
+                5L, "볼트", 100, 12_000L, newDueDate, orderCreatedAt));
+    }
+
+    @Test
+    @DisplayName("수정 이벤트 처리 시 기존 row가 없으면 예외를 던지고 지우지 않는다")
+    void updatedEventFailsWhenViewIsMissing() {
+        when(repository.findAllByOrderId(ORDER_ID)).thenReturn(List.of());
+        OrderUpdatedEvent event = new OrderUpdatedEvent(ORDER_ID, 2L, "거래처",
+                List.of(), 0L, DUE_DATE, delivery(), OffsetDateTime.parse("2026-08-21T09:00:00+09:00"));
+
+        assertThatThrownBy(() -> listener.handle(event))
+                .isInstanceOf(IllegalStateException.class);
+
+        verify(repository, never()).deleteAllByOrderId(ORDER_ID);
     }
 
     private OrderStatView view() {
