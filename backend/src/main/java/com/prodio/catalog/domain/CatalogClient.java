@@ -36,4 +36,22 @@ public record CatalogClient(
                 true
         );
     }
+
+    /** id/clientCode/userId는 그대로 두고 그리드에서 편집 가능한 필드만 업데이트. */
+    public CatalogClient update(String companyName, String ceoName, String businessRegNo,
+            String phone, String address, String managerName, String memo, boolean active) {
+        return new CatalogClient(
+                id,
+                clientCode,
+                companyName,
+                ceoName,
+                businessRegNo,
+                phone,
+                address,
+                managerName,
+                userId,
+                memo,
+                active
+        );
+    }
 }

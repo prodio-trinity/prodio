@@ -23,16 +23,22 @@ class JpaCatalogClientQueryRepository implements CatalogClientQueryRepository {
     @Override
     public Page<ClientListItem> findClients(String keyword, Boolean isActive, int page, int size, String sort) {
         Pageable pageable = PageRequest.of(page, size, parseSort(sort));
-        return springDataCatalogClientRepository.findClients(keyword, isActive, pageable)
+        return springDataCatalogClientRepository.findClients(escapeLike(keyword), isActive, pageable)
                 .map(JpaCatalogClientQueryRepository::toListItem);
     }
 
     @Override
     public List<ClientAutocompleteItem> findClientsForAutocomplete(String keyword, int size) {
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.ASC, "companyName"));
         return springDataCatalogClientRepository
-                .findActiveClients(keyword, PageRequest.of(0, size)).stream()
+                .findClientsForAutocomplete(escapeLike(keyword), true, pageable).stream()
                 .map(JpaCatalogClientQueryRepository::toAutocompleteItem)
                 .toList();
+    }
+
+    private static String escapeLike(String value) {
+        if (value == null) return null;
+        return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
 
     private static Sort parseSort(String sort) {
