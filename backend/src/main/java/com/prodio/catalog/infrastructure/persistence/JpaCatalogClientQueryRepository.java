@@ -16,7 +16,7 @@ import java.util.Set;
 @Repository
 @RequiredArgsConstructor
 class JpaCatalogClientQueryRepository implements CatalogClientQueryRepository {
-    private static final Set<String> SORTABLE_FIELDS = Set.of("companyName", "createdAt");
+    private static final Set<String> SORTABLE_FIELDS = Set.of("companyName", "clientCode", "createdAt");
 
     private final SpringDataCatalogClientRepository springDataCatalogClientRepository;
 
@@ -43,13 +43,13 @@ class JpaCatalogClientQueryRepository implements CatalogClientQueryRepository {
 
     private static Sort parseSort(String sort) {
         if (sort == null || sort.isBlank())
-            return Sort.by(Sort.Direction.ASC, "companyName");
+            return Sort.by(Sort.Direction.ASC, "clientCode");
 
         String[] parts = sort.split(",", 2);
         String property = parts[0].trim();
 
         if (!SORTABLE_FIELDS.contains(property))
-            return Sort.by(Sort.Direction.ASC, "companyName");
+            return Sort.by(Sort.Direction.ASC, "clientCode");
 
         Sort.Direction direction = parts.length > 1 && "desc".equalsIgnoreCase(parts[1].trim())
                 ? Sort.Direction.DESC
