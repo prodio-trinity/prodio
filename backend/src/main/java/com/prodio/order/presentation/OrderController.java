@@ -38,7 +38,7 @@ class OrderController {
     private final UserDirectory userDirectory;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<OrderPageResponse> list(@RequestParam(required = false) String status,
             @RequestParam(defaultValue = "") String q,
             @RequestParam(defaultValue = "0") int page,
@@ -48,6 +48,7 @@ class OrderController {
     }
 
     @GetMapping("/mine")
+    @PreAuthorize("hasRole('CLIENT')")
     ApiResponse<OrderPageResponse> listMine(@RequestParam(required = false) String status,
             @RequestParam(defaultValue = "") String q,
             @RequestParam(defaultValue = "0") int page,
@@ -59,13 +60,14 @@ class OrderController {
     }
 
     @GetMapping("/client-context")
+    @PreAuthorize("hasRole('CLIENT')")
     ApiResponse<ClientContextResponse> clientContext(Authentication authentication) {
         UserRef user = currentUser(authentication);
         return ApiResponse.success(ClientContextResponse.from(orderService.clientContext(user.id())));
     }
 
     @GetMapping("/form-context")
-    @PreAuthorize("hasAnyRole('CLIENT', 'STAFF', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     ApiResponse<FormContextResponse> formContext(@RequestParam(required = false) String clientId,
             Authentication authentication) {
         UserRef user = currentUser(authentication);
@@ -76,19 +78,20 @@ class OrderController {
     }
 
     @GetMapping("/mine/{id}")
+    @PreAuthorize("hasRole('CLIENT')")
     ApiResponse<OrderResponse> getMine(@PathVariable String id, Authentication authentication) {
         UserRef creator = currentUser(authentication);
         return ApiResponse.success(OrderResponse.from(orderService.getMine(parseId(id), creator.id())));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<OrderResponse> get(@PathVariable String id) {
         return ApiResponse.success(OrderResponse.from(orderService.get(parseId(id))));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('CLIENT', 'STAFF', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     ApiResponse<OrderResponse> create(@Valid @RequestBody CreateOrderRequest request,
             Authentication authentication) {
@@ -102,7 +105,7 @@ class OrderController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<OrderResponse> update(@PathVariable String id,
             @Valid @RequestBody UpdateOrderRequest request) {
         UpdateOrderCommand command = toUpdateCommand(request);
@@ -120,14 +123,14 @@ class OrderController {
     }
 
     @PatchMapping("/{id}/confirm")
-    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<OrderResponse> confirm(@PathVariable String id) {
         return ApiResponse.success("입금을 확인하고 주문을 확정했습니다.",
                 OrderResponse.from(orderService.confirm(parseId(id))));
     }
 
     @PatchMapping("/{id}/cancel")
-    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<OrderResponse> cancel(@PathVariable String id,
             @Valid @RequestBody CancelOrderRequest request) {
         return ApiResponse.success("주문을 취소했습니다.",
@@ -151,8 +154,7 @@ class OrderController {
 
     private boolean isPrivileged(Authentication authentication) {
         return authentication.getAuthorities().stream().anyMatch(authority ->
-                authority.getAuthority().equals("ROLE_STAFF")
-                        || authority.getAuthority().equals("ROLE_ADMIN"));
+                authority.getAuthority().equals("ROLE_ADMIN"));
     }
 
     private OrderStatus parseStatus(String value) {

@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders/delivery")
-@PreAuthorize("hasAnyRole('CLIENT', 'STAFF', 'ADMIN')")
+@PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
 @RequiredArgsConstructor
 class OrderDeliveryController {
     private final OrderDeliveryService deliveryService;
@@ -69,8 +69,7 @@ class OrderDeliveryController {
 
     private boolean isPrivileged(Authentication authentication) {
         return authentication.getAuthorities().stream().anyMatch(authority ->
-                authority.getAuthority().equals("ROLE_STAFF")
-                        || authority.getAuthority().equals("ROLE_ADMIN"));
+                authority.getAuthority().equals("ROLE_ADMIN"));
     }
 
     private long parseId(String value) {

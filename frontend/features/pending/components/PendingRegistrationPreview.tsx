@@ -1,6 +1,6 @@
-import styles from "./ClientOnboarding.module.css";
+import styles from "./Pending.module.css";
 
-export function ClientRegistrationPreview() {
+export function PendingRegistrationPreview() {
   return <div className={styles.page}>
     <section className={styles.formCard}>
       <header className={styles.formHeader}><span className={styles.eyebrow}>CLIENT REGISTRATION</span><h1>거래처 등록</h1><p>아래 화면은 등록에 필요한 정보를 확인하기 위한 임시 화면이며 아직 저장되지 않습니다.</p></header>

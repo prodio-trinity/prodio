@@ -125,7 +125,7 @@ export function MemberTable() {
           <h1>회원 관리</h1>
           <p>
             이름 또는 이메일로 회원을 검색하고 권한을 변경합니다. 권한이 없으면
-            신규 회원에게는 기본적으로 UNREGISTERED_CLIENT 권한이 부여됩니다.
+            신규 회원에게는 기본적으로 PENDING 권한이 부여됩니다.
           </p>
         </div>
         {data ? (

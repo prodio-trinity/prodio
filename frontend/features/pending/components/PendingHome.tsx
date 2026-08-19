@@ -1,5 +1,5 @@
 import Link from "next/link";
-import styles from "./ClientOnboarding.module.css";
+import styles from "./Pending.module.css";
 
 const PRODUCTS = [
   { badge: "정밀 가공", name: "맞춤형 금속 부품", description: "도면과 요구 규격에 맞춘 정밀 부품 생산을 지원합니다." },
@@ -7,7 +7,7 @@ const PRODUCTS = [
   { badge: "품질 관리", name: "생산 이력 관리", description: "주문부터 생산·납품까지 진행 이력을 한곳에서 확인할 수 있습니다." },
 ];
 
-export function UnregisteredClientHome() {
+export function PendingHome() {
   return <div className={styles.page}>
     <section className={styles.notice}>
       <strong>거래처 등록이 필요합니다.</strong>
@@ -19,7 +19,7 @@ export function UnregisteredClientHome() {
         <h1>생산 주문을 더 간단하고 정확하게</h1>
         <p>거래처 등록 후 품목별 주문, 생산 진행 확인, 배송 정보 관리를 이용할 수 있습니다.</p>
       </div>
-      <div className={styles.heroAction}><Link className={styles.primary} href="/client-registration">거래처 등록 정보 입력</Link></div>
+      <div className={styles.heroAction}><Link className={styles.primary} href="/pending/registration">거래처 등록 정보 입력</Link></div>
     </section>
     <section className={styles.section}>
       <h2>Prodio 주요 서비스</h2>
