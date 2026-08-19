@@ -20,7 +20,7 @@ public final class UserRoles {
                 if (code != null) normalized.add(code);
             }
         }
-        if (normalized.isEmpty()) normalized.add(UserRole.UNREGISTERED_CLIENT);
+        if (normalized.isEmpty()) normalized.add(UserRole.PENDING);
         return new UserRoles(normalized);
     }
 

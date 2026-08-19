@@ -17,18 +17,12 @@ interface RoleDestination {
 }
 
 const ROLE_DESTINATIONS: Record<string, RoleDestination> = {
-  UNREGISTERED_CLIENT: {
+  PENDING: {
     label: "가입자",
-    href: "/welcome",
-    activeWhen: ["/welcome", "/client-registration"],
+    href: "/pending",
+    activeWhen: ["/pending"],
   },
   CLIENT: {
-    label: "거래처",
-    href: "/my-orders",
-    activeWhen: ["/my-orders", "/orders/new"],
-  },
-  // V4 role 리네임 전까지 STAFF → CLIENT와 동일하게 처리
-  STAFF: {
     label: "거래처",
     href: "/my-orders",
     activeWhen: ["/my-orders", "/orders/new"],
@@ -58,8 +52,8 @@ export function ModeSwitcher({ roles, compact = false }: ModeSwitcherProps) {
 
   if (buttons.length < 1) return null;
 
-  // CLIENT/STAFF 경로가 매칭되면 ADMIN은 active 아님 (경로 겹침 방지)
-  const clientButton = buttons.find((b) => b.role === "CLIENT" || b.role === "STAFF");
+  // CLIENT 경로가 매칭되면 ADMIN은 active 아님 (경로 겹침 방지)
+  const clientButton = buttons.find((b) => b.role === "CLIENT");
   const isClientArea = clientButton
     ? isAreaActive(pathname, clientButton.destination.activeWhen)
     : false;

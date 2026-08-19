@@ -44,8 +44,8 @@ export function LoginForm() {
       }
       const destination = roles.includes("ADMIN")
         ? "/dashboard"
-        : roles.includes("UNREGISTERED_CLIENT")
-          ? "/welcome"
+        : roles.includes("PENDING")
+          ? "/pending"
           : "/my-orders";
       router.replace(destination);
     } catch {

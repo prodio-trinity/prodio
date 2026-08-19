@@ -20,7 +20,7 @@ interface RoleLayoutProps {
   /** CLIENT 권한일 때 노출할 메뉴. */
   clientNavItems?: SidebarNavItem[];
   /** 거래처 등록 전 권한일 때 노출할 제한 메뉴. */
-  unregisteredClientNavItems?: SidebarNavItem[];
+  pendingNavItems?: SidebarNavItem[];
   /** 사이드바 접힘 상태를 저장할 localStorage 키. 화면마다 따로 기억하도록 구분한다. */
   storageKey: string;
   /** 권한이 없을 때 돌려보낼 경로. */
@@ -38,7 +38,7 @@ export function RoleLayout({
   navItems,
   adminNavItems,
   clientNavItems,
-  unregisteredClientNavItems,
+  pendingNavItems,
   storageKey,
   deniedRedirect = "/",
 }: RoleLayoutProps) {
@@ -50,13 +50,13 @@ export function RoleLayout({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const hasRequiredRole = user?.roles.some((role) => requiredRoles.includes(role)) ?? false;
   const isAdmin = user?.roles.includes("ADMIN") ?? false;
-  const hasUnregisteredClientRole = user?.roles.includes("UNREGISTERED_CLIENT") ?? false;
-  const isRestrictedUnregisteredClient = hasUnregisteredClientRole
+  const hasPendingRole = user?.roles.includes("PENDING") ?? false;
+  const isRestrictedPending = hasPendingRole
     && !(user?.roles.includes("CLIENT") ?? false)
     && !isAdmin;
 
-  const unregisteredPrefixes = (unregisteredClientNavItems ?? []).map((item) => item.href);
-  const isInUnregisteredArea = unregisteredPrefixes.some(
+  const pendingPrefixes = (pendingNavItems ?? []).map((item) => item.href);
+  const isInPendingArea = pendingPrefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 
@@ -74,8 +74,8 @@ export function RoleLayout({
 
   // 경로 기준으로 사이드바 결정: CLIENT 영역 → clientNavItems, 그 외 → navItems
   const activeNavItems =
-    hasUnregisteredClientRole && isInUnregisteredArea && unregisteredClientNavItems
-      ? unregisteredClientNavItems
+    hasPendingRole && isInPendingArea && pendingNavItems
+      ? pendingNavItems
       : isInClientArea && clientNavItems
       ? clientNavItems
       : isAdmin && isInAdminArea && adminNavItems
@@ -85,11 +85,11 @@ export function RoleLayout({
   useEffect(() => {
     if (authStatus === "unauthenticated") router.replace("/login");
     else if (authStatus === "authenticated" && !hasRequiredRole) router.replace(deniedRedirect);
-    else if (authStatus === "authenticated" && isRestrictedUnregisteredClient && !isInUnregisteredArea) {
-      router.replace(unregisteredClientNavItems?.[0]?.href ?? "/welcome");
+    else if (authStatus === "authenticated" && isRestrictedPending && !isInPendingArea) {
+      router.replace(pendingNavItems?.[0]?.href ?? "/pending");
     }
-  }, [authStatus, hasRequiredRole, isInUnregisteredArea, isRestrictedUnregisteredClient,
-    router, deniedRedirect, unregisteredClientNavItems]);
+  }, [authStatus, hasRequiredRole, isInPendingArea, isRestrictedPending,
+    router, deniedRedirect, pendingNavItems]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -120,7 +120,7 @@ export function RoleLayout({
           <p className={styles.stateTitle}>로그인 상태를 확인할 수 없습니다.</p>
           <p className={styles.stateDetail}>{authError}</p>
         </div>
-      ) : !hasRequiredRole || (isRestrictedUnregisteredClient && !isInUnregisteredArea) ? (
+      ) : !hasRequiredRole || (isRestrictedPending && !isInPendingArea) ? (
         <div className={styles.state}>다른 화면으로 이동 중...</div>
       ) : (
         <>
