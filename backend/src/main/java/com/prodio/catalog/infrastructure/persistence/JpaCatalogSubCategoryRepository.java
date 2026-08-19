@@ -1,6 +1,6 @@
 package com.prodio.catalog.infrastructure.persistence;
 
-import com.prodio.catalog.application.CatalogSubCategoryQueryRepository;
+import com.prodio.catalog.application.CatalogSubCategoryRepository;
 import com.prodio.catalog.domain.CatalogSubCategory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-class JpaCatalogSubCategoryQueryRepository implements CatalogSubCategoryQueryRepository {
+class JpaCatalogSubCategoryRepository implements CatalogSubCategoryRepository {
     private final SpringDataCatalogSubCategoryRepository springDataCatalogSubCategoryRepository;
 
     @Override
@@ -26,5 +26,11 @@ class JpaCatalogSubCategoryQueryRepository implements CatalogSubCategoryQueryRep
                 : springDataCatalogSubCategoryRepository.findAll();
         return entities.stream().map(CatalogSubCategoryEntity::toDomain)
                 .toList();
+    }
+
+    @Override
+    public CatalogSubCategory save(CatalogSubCategory subCategory) {
+        CatalogSubCategoryEntity entity = CatalogSubCategoryEntity.from(subCategory);
+        return springDataCatalogSubCategoryRepository.save(entity).toDomain();
     }
 }
