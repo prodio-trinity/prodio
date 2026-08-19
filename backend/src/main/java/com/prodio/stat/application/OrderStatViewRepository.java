@@ -12,5 +12,6 @@ public interface OrderStatViewRepository {
     void markCompleted(long orderId, OffsetDateTime completedAt, boolean onTime);
     void markCancelled(long orderId, String cancellationReason, OffsetDateTime cancelledAt);
     void confirmPayment(long orderId);
+    void deleteAllByOrderId(long orderId);
     List<OrderStatView> findAllByOrderId(long orderId);
 }
