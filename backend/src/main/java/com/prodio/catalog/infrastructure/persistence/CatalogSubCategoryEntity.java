@@ -34,6 +34,17 @@ class CatalogSubCategoryEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    static CatalogSubCategoryEntity from(CatalogSubCategory domain) {
+        CatalogSubCategoryEntity entity = new CatalogSubCategoryEntity();
+        entity.subCategoryCode = domain.subCategoryCode();
+        entity.name = domain.name();
+        entity.topCategory = domain.topCategory();
+        entity.active = domain.active();
+        entity.createdAt = Instant.now();
+        entity.updatedAt = Instant.now();
+        return entity;
+    }
+
     CatalogSubCategory toDomain() {
         return new CatalogSubCategory(id, subCategoryCode, name, topCategory, active);
     }

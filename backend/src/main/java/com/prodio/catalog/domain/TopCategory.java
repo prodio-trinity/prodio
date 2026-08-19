@@ -18,15 +18,6 @@ public enum TopCategory {
         this.sequenceName = sequenceName;
     }
 
-    public static TopCategory fromCode(String categoryCode) {
-        try {
-            return TopCategory.valueOf(categoryCode);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalStateException(
-                    "catalog_sub_categories에는 있는데 TopCategory enum에 없는 대분류: " + categoryCode, e);
-        }
-    }
-
     public String codePrefix() { return codePrefix; }
     public String displayName() { return displayName; }
     public String sequenceName() { return sequenceName; }
