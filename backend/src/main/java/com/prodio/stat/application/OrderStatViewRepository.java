@@ -3,7 +3,7 @@ package com.prodio.stat.application;
 import com.prodio.stat.domain.OrderStatView;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
+import java.util.List;
 
 public interface OrderStatViewRepository {
     OrderStatView create(OrderStatView view);
@@ -12,5 +12,5 @@ public interface OrderStatViewRepository {
     void markCompleted(long orderId, OffsetDateTime completedAt, boolean onTime);
     void markCancelled(long orderId, String cancellationReason, OffsetDateTime cancelledAt);
     void confirmPayment(long orderId);
-    Optional<OrderStatView> findByOrderId(long orderId);
+    List<OrderStatView> findAllByOrderId(long orderId);
 }

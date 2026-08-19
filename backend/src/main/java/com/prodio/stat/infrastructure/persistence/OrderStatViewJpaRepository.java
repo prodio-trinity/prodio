@@ -7,10 +7,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, Long> {
-    Optional<OrderStatViewEntity> findByOrderId(long orderId);
+    List<OrderStatViewEntity> findAllByOrderId(long orderId);
 
     @Query("""
             select v.status as status, count(v) as count
