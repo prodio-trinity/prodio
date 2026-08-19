@@ -65,6 +65,12 @@ class OrderStatViewEntity {
     @Column(name = "completed_at")
     private OffsetDateTime completedAt;
 
+    @Column(name = "cancellation_reason")
+    private String cancellationReason;
+
+    @Column(name = "cancelled_at")
+    private OffsetDateTime cancelledAt;
+
     /** 최초 생성(OrderCreated) 시점 스냅샷. status는 항상 PENDING으로 시작한다. */
     private OrderStatViewEntity(OrderStatView view) {
         orderId = view.orderId();
@@ -100,6 +106,12 @@ class OrderStatViewEntity {
         this.onTime = onTime;
     }
 
+    void markCancelled(String cancellationReason, OffsetDateTime cancelledAt) {
+        this.status = OrderViewStatus.CANCELLED;
+        this.cancellationReason = cancellationReason;
+        this.cancelledAt = cancelledAt;
+    }
+
     void confirmPayment() {
         this.paymentConfirmed = true;
     }
@@ -107,6 +119,7 @@ class OrderStatViewEntity {
     OrderStatView toDomain() {
         return new OrderStatView(id, orderId, clientId, clientName, productId, productName,
                 quantity, totalAmount, dueDate, status, paymentConfirmed, onTime,
-                orderCreatedAt, productionStartedAt, shippedAt, completedAt);
+                orderCreatedAt, productionStartedAt, shippedAt, completedAt,
+                cancellationReason, cancelledAt);
     }
 }

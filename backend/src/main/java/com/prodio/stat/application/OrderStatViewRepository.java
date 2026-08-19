@@ -10,6 +10,7 @@ public interface OrderStatViewRepository {
     void markProductionStarted(long orderId, OffsetDateTime startedAt);
     void markShipped(long orderId, OffsetDateTime shippedAt);
     void markCompleted(long orderId, OffsetDateTime completedAt, boolean onTime);
+    void markCancelled(long orderId, String cancellationReason, OffsetDateTime cancelledAt);
     void confirmPayment(long orderId);
     Optional<OrderStatView> findByOrderId(long orderId);
 }

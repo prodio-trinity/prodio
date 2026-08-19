@@ -36,7 +36,7 @@ class StatDashboardServiceTest {
     @DisplayName("필터를 그대로 레포지토리에 전달해 대시보드 요약을 조회한다")
     void getDashboardDelegatesToRepository() {
         StatFilter filter = new StatFilter(LocalDate.parse("2026-08-01"), LocalDate.parse("2026-08-31"), null);
-        DashboardSummary summary = new DashboardSummary(1, 2, 3, 4, 10, 40, 0.75);
+        DashboardSummary summary = new DashboardSummary(1, 2, 3, 4, 1, 11, 40, 0.75);
         when(repository.summarize(filter)).thenReturn(summary);
 
         DashboardSummary result = service.getDashboard(filter);
