@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { orderService } from "../services/orderService";
 import type { DeliveryAddress, Order, OrderFormContext } from "../types/order";
 import { OrderCatalogSection } from "./OrderCatalogSection";
-import { OrderDetailsSection, OrderMemoSection } from "./OrderDetailsSection";
+import { OrderMemoSection } from "./OrderDetailsSection";
 import { OrderDeliverySection } from "./OrderDeliverySection";
 import styles from "./orders.module.css";
 
@@ -17,8 +17,8 @@ export function OrderForm({ initialOrder, mine = false }: { initialOrder?: Order
   const [clientLoading, setClientLoading] = useState(true);
   const [clientLookupError, setClientLookupError] = useState("");
   const [items, setItems] = useState(() => initialOrder?.items.map((item) => ({ productId: Number(item.productId), quantity: item.quantity })) ?? []);
+  const [orderName, setOrderName] = useState(initialOrder?.orderName ?? "");
   const [vatIncluded, setVatIncluded] = useState(initialOrder?.vatIncluded ?? true);
-  const [dueDate, setDueDate] = useState(initialOrder?.dueDate ?? "");
   const [delivery, setDelivery] = useState<DeliveryAddress | undefined>(() => initialOrder
     ? { ...initialOrder.delivery, addressId: null } : undefined);
   const [note, setNote] = useState(initialOrder?.note ?? "");
@@ -42,7 +42,7 @@ export function OrderForm({ initialOrder, mine = false }: { initialOrder?: Order
     if (!delivery) return setError("배송 정보를 선택해 주세요.");
     setSaving(true); setError("");
     try {
-      const details = { items: items.map((item) => ({ ...item, productId: String(item.productId) })), vatIncluded, dueDate, delivery, note };
+      const details = { orderName: orderName.trim() || undefined, items: items.map((item) => ({ ...item, productId: String(item.productId) })), vatIncluded, delivery, note };
       const order = editing
         ? mine ? await orderService.updateMine(initialOrder.id, details) : await orderService.update(initialOrder.id, details)
         : await orderService.create({ clientId: String(clientId), ...details });
@@ -61,15 +61,12 @@ export function OrderForm({ initialOrder, mine = false }: { initialOrder?: Order
         <OrderCatalogSection
           client={formContext.client}
           products={formContext.products}
+          orderName={orderName}
           items={items}
           vatIncluded={vatIncluded}
           onItemsChangeAction={setItems}
-        />
-        <OrderDetailsSection
-          dueDate={dueDate}
-          vatIncluded={vatIncluded}
-          onDueDateChange={setDueDate}
-          onVatIncludedChange={setVatIncluded}
+          onOrderNameChangeAction={setOrderName}
+          onVatIncludedChangeAction={setVatIncluded}
         />
         <OrderDeliverySection clientId={clientId} delivery={delivery} onDeliveryChangeAction={setDelivery} />
         <OrderMemoSection note={note} onNoteChange={setNote} />

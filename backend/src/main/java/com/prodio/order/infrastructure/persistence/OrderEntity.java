@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +21,13 @@ class OrderEntity {
     private Long id;
     @Column(name = "client_id", nullable = false) private long clientId;
     @Column(name = "client_name_snapshot", nullable = false) private String clientNameSnapshot;
-    @Column(name = "client_phone_snapshot") private String clientPhoneSnapshot;
+    @Column(name = "client_contact_snapshot") private String clientContactSnapshot;
+    @Column(name = "order_name", length = 200) private String orderName;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
     private List<OrderItemEntity> items = new ArrayList<>();
     @Column(name = "vat_included", nullable = false) private boolean vatIncluded;
     @Column(name = "total_amount", nullable = false) private long totalAmount;
-    @Column(name = "due_date", nullable = false) private LocalDate dueDate;
     @Column(name = "delivery_address") private String deliveryAddress;
     @Column(name = "delivery_address_id") private Long deliveryAddressId;
     @Column(name = "delivery_name_snapshot", nullable = false) private String deliveryNameSnapshot;
@@ -53,12 +52,12 @@ class OrderEntity {
     void apply(Order order) {
         clientId = order.clientId();
         clientNameSnapshot = order.clientNameSnapshot();
-        clientPhoneSnapshot = order.clientPhoneSnapshot();
+        clientContactSnapshot = order.clientContactSnapshot();
+        orderName = order.orderName();
         items.clear();
         items.addAll(order.items().stream().map(item -> OrderItemEntity.from(this, item)).toList());
         vatIncluded = order.vatIncluded();
         totalAmount = order.totalAmount();
-        dueDate = order.dueDate();
         deliveryAddress = order.deliveryAddress();
         deliveryAddressId = order.delivery().addressId();
         deliveryNameSnapshot = order.delivery().name();
@@ -75,9 +74,9 @@ class OrderEntity {
     }
 
     Order toDomain() {
-        return Order.reconstitute(id, clientId, clientNameSnapshot, clientPhoneSnapshot,
-                items.stream().map(OrderItemEntity::toDomain).toList(), vatIncluded,
-                totalAmount, dueDate, new com.prodio.order.domain.DeliverySnapshot(
+        return Order.reconstitute(id, clientId, clientNameSnapshot, clientContactSnapshot,
+                orderName, items.stream().map(OrderItemEntity::toDomain).toList(), vatIncluded,
+                totalAmount, new com.prodio.order.domain.DeliverySnapshot(
                         deliveryAddressId, deliveryNameSnapshot, deliveryRecipientNameSnapshot,
                         deliveryRecipientPhoneSnapshot, deliveryPostalCodeSnapshot,
                         deliveryAddress, deliveryAddressDetailSnapshot),

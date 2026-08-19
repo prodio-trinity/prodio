@@ -5,7 +5,6 @@ import com.prodio.order.exception.OrderException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -15,11 +14,11 @@ public final class Order {
     private final long id;
     private final long clientId;
     private final String clientNameSnapshot;
-    private final String clientPhoneSnapshot;
+    private final String clientContactSnapshot;
+    private String orderName;
     private List<OrderItem> items;
     private boolean vatIncluded;
     private long totalAmount;
-    private LocalDate dueDate;
     private DeliverySnapshot delivery;
     private String note;
     private OrderStatus status;
@@ -28,8 +27,8 @@ public final class Order {
     private final OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
-    private Order(long id, long clientId, String clientNameSnapshot, String clientPhoneSnapshot,
-            List<OrderItem> items, boolean vatIncluded, long totalAmount, LocalDate dueDate,
+    private Order(long id, long clientId, String clientNameSnapshot, String clientContactSnapshot,
+            String orderName, List<OrderItem> items, boolean vatIncluded, long totalAmount,
             DeliverySnapshot delivery,
             String note, OrderStatus status, String cancellationReason, long createdBy,
             OffsetDateTime createdAt, OffsetDateTime updatedAt) {
@@ -42,11 +41,11 @@ public final class Order {
         this.id = id;
         this.clientId = clientId;
         this.clientNameSnapshot = requireText(clientNameSnapshot, "거래처명이 필요합니다.");
-        this.clientPhoneSnapshot = normalize(clientPhoneSnapshot);
+        this.clientContactSnapshot = normalize(clientContactSnapshot);
+        this.orderName = normalizeNullable(orderName);
         this.items = validateItems(items);
         this.vatIncluded = vatIncluded;
         this.totalAmount = totalAmount;
-        this.dueDate = Objects.requireNonNull(dueDate, "납기일이 필요합니다.");
         this.delivery = Objects.requireNonNull(delivery, "배송 정보가 필요합니다.");
         this.note = normalize(note);
         this.status = Objects.requireNonNull(status, "수주 상태가 필요합니다.");
@@ -59,34 +58,34 @@ public final class Order {
         this.updatedAt = Objects.requireNonNull(updatedAt, "수정 시각이 필요합니다.");
     }
 
-    public static Order place(long clientId, String clientName, String clientPhone,
-            List<OrderItem> items, boolean vatIncluded, LocalDate dueDate,
+    public static Order place(long clientId, String clientName, String clientContact,
+            String orderName, List<OrderItem> items, boolean vatIncluded,
             DeliverySnapshot delivery, String note,
             long createdBy, OffsetDateTime now) {
         long totalAmount = calculateTotal(items, vatIncluded);
-        return new Order(0, clientId, clientName, clientPhone, items,
-                vatIncluded, totalAmount, dueDate, delivery,
+        return new Order(0, clientId, clientName, clientContact, orderName, items,
+                vatIncluded, totalAmount, delivery,
                 note, OrderStatus.PENDING_PAYMENT, null, createdBy, now, now);
     }
 
-    public static Order reconstitute(long id, long clientId, String clientName, String clientPhone,
-            List<OrderItem> items, boolean vatIncluded, long totalAmount, LocalDate dueDate,
+    public static Order reconstitute(long id, long clientId, String clientName, String clientContact,
+            String orderName, List<OrderItem> items, boolean vatIncluded, long totalAmount,
             DeliverySnapshot delivery,
             String note, OrderStatus status, String cancellationReason, long createdBy,
             OffsetDateTime createdAt, OffsetDateTime updatedAt) {
-        return new Order(id, clientId, clientName, clientPhone, items,
-                vatIncluded, totalAmount, dueDate, delivery,
+        return new Order(id, clientId, clientName, clientContact, orderName, items,
+                vatIncluded, totalAmount, delivery,
                 note, status, cancellationReason, createdBy, createdAt, updatedAt);
     }
 
-    public void update(List<OrderItem> items, boolean vatIncluded, LocalDate dueDate,
+    public void update(String orderName, List<OrderItem> items, boolean vatIncluded,
             DeliverySnapshot delivery, String note,
             OffsetDateTime now) {
         ensurePendingPayment();
+        this.orderName = normalizeNullable(orderName);
         this.items = validateItems(items);
         this.vatIncluded = vatIncluded;
         this.totalAmount = calculateTotal(items, vatIncluded);
-        this.dueDate = Objects.requireNonNull(dueDate, "납기일이 필요합니다.");
         this.delivery = Objects.requireNonNull(delivery, "배송 정보가 필요합니다.");
         this.note = normalize(note);
         updatedAt = Objects.requireNonNull(now);
@@ -159,11 +158,11 @@ public final class Order {
     public long id() { return id; }
     public long clientId() { return clientId; }
     public String clientNameSnapshot() { return clientNameSnapshot; }
-    public String clientPhoneSnapshot() { return clientPhoneSnapshot; }
+    public String clientContactSnapshot() { return clientContactSnapshot; }
+    public String orderName() { return orderName; }
     public List<OrderItem> items() { return items; }
     public boolean vatIncluded() { return vatIncluded; }
     public long totalAmount() { return totalAmount; }
-    public LocalDate dueDate() { return dueDate; }
     public DeliverySnapshot delivery() { return delivery; }
     public String deliveryAddress() { return delivery.addressLine1(); }
     public String note() { return note; }

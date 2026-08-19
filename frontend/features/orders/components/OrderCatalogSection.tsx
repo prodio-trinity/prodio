@@ -2,19 +2,24 @@
 
 import { useState } from "react";
 import type { OrderClientContext, OrderProductContext } from "../types/order";
+import { OrderQuotationModal } from "./OrderQuotationModal";
 import styles from "./orders.module.css";
 
 export type OrderItemSelection = { productId: number; quantity: number };
 
-export function OrderCatalogSection({ client, products, items, vatIncluded,
-  onItemsChangeAction }: {
+export function OrderCatalogSection({ client, products, orderName, items, vatIncluded,
+  onItemsChangeAction, onOrderNameChangeAction, onVatIncludedChangeAction }: {
   client: OrderClientContext;
   products: OrderProductContext[];
+  orderName: string;
   items: OrderItemSelection[];
   vatIncluded: boolean;
   onItemsChangeAction: (items: OrderItemSelection[]) => void;
+  onOrderNameChangeAction: (orderName: string) => void;
+  onVatIncludedChangeAction: (vatIncluded: boolean) => void;
 }) {
   const [selectedProductId, setSelectedProductId] = useState("");
+  const [quotationOpen, setQuotationOpen] = useState(false);
   const subtotal = items.reduce((sum, item) => {
     const product = products.find((value) => Number(value.productId) === item.productId);
     return sum + (product?.unitPrice ?? 0) * item.quantity;
@@ -34,13 +39,18 @@ export function OrderCatalogSection({ client, products, items, vatIncluded,
   }
 
   return <section className={styles.card}>
-    <h2>1. 수주 정보</h2>
+    <div className={styles.sectionTitle}><h2>1. 수주 정보</h2><button type="button" className={styles.quotationButton} disabled={items.length === 0} onClick={() => setQuotationOpen(true)}>견적서 출력</button></div>
     <div className={styles.orderClientInfo}>
-      <div><span>수주처</span><strong>{client.companyName}</strong><small>{client.clientCode}</small></div>
-      <div><span>대표자</span><strong>{client.representative || "-"}</strong><small>{client.businessRegistrationNumber || "사업자번호 미등록"}</small></div>
-      <div><span>담당자</span><strong>{client.managerName || "-"}</strong><small>{client.phone || "연락처 미등록"}</small></div>
-      <p>{client.defaultAddress || "등록된 본사 주소가 없습니다."}</p>
+      <div><span>수주처 · {client.clientCode}</span><strong>{client.companyName}</strong></div>
+      <div><span>대표자</span><strong>{client.representative || "-"}</strong></div>
+      <div><span>담당자</span><strong>{client.managerName || "-"}</strong></div>
+      <dl className={styles.clientMetaRow}>
+        <div><dt>사업자등록번호</dt><dd>{client.businessRegistrationNumber || "-"}</dd></div>
+        <div><dt>거래처 연락처</dt><dd>{client.phone || "-"}</dd></div>
+      </dl>
+      <p><span>사업장 위치</span><strong>{client.defaultAddress || "등록된 사업장 위치가 없습니다."}</strong></p>
     </div>
+    <label className={styles.orderNameField}>주문서명 <span>선택 입력 · 미입력 시 일부 품목명으로 표시</span><input maxLength={200} value={orderName} onChange={(event) => onOrderNameChangeAction(event.target.value)} placeholder="예: 8월 본사 설비 교체 주문" /></label>
     <div className={styles.productPicker}>
       <label>물품 선택<select value={selectedProductId} onChange={(event) => setSelectedProductId(event.target.value)}>
         <option value="">주문할 물품을 선택하세요</option>
@@ -62,7 +72,12 @@ export function OrderCatalogSection({ client, products, items, vatIncluded,
           <button type="button" onClick={() => onItemsChangeAction(items.filter((value) => value.productId !== item.productId))}>삭제</button>
         </article>;
       })}
+      <label className={styles.check}>
+        <input type="checkbox" checked={vatIncluded} onChange={(event) => onVatIncludedChangeAction(event.target.checked)} /> 부가세 10% 포함
+      </label>
       <div className={styles.orderTotal}><span>예상 주문 금액{vatIncluded ? " (부가세 포함)" : ""}</span><strong>{total.toLocaleString("ko-KR")}원</strong></div>
     </div>}
+    {quotationOpen && <OrderQuotationModal client={client} products={products} items={items}
+      vatIncluded={vatIncluded} onCloseAction={() => setQuotationOpen(false)} />}
   </section>;
 }

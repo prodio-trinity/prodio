@@ -20,7 +20,6 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -97,11 +96,12 @@ class OrderServiceTest {
         when(catalogOrderLookup.findProduct(3L)).thenReturn(Optional.of(product(3L)));
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Order updated = orderService.updateMine(1L, ACCOUNT_ID, new UpdateOrderCommand(
+        Order updated = orderService.updateMine(1L, ACCOUNT_ID, new UpdateOrderCommand("거래처 주문서",
                 List.of(new OrderItemCommand(3L, 2)), true,
-                LocalDate.parse("2026-09-10"), deliveryCommand(), "거래처 수정"));
+                deliveryCommand(), "거래처 수정"));
 
         assertThat(updated.items()).extracting(OrderItem::productId).containsExactly(3L);
+        assertThat(updated.orderName()).isEqualTo("거래처 주문서");
         assertThat(updated.note()).isEqualTo("거래처 수정");
         verify(eventPublisher).publishEvent(any(OrderUpdatedEvent.class));
     }
@@ -111,11 +111,25 @@ class OrderServiceTest {
         when(orderRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(order(1L, 99L)));
         when(catalogOrderLookup.findClientByAccountId(ACCOUNT_ID)).thenReturn(Optional.of(client(CLIENT_ID)));
 
-        assertThatThrownBy(() -> orderService.updateMine(1L, ACCOUNT_ID, new UpdateOrderCommand(
+        assertThatThrownBy(() -> orderService.updateMine(1L, ACCOUNT_ID, new UpdateOrderCommand(null,
                 List.of(new OrderItemCommand(3L, 2)), true,
-                LocalDate.parse("2026-09-10"), deliveryCommand(), "변경 시도")))
+                deliveryCommand(), "변경 시도")))
                 .isInstanceOfSatisfying(OrderException.class,
                         exception -> assertThat(exception.getErrorCode()).isEqualTo(OrderErrorCode.ORDER_NOT_FOUND));
+    }
+
+    @Test
+    void clientCanCancelItsOwnPendingOrderAndPublishesCancelledEvent() {
+        Order pending = order(1L, CLIENT_ID);
+        when(orderRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(pending));
+        when(catalogOrderLookup.findClientByAccountId(ACCOUNT_ID)).thenReturn(Optional.of(client(CLIENT_ID)));
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Order cancelled = orderService.cancelMine(1L, ACCOUNT_ID, "거래처 요청");
+
+        assertThat(cancelled.status()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(cancelled.cancellationReason()).isEqualTo("거래처 요청");
+        verify(eventPublisher).publishEvent(any(OrderCancelledEvent.class));
     }
 
     @Test
@@ -124,9 +138,9 @@ class OrderServiceTest {
         when(catalogOrderLookup.findProduct(2L)).thenReturn(Optional.of(product(2L)));
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> withId(invocation.getArgument(0)));
 
-        orderService.create(new CreateOrderCommand(CLIENT_ID,
+        orderService.create(new CreateOrderCommand(CLIENT_ID, "8월 설비 주문",
                 List.of(new OrderItemCommand(2L, 10)), false,
-                LocalDate.parse("2026-09-01"), deliveryCommand(), "메모", ACCOUNT_ID));
+                deliveryCommand(), "메모", ACCOUNT_ID));
 
         verify(eventPublisher).publishEvent(any(OrderCreatedEvent.class));
     }
@@ -138,9 +152,9 @@ class OrderServiceTest {
         when(orderRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(pending));
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        orderService.update(1L, new UpdateOrderCommand(
+        orderService.update(1L, new UpdateOrderCommand(null,
                 List.of(new OrderItemCommand(3L, 2)), true,
-                LocalDate.parse("2026-09-10"), deliveryCommand(), "새 메모"));
+                deliveryCommand(), "새 메모"));
 
         verify(eventPublisher).publishEvent(any(OrderUpdatedEvent.class));
 
@@ -167,15 +181,15 @@ class OrderServiceTest {
 
     private Order withId(Order order) {
         return Order.reconstitute(1L, order.clientId(), order.clientNameSnapshot(),
-                order.clientPhoneSnapshot(), order.items(), order.vatIncluded(), order.totalAmount(),
-                order.dueDate(), order.delivery(), order.note(), order.status(),
+                order.clientContactSnapshot(), order.orderName(), order.items(), order.vatIncluded(), order.totalAmount(),
+                order.delivery(), order.note(), order.status(),
                 order.cancellationReason(), order.createdBy(), order.createdAt(), order.updatedAt());
     }
 
     private Order order(long id, long clientId) {
         return Order.reconstitute(id, clientId, "거래처", "010-0000-0000",
-                List.of(OrderItem.of(2L, "정밀 샤프트", 8_500L, 10)), false, 85_000L,
-                LocalDate.parse("2026-09-01"), delivery(), "", OrderStatus.PENDING_PAYMENT,
+                null, List.of(OrderItem.of(2L, "정밀 샤프트", 8_500L, 10)), false, 85_000L,
+                delivery(), "", OrderStatus.PENDING_PAYMENT,
                 null, ACCOUNT_ID, NOW, NOW);
     }
 

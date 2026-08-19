@@ -10,11 +10,11 @@ export interface Order {
   id: string;
   clientId: string;
   clientName: string;
-  clientPhone: string | null;
+  clientContact: string | null;
+  orderName: string | null;
   items: OrderItem[];
   vatIncluded: boolean;
   totalAmount: number;
-  dueDate: string;
   delivery: DeliveryAddress;
   note: string | null;
   status: OrderStatus;
@@ -100,17 +100,17 @@ export interface OrderFilters {
 
 export interface CreateOrderCommand {
   clientId: string;
+  orderName?: string;
   items: OrderItemCommand[];
   vatIncluded: boolean;
-  dueDate: string;
   delivery: DeliveryAddress;
   note?: string;
 }
 
 export interface UpdateOrderCommand {
+  orderName?: string;
   items: OrderItemCommand[];
   vatIncluded: boolean;
-  dueDate: string;
   delivery: DeliveryAddress;
   note?: string;
 }

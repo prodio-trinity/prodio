@@ -16,7 +16,7 @@ public class ProductionListener {
     @ApplicationModuleListener
     public void handle(OrderCreatedEvent orderCreated){
         if(repository.existsByOrderId(orderCreated.orderId())) throw new ProductionException(ProductionErrorCode.ALREADY_EXISTS_ORDER);
-        ProductionRecord record = ProductionRecord.create(orderCreated.orderId(), orderCreated.clientPhone());
+        ProductionRecord record = ProductionRecord.create(orderCreated.orderId(), orderCreated.clientContact());
         repository.save(record);
     }
 }

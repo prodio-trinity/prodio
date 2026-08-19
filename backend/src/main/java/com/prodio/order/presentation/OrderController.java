@@ -26,7 +26,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -98,8 +97,8 @@ class OrderController {
         UserRef creator = currentUser(authentication);
         long clientId = isPrivileged(authentication) ? parseId(request.clientId())
                 : orderService.clientContext(creator.id()).clientId();
-        CreateOrderCommand command = new CreateOrderCommand(clientId,
-                toItemCommands(request.items()), request.vatIncluded(), request.dueDate(),
+        CreateOrderCommand command = new CreateOrderCommand(clientId, request.orderName(),
+                toItemCommands(request.items()), request.vatIncluded(),
                 toDeliveryCommand(request.delivery()), request.note(), creator.id());
         return ApiResponse.success("수주를 등록했습니다.", OrderResponse.from(orderService.create(command)));
     }
@@ -137,6 +136,15 @@ class OrderController {
                 OrderResponse.from(orderService.cancel(parseId(id), request.reason())));
     }
 
+    @PatchMapping("/mine/{id}/cancel")
+    @PreAuthorize("hasRole('CLIENT')")
+    ApiResponse<OrderResponse> cancelMine(@PathVariable String id,
+            @Valid @RequestBody CancelOrderRequest request, Authentication authentication) {
+        UserRef user = currentUser(authentication);
+        return ApiResponse.success("주문을 취소했습니다.", OrderResponse.from(
+                orderService.cancelMine(parseId(id), user.id(), request.reason())));
+    }
+
     private long parseId(String value) {
         try {
             long id = Long.parseLong(value);
@@ -172,8 +180,8 @@ class OrderController {
     }
 
     private UpdateOrderCommand toUpdateCommand(UpdateOrderRequest request) {
-        return new UpdateOrderCommand(toItemCommands(request.items()), request.vatIncluded(),
-                request.dueDate(), toDeliveryCommand(request.delivery()), request.note());
+        return new UpdateOrderCommand(request.orderName(), toItemCommands(request.items()), request.vatIncluded(),
+                toDeliveryCommand(request.delivery()), request.note());
     }
 
     private DeliveryCommand toDeliveryCommand(DeliveryRequest delivery) {
@@ -184,13 +192,13 @@ class OrderController {
                 delivery.addressLine2());
     }
 
-    record CreateOrderRequest(@NotBlank String clientId,
+    record CreateOrderRequest(@NotBlank String clientId, @Size(max = 200) String orderName,
             @NotEmpty List<@Valid OrderItemRequest> items,
-            boolean vatIncluded, @NotNull LocalDate dueDate,
+            boolean vatIncluded,
             @NotNull @Valid DeliveryRequest delivery, @Size(max = 2000) String note) {}
 
-    record UpdateOrderRequest(@NotEmpty List<@Valid OrderItemRequest> items,
-            boolean vatIncluded, @NotNull LocalDate dueDate,
+    record UpdateOrderRequest(@Size(max = 200) String orderName, @NotEmpty List<@Valid OrderItemRequest> items,
+            boolean vatIncluded,
             @NotNull @Valid DeliveryRequest delivery, @Size(max = 2000) String note) {}
 
     record OrderItemRequest(@NotBlank String productId, @Positive int quantity) {}
@@ -202,15 +210,15 @@ class OrderController {
 
     record CancelOrderRequest(@NotBlank @Size(max = 1000) String reason) {}
 
-    record OrderResponse(String id, String clientId, String clientName, String clientPhone,
-            List<OrderItemResponse> items, boolean vatIncluded, long totalAmount, LocalDate dueDate,
+    record OrderResponse(String id, String clientId, String clientName, String clientContact, String orderName,
+            List<OrderItemResponse> items, boolean vatIncluded, long totalAmount,
             DeliveryResponse delivery, String status, String cancellationReason,
             String createdBy, String note, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
         static OrderResponse from(Order order) {
             return new OrderResponse(Long.toString(order.id()), Long.toString(order.clientId()),
-                    order.clientNameSnapshot(), order.clientPhoneSnapshot(),
+                    order.clientNameSnapshot(), order.clientContactSnapshot(), order.orderName(),
                     order.items().stream().map(OrderItemResponse::from).toList(), order.vatIncluded(),
-                    order.totalAmount(), order.dueDate(), DeliveryResponse.from(order.delivery()),
+                    order.totalAmount(), DeliveryResponse.from(order.delivery()),
                     order.status().name(), order.cancellationReason(), Long.toString(order.createdBy()),
                     order.note(), order.createdAt(), order.updatedAt());
         }
