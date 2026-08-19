@@ -56,6 +56,37 @@ class GeminiClient implements AiClient {
         return result;
     }
 
+    @Override
+    public String generateText(String prompt) {
+        try {
+            return retryExecutor.execute(() -> callGenerate(prompt), this::isRetryable);
+        } catch (RestClientException exception) {
+            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED, exception);
+        }
+    }
+
+    private String callGenerate(String prompt) {
+        GenerateRequest request = new GenerateRequest(
+                List.of(new GenerateRequest.Content(List.of(new GenerateRequest.Part(prompt)))));
+
+        GenerateResponse response = geminiRestClient.post()
+                .uri("/v1beta/models/{model}:generateContent", properties.chatModel())
+                .body(request)
+                .retrieve()
+                .body(GenerateResponse.class);
+
+        if (response == null || response.candidates() == null || response.candidates().isEmpty()) {
+            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED);
+        }
+
+        GenerateResponse.Content content = response.candidates().get(0).content();
+        if (content == null || content.parts() == null || content.parts().isEmpty()) {
+            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED);
+        }
+
+        return content.parts().get(0).text();
+    }
+
     /** 5xx, 타임아웃/연결 실패, 429(rate limit)는 재시도 대상. 그 외 4xx(API 키 오류 등)는 즉시 실패. */
     private boolean isRetryable(RuntimeException exception) {
         return exception instanceof HttpServerErrorException
@@ -70,5 +101,16 @@ class GeminiClient implements AiClient {
 
     private record EmbedResponse(Embedding embedding) {
         record Embedding(List<Float> values) {}
+    }
+
+    private record GenerateRequest(List<Content> contents) {
+        record Content(List<Part> parts) {}
+        record Part(String text) {}
+    }
+
+    private record GenerateResponse(List<Candidate> candidates) {
+        record Candidate(Content content) {}
+        record Content(List<Part> parts) {}
+        record Part(String text) {}
     }
 }
