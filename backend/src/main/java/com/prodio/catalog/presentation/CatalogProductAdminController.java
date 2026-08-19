@@ -1,6 +1,8 @@
 package com.prodio.catalog.presentation;
 
 import com.prodio.catalog.application.CatalogProductService;
+import com.prodio.catalog.application.ProductBulkUpsertRequest;
+import com.prodio.catalog.application.ProductBulkUpsertResult;
 import com.prodio.catalog.application.ProductListItem;
 import com.prodio.shared.ApiResponse;
 import jakarta.validation.constraints.Max;
@@ -9,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +39,11 @@ class CatalogProductAdminController {
         Page<ProductListItem> result = catalogProductService
                 .getProductList(keyword, categoryId, isActive, page, size, sort);
         return ApiResponse.success(ProductPageResponse.from(result));
+    }
+
+    @PostMapping("/bulk")
+    ApiResponse<List<ProductBulkUpsertResult>> upsertProducts(@RequestBody List<ProductBulkUpsertRequest> requests) {
+        return ApiResponse.success(catalogProductService.upsertRows(requests));
     }
 
     record ProductListItemResponse(long id, String productCode, String productName, Long subCategoryId,
