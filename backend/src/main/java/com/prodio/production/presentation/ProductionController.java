@@ -14,7 +14,7 @@ public class ProductionController {
     record ShipResponse(boolean smsSent) {}
 
     @PatchMapping("/{productionId}/ship")
-    public ApiResponse<ShipResponse> ship(@PathVariable Long productionId) {
+    ApiResponse<ShipResponse> ship(@PathVariable Long productionId) {
         boolean smsSent = productService.ship(productionId);
         return ApiResponse.success(new ShipResponse(smsSent));
     }
