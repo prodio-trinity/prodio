@@ -1,11 +1,12 @@
 package com.prodio.stat.application;
 
-import com.prodio.stat.SampleOrderCancelledEvent;
-import com.prodio.stat.SampleOrderCompletedEvent;
-import com.prodio.stat.SampleOrderCreatedEvent;
-import com.prodio.stat.SampleOrderItem;
-import com.prodio.stat.SampleOrderShippedEvent;
-import com.prodio.stat.SampleOrderStartedEvent;
+import com.prodio.order.OrderCancelledEvent;
+import com.prodio.order.OrderConfirmedEvent;
+import com.prodio.order.OrderCreatedEvent;
+import com.prodio.order.OrderDeliveryEventData;
+import com.prodio.order.OrderItemEventData;
+import com.prodio.production.event.OrderCompleted;
+import com.prodio.production.event.OrderShipped;
 import com.prodio.stat.domain.OrderStatView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,10 +41,10 @@ class StatListenerTest {
     @DisplayName("생성 이벤트를 받으면 품목마다 OrderStatView를 하나씩 생성한다")
     void createdEventCreatesOneOrderStatViewPerItem() {
         OffsetDateTime createdAt = OffsetDateTime.parse("2026-08-18T10:00:00+09:00");
-        SampleOrderItem shaft = new SampleOrderItem(3L, "정밀 샤프트", 10, 85_000L);
-        SampleOrderItem bearing = new SampleOrderItem(4L, "베어링", 5, 25_000L);
-        SampleOrderCreatedEvent event = new SampleOrderCreatedEvent(ORDER_ID, 2L, "거래처",
-                List.of(shaft, bearing), DUE_DATE, createdAt);
+        OrderItemEventData shaft = new OrderItemEventData(3L, "정밀 샤프트", 8_500L, 10, 85_000L);
+        OrderItemEventData bearing = new OrderItemEventData(4L, "베어링", 5_000L, 5, 25_000L);
+        OrderCreatedEvent event = new OrderCreatedEvent(ORDER_ID, 2L, "거래처", "010-0000-0000",
+                List.of(shaft, bearing), 110_000L, DUE_DATE, delivery(), createdAt);
 
         listener.handle(event);
 
@@ -54,13 +55,15 @@ class StatListenerTest {
     }
 
     @Test
-    @DisplayName("생산 시작 이벤트를 받으면 markProductionStarted를 호출한다")
-    void startedEventMarksProductionStarted() {
-        OffsetDateTime startedAt = OffsetDateTime.parse("2026-08-19T09:00:00+09:00");
+    @DisplayName("확정 이벤트를 받으면 markProductionStarted를 호출한다")
+    void confirmedEventMarksProductionStarted() {
+        OffsetDateTime confirmedAt = OffsetDateTime.parse("2026-08-19T09:00:00+09:00");
+        OrderConfirmedEvent event = new OrderConfirmedEvent(ORDER_ID, 2L, "거래처", "010-0000-0000",
+                List.of(), 110_000L, DUE_DATE, delivery(), "", confirmedAt.minusDays(1), confirmedAt);
 
-        listener.handle(new SampleOrderStartedEvent(ORDER_ID, startedAt));
+        listener.handle(event);
 
-        verify(repository).markProductionStarted(ORDER_ID, startedAt);
+        verify(repository).markProductionStarted(ORDER_ID, confirmedAt);
     }
 
     @Test
@@ -68,7 +71,7 @@ class StatListenerTest {
     void shippedEventMarksShipped() {
         OffsetDateTime shippedAt = OffsetDateTime.parse("2026-08-25T09:00:00+09:00");
 
-        listener.handle(new SampleOrderShippedEvent(ORDER_ID, shippedAt));
+        listener.handle(new OrderShipped(ORDER_ID, shippedAt));
 
         verify(repository).markShipped(ORDER_ID, shippedAt);
     }
@@ -79,7 +82,7 @@ class StatListenerTest {
         when(repository.findAllByOrderId(ORDER_ID)).thenReturn(List.of(view()));
         OffsetDateTime completedAt = DUE_DATE.atStartOfDay(java.time.ZoneOffset.UTC).toOffsetDateTime();
 
-        listener.handle(new SampleOrderCompletedEvent(ORDER_ID, completedAt));
+        listener.handle(new OrderCompleted(ORDER_ID, completedAt));
 
         verify(repository).markCompleted(ORDER_ID, completedAt, true);
     }
@@ -90,7 +93,7 @@ class StatListenerTest {
         when(repository.findAllByOrderId(ORDER_ID)).thenReturn(List.of(view()));
         OffsetDateTime completedAt = DUE_DATE.plusDays(1).atStartOfDay(java.time.ZoneOffset.UTC).toOffsetDateTime();
 
-        listener.handle(new SampleOrderCompletedEvent(ORDER_ID, completedAt));
+        listener.handle(new OrderCompleted(ORDER_ID, completedAt));
 
         verify(repository).markCompleted(ORDER_ID, completedAt, false);
     }
@@ -101,7 +104,7 @@ class StatListenerTest {
         when(repository.findAllByOrderId(ORDER_ID)).thenReturn(List.of());
         OffsetDateTime completedAt = OffsetDateTime.parse("2026-09-01T09:00:00+09:00");
 
-        assertThatThrownBy(() -> listener.handle(new SampleOrderCompletedEvent(ORDER_ID, completedAt)))
+        assertThatThrownBy(() -> listener.handle(new OrderCompleted(ORDER_ID, completedAt)))
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -110,7 +113,7 @@ class StatListenerTest {
     void cancelledEventMarksCancelled() {
         OffsetDateTime cancelledAt = OffsetDateTime.parse("2026-08-20T09:00:00+09:00");
 
-        listener.handle(new SampleOrderCancelledEvent(ORDER_ID, "고객 요청", cancelledAt));
+        listener.handle(new OrderCancelledEvent(ORDER_ID, "고객 요청", cancelledAt));
 
         verify(repository).markCancelled(ORDER_ID, "고객 요청", cancelledAt);
     }
@@ -118,5 +121,10 @@ class StatListenerTest {
     private OrderStatView view() {
         return OrderStatView.create(ORDER_ID, 2L, "거래처", 3L, "정밀 샤프트", 10, 85_000L,
                 DUE_DATE, OffsetDateTime.parse("2026-08-18T10:00:00+09:00"));
+    }
+
+    private OrderDeliveryEventData delivery() {
+        return new OrderDeliveryEventData("기본 배송지", "홍길동", "010-0000-0000",
+                "12345", "서울시 어딘가", "");
     }
 }
