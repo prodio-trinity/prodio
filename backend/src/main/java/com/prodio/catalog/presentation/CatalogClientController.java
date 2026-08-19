@@ -2,6 +2,8 @@ package com.prodio.catalog.presentation;
 
 import com.prodio.catalog.application.CatalogClientService;
 import com.prodio.catalog.application.ClientAutocompleteItem;
+import com.prodio.catalog.application.ClientBulkUpsertRequest;
+import com.prodio.catalog.application.ClientBulkUpsertResult;
 import com.prodio.catalog.application.ClientListItem;
 import com.prodio.shared.ApiResponse;
 import jakarta.validation.constraints.Max;
@@ -11,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,6 +49,12 @@ class CatalogClientController {
         List<ClientAutocompleteItem> items = catalogClientService.getAutocomplete(keyword, size);
         return ApiResponse.success(items.stream()
                 .map(ClientAutocompleteResponse::from).toList());
+    }
+
+    @PostMapping("/bulk")
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<List<ClientBulkUpsertResult>> upsertClients(@RequestBody List<ClientBulkUpsertRequest> requests) {
+        return ApiResponse.success(catalogClientService.upsertRows(requests));
     }
 
     record ClientListItemResponse(Long id, String clientCode, String companyName, String ceoName,
