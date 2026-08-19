@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.*;
 public class ProductionController {
     private final ProductionService productService;
 
+    record ShipResponse(boolean smsSent) {}
+
     @PatchMapping("/{productionId}/ship")
-    public ApiResponse<Void> ship(@PathVariable Long productionId) {
-        productService.ship(productionId);
-        return ApiResponse.success(null);
+    public ApiResponse<ShipResponse> ship(@PathVariable Long productionId) {
+        boolean smsSent = productService.ship(productionId);
+        return ApiResponse.success(new ShipResponse(smsSent));
     }
 }

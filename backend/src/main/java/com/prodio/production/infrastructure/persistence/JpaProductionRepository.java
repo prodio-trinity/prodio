@@ -33,6 +33,6 @@ public class JpaProductionRepository implements ProductionRepository {
         ProductionRecord shipped = entity.toDomain().markShipped();
         springDataProductionRepository.save(ProductionRecordEntity.from(shipped));
 
-        return new ShipInfo(shipped.orderId(), shipped.phone());
+        return new ShipInfo(shipped.orderId(), shipped.phone(), shipped.shippedAt());
     }
 }
