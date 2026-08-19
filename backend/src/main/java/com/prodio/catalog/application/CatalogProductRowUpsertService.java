@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 class CatalogProductRowUpsertService {
     private final CatalogProductRepository productRepository;
-    private final CatalogSubCategoryQueryRepository subCategoryQueryRepository;
+    private final CatalogSubCategoryRepository subCategoryRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CatalogProduct upsertOne(ProductBulkUpsertRequest req) {
@@ -25,7 +25,7 @@ class CatalogProductRowUpsertService {
     }
 
     private Long resolveSubCategoryId(String categoryCode) {
-        return subCategoryQueryRepository.findIdByCode(categoryCode)
+        return subCategoryRepository.findIdByCode(categoryCode)
                 .orElseThrow(() -> new CatalogException(CatalogErrorCode.CATEGORY_NOT_FOUND));
     }
 
