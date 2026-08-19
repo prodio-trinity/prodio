@@ -3,6 +3,7 @@ package com.prodio.production.application;
 import com.prodio.production.domain.ProductionRecord;
 import com.prodio.production.event.OrderCompleted;
 import com.prodio.production.event.OrderShipped;
+import com.prodio.shared.PageResult;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -38,6 +39,11 @@ public class ProductionService {
                 new OrderCompleted(completed.orderId(), toOffsetDateTime(completed.completedAt()))
         );
         return smsSent;
+    }
+
+    @Transactional(readOnly = true)
+    public PageResult<ProductionRecord> list(ProductionStatus status, int page, int size) {
+        return repository.findAll(status, page, size);
     }
 
     /** SMS 발송을 시도하고 성공 여부를 리턴한다. 실패해도 예외를 던지지 않고 로그만 남긴다. */

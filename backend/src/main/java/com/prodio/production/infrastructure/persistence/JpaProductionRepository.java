@@ -1,11 +1,16 @@
 package com.prodio.production.infrastructure.persistence;
 
 import com.prodio.production.application.ProductionRepository;
+import com.prodio.production.application.ProductionStatus;
 import com.prodio.production.domain.ProductionRecord;
 import com.prodio.production.exception.ProductionErrorCode;
 import com.prodio.production.exception.ProductionException;
+import com.prodio.shared.PageResult;
 import java.util.function.UnaryOperator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -44,5 +49,14 @@ public class JpaProductionRepository implements ProductionRepository {
         springDataProductionRepository.save(ProductionRecordEntity.from(next));
 
         return next;
+    }
+
+    @Override
+    public PageResult<ProductionRecord> findAll(ProductionStatus status, int page, int size) {
+        Page<ProductionRecordEntity> result = springDataProductionRepository.search(status,
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+
+        return new PageResult<>(result.getContent().stream().map(ProductionRecordEntity::toDomain).toList(),
+                page, size, result.getTotalElements(), result.getTotalPages());
     }
 }
