@@ -21,7 +21,7 @@ import java.time.Instant;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/clients")
+@RequestMapping("/api/admin/catalog/clients")
 @RequiredArgsConstructor
 @Validated
 class CatalogClientAdminController {
