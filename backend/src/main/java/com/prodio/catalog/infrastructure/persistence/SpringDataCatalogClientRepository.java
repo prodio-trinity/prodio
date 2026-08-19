@@ -22,7 +22,7 @@ public interface SpringDataCatalogClientRepository extends JpaRepository<Catalog
             """;
 
     Optional<CatalogClientEntity> findByUserId(Long userId);
-
+    
     // 목록 화면 — Page (총 개수 필요, COUNT 쿼리 발생해도 됨)
     @Query("SELECT c FROM CatalogClientEntity c WHERE " + KEYWORD_FILTER)
     Page<CatalogClientEntity> findClients(
@@ -35,4 +35,10 @@ public interface SpringDataCatalogClientRepository extends JpaRepository<Catalog
             @Param("keyword") String keyword,
             @Param("isActive") Boolean isActive,
             Pageable pageable);
+
+    Optional<CatalogClientEntity> findByBusinessRegNo(String businessRegNo);
+
+    @Query(value = "SELECT nextval('catalog_client_code_seq')", nativeQuery = true)
+    Long nextClientCodeSequence();
+
 }

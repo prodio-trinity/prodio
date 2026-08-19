@@ -62,7 +62,26 @@ class CatalogClientEntity {
         entity.userId = domain.userId();
         entity.memo = domain.memo();
         entity.active = domain.active();
+        entity.createdAt = Instant.now();
+        entity.updatedAt = Instant.now();
         return entity;
+    }
+
+    void assignClientCode(String clientCode) {
+        this.clientCode = clientCode;
+    }
+
+    /** 그리드에서 편집 가능한 필드만 갱신 */
+    void update(CatalogClient domain) {
+        this.companyName = domain.companyName();
+        this.ceoName = domain.ceoName();
+        this.businessRegNo = domain.businessRegNo();
+        this.phone = domain.phone();
+        this.address = domain.address();
+        this.managerName = domain.managerName();
+        this.memo = domain.memo();
+        this.active = domain.active();
+        this.updatedAt = Instant.now();
     }
 
     CatalogClient toDomain() {
