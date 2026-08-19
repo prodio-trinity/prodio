@@ -24,6 +24,9 @@ services:
       PRODIO_CORS_ALLOWED_ORIGINS: https://prodio.songkyeongyong.xyz
       PRODIO_CSRF_SECURE_COOKIE: "true"
       SERVER_FORWARD_HEADERS_STRATEGY: framework
+      COOLSMS_API_KEY: ${COOLSMS_API_KEY}
+      COOLSMS_API_SECRET: ${COOLSMS_API_SECRET}
+      COOLSMS_SENDER_NUMBER: ${COOLSMS_SENDER_NUMBER}
       JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=65.0"
     depends_on:
       - db
