@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { orderService } from "../services/orderService";
-import type { OrderPage, OrderStatus } from "../types/order";
+import { ORDER_STATUS_LABELS, type OrderPage, type OrderStatus } from "../types/order";
 import styles from "./orders.module.css";
 
 const EMPTY: OrderPage = { orders: [], page: 0, size: 10, totalElements: 0, totalPages: 0 };
@@ -30,14 +30,14 @@ export function MyOrderList() {
     </header>
     <section className={styles.summary}>
       <div><span>전체 주문</span><strong>{data.totalElements}</strong></div>
-      <div><span>생산 대기</span><strong>{data.orders.filter((order) => order.status === "PENDING").length}</strong></div>
-      <div><span>결제 확인</span><strong>{data.orders.filter((order) => order.paymentConfirmed).length}</strong></div>
+      <div><span>입금 대기</span><strong>{data.orders.filter((order) => order.status === "PENDING_PAYMENT").length}</strong></div>
+      <div><span>주문 확정</span><strong>{data.orders.filter((order) => order.status === "CONFIRMED").length}</strong></div>
     </section>
     <section className={styles.card}>
       <div className={styles.filters}>
         <input value={query} onChange={(event) => { setQuery(event.target.value); setPage(0); }} placeholder="거래처 또는 품목 검색" />
         <select value={status} onChange={(event) => { setStatus(event.target.value as OrderStatus | ""); setPage(0); }}>
-          <option value="">전체 상태</option><option value="PENDING">생산 대기</option><option value="IN_PRODUCTION">생산 진행</option>
+          <option value="">전체 상태</option><option value="PENDING_PAYMENT">입금 대기</option><option value="CONFIRMED">주문 확정</option><option value="CANCELLED">주문 취소</option>
         </select>
       </div>
       {error && <p className={styles.error}>{error}</p>}
@@ -46,7 +46,7 @@ export function MyOrderList() {
           <tbody>{data.orders.map((order) => <tr key={order.id}>
             <td><Link href={`/my-orders/${order.id}`}>#{order.id}</Link></td><td><strong>{order.productName}</strong><span>{order.clientName}</span></td>
             <td>{order.quantity.toLocaleString()}</td><td>{order.totalAmount.toLocaleString()}원</td><td>{order.dueDate}</td>
-            <td><span className={styles.badge}>{order.status === "PENDING" ? "생산 대기" : "생산 진행"}</span></td><td>{order.paymentConfirmed ? "확인" : "미확인"}</td>
+            <td><span className={styles.badge}>{ORDER_STATUS_LABELS[order.status]}</span></td><td>{order.status === "CONFIRMED" ? "확인" : order.status === "CANCELLED" ? "취소" : "미확인"}</td>
           </tr>)}</tbody></table></div>}
       <div className={styles.pagination}><button type="button" disabled={page === 0} onClick={() => setPage(page - 1)}>이전</button><span>{data.totalPages === 0 ? 0 : page + 1} / {data.totalPages}</span><button type="button" disabled={page + 1 >= data.totalPages} onClick={() => setPage(page + 1)}>다음</button></div>
     </section>

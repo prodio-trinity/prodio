@@ -30,6 +30,7 @@ export const DUMMY_PRODUCTS: ProductOption[] = [
 
 type ClientSelectorProps = {
   value?: number;
+  readOnly?: boolean;
   onChange: (client: ClientOption) => void;
 };
 
@@ -64,7 +65,7 @@ function PreviewModal({ kind, onClose }: { kind: "거래처" | "품목"; onClose
   );
 }
 
-export function ClientSelector({ value, onChange }: ClientSelectorProps) {
+export function ClientSelector({ value, readOnly = false, onChange }: ClientSelectorProps) {
   const [query, setQuery] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const options = useMemo(
@@ -76,15 +77,16 @@ export function ClientSelector({ value, onChange }: ClientSelectorProps) {
     <div className={styles.selector}>
       <div className={styles.selectorHeader}>
         <div><strong>수주처</strong><span>카탈로그 더미 데이터</span></div>
-        <button type="button" onClick={() => setPreviewOpen(true)}>+ 미등록 거래처</button>
+        <button type="button" disabled={readOnly} onClick={() => setPreviewOpen(true)}>+ 미등록 거래처</button>
       </div>
-      <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="거래처명으로 검색" />
+      <input disabled={readOnly} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="거래처명으로 검색" />
       <div className={styles.options}>
         {options.map((client) => (
           <button
             type="button"
             className={value === client.id ? styles.selected : undefined}
             key={client.id}
+            disabled={readOnly}
             onClick={() => onChange(client)}
           >
             <strong>{client.name}</strong><span>{client.contact}</span>

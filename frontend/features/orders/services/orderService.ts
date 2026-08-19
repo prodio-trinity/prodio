@@ -4,6 +4,7 @@ import type {
   Order,
   OrderFilters,
   OrderPage,
+  UpdateOrderCommand,
 } from "../types/order";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
@@ -72,16 +73,23 @@ export const orderService = {
     });
   },
 
-  startProduction(id: string) {
-    return request<Order>(`/api/orders/${id}/start-production`, {
+  update(id: string, command: UpdateOrderCommand) {
+    return request<Order>(`/api/orders/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(command),
+    });
+  },
+
+  confirm(id: string) {
+    return request<Order>(`/api/orders/${id}/confirm`, {
       method: "PATCH",
     });
   },
 
-  updatePayment(id: string, confirmed: boolean) {
-    return request<Order>(`/api/orders/${id}/payment`, {
+  cancel(id: string, reason: string) {
+    return request<Order>(`/api/orders/${id}/cancel`, {
       method: "PATCH",
-      body: JSON.stringify({ confirmed }),
+      body: JSON.stringify({ reason }),
     });
   },
 };

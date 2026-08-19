@@ -21,25 +21,44 @@ class OrderTest {
     }
 
     @Test
-    void productionCanStartOnlyOnce() {
+    void pendingOrderCanBeUpdatedAndTotalIsRecalculated() {
         Order order = Order.place(1, "거래처", "010", 2, "품목", 15_000,
                 10, false, LocalDate.parse("2026-09-01"), "주소", "", 1, NOW);
 
-        order.startProduction(NOW.plusHours(1));
+        order.update(3, "변경 품목", 20_000, 2, true,
+                LocalDate.parse("2026-09-10"), "새 주소", "새 메모", NOW.plusHours(1));
 
-        assertThat(order.status()).isEqualTo(OrderStatus.IN_PRODUCTION);
-        assertThatThrownBy(() -> order.startProduction(NOW.plusHours(2)))
+        assertThat(order.productId()).isEqualTo(3);
+        assertThat(order.totalAmount()).isEqualTo(44_000);
+        assertThat(order.status()).isEqualTo(OrderStatus.PENDING_PAYMENT);
+    }
+
+    @Test
+    void confirmedOrderCannotBeChangedAgain() {
+        Order order = Order.place(1, "거래처", "010", 2, "품목", 15_000,
+                10, false, LocalDate.parse("2026-09-01"), "주소", "", 1, NOW);
+
+        order.confirm(NOW.plusMinutes(1));
+
+        assertThat(order.status()).isEqualTo(OrderStatus.CONFIRMED);
+        assertThatThrownBy(() -> order.confirm(NOW.plusMinutes(2)))
                 .isInstanceOf(OrderException.class);
     }
 
     @Test
-    void paymentConfirmationIsIdempotent() {
+    void cancellationRequiresAReasonAndLocksTheOrder() {
         Order order = Order.place(1, "거래처", "010", 2, "품목", 15_000,
                 10, false, LocalDate.parse("2026-09-01"), "주소", "", 1, NOW);
 
-        order.changePaymentConfirmation(true, NOW.plusMinutes(1));
-        order.changePaymentConfirmation(true, NOW.plusMinutes(2));
+        assertThatThrownBy(() -> order.cancel(" ", NOW.plusMinutes(1)))
+                .isInstanceOf(IllegalArgumentException.class);
 
-        assertThat(order.paymentConfirmed()).isTrue();
+        order.cancel("고객 요청", NOW.plusMinutes(2));
+
+        assertThat(order.status()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(order.cancellationReason()).isEqualTo("고객 요청");
+        assertThatThrownBy(() -> order.update(3, "변경", 1, 1, false,
+                LocalDate.parse("2026-09-02"), "", "", NOW.plusMinutes(3)))
+                .isInstanceOf(OrderException.class);
     }
 }
