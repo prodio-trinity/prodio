@@ -33,4 +33,18 @@ class JpaCatalogSubCategoryRepository implements CatalogSubCategoryRepository {
         CatalogSubCategoryEntity entity = CatalogSubCategoryEntity.from(subCategory);
         return springDataCatalogSubCategoryRepository.save(entity).toDomain();
     }
+
+    @Override
+    public Optional<CatalogSubCategory> update(Long id, String name, boolean active) {
+        Optional<CatalogSubCategoryEntity> found = springDataCatalogSubCategoryRepository.findById(id);
+        
+        if (found.isEmpty()) {
+            return Optional.empty();
+        }
+        
+        CatalogSubCategoryEntity entity = found.get();
+        CatalogSubCategory updated = entity.toDomain().update(name, active);
+        entity.update(updated);
+        return Optional.of(updated);
+    }
 }
