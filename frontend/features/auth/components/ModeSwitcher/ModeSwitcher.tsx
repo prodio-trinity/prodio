@@ -17,6 +17,11 @@ interface RoleDestination {
 }
 
 const ROLE_DESTINATIONS: Record<string, RoleDestination> = {
+  UNREGISTERED_CLIENT: {
+    label: "가입자",
+    href: "/welcome",
+    activeWhen: ["/welcome", "/client-registration"],
+  },
   CLIENT: {
     label: "거래처",
     href: "/my-orders",

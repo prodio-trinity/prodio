@@ -42,7 +42,11 @@ export function LoginForm() {
         const result = await signup({ email, password, name }).unwrap();
         roles = result.roles;
       }
-      const destination = roles.includes("ADMIN") ? "/dashboard" : "/my-orders";
+      const destination = roles.includes("ADMIN")
+        ? "/dashboard"
+        : roles.includes("UNREGISTERED_CLIENT")
+          ? "/welcome"
+          : "/my-orders";
       router.replace(destination);
     } catch {
       // 에러 메시지는 loginState/signupState.error 에서 표시한다.

@@ -47,7 +47,7 @@ class AuthController {
         UserAccount created = signupService.signup(
                 new SignupCommand(request.email(), request.password(), request.name()));
         return ApiResponse.success("회원가입이 완료되었습니다.",
-                MemberResponse.of(created.id(), created.email(), created.name(), Set.of("CLIENT")));
+                MemberResponse.of(created.id(), created.email(), created.name(), Set.of("UNREGISTERED_CLIENT")));
     }
 
     record LoginRequest(String email, String password) {}

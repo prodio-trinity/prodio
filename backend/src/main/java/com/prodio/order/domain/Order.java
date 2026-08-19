@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 public final class Order {
@@ -14,14 +16,11 @@ public final class Order {
     private final long clientId;
     private final String clientNameSnapshot;
     private final String clientPhoneSnapshot;
-    private long productId;
-    private String productNameSnapshot;
-    private long unitPriceSnapshot;
-    private int quantity;
+    private List<OrderItem> items;
     private boolean vatIncluded;
     private long totalAmount;
     private LocalDate dueDate;
-    private String deliveryAddress;
+    private DeliverySnapshot delivery;
     private String note;
     private OrderStatus status;
     private String cancellationReason;
@@ -30,28 +29,25 @@ public final class Order {
     private OffsetDateTime updatedAt;
 
     private Order(long id, long clientId, String clientNameSnapshot, String clientPhoneSnapshot,
-            long productId, String productNameSnapshot, long unitPriceSnapshot, int quantity,
-            boolean vatIncluded, long totalAmount, LocalDate dueDate, String deliveryAddress,
+            List<OrderItem> items, boolean vatIncluded, long totalAmount, LocalDate dueDate,
+            DeliverySnapshot delivery,
             String note, OrderStatus status, String cancellationReason, long createdBy,
             OffsetDateTime createdAt, OffsetDateTime updatedAt) {
-        if (id < 0 || clientId <= 0 || productId <= 0 || createdBy <= 0) {
+        if (id < 0 || clientId <= 0 || createdBy <= 0) {
             throw new IllegalArgumentException("수주 식별자는 양수여야 합니다.");
         }
-        if (unitPriceSnapshot < 0 || quantity <= 0 || totalAmount < 0) {
+        if (totalAmount < 0) {
             throw new IllegalArgumentException("수주 금액과 수량이 올바르지 않습니다.");
         }
         this.id = id;
         this.clientId = clientId;
         this.clientNameSnapshot = requireText(clientNameSnapshot, "거래처명이 필요합니다.");
         this.clientPhoneSnapshot = normalize(clientPhoneSnapshot);
-        this.productId = productId;
-        this.productNameSnapshot = requireText(productNameSnapshot, "품목명이 필요합니다.");
-        this.unitPriceSnapshot = unitPriceSnapshot;
-        this.quantity = quantity;
+        this.items = validateItems(items);
         this.vatIncluded = vatIncluded;
         this.totalAmount = totalAmount;
         this.dueDate = Objects.requireNonNull(dueDate, "납기일이 필요합니다.");
-        this.deliveryAddress = normalize(deliveryAddress);
+        this.delivery = Objects.requireNonNull(delivery, "배송 정보가 필요합니다.");
         this.note = normalize(note);
         this.status = Objects.requireNonNull(status, "수주 상태가 필요합니다.");
         this.cancellationReason = normalizeNullable(cancellationReason);
@@ -64,38 +60,34 @@ public final class Order {
     }
 
     public static Order place(long clientId, String clientName, String clientPhone,
-            long productId, String productName, long unitPrice, int quantity,
-            boolean vatIncluded, LocalDate dueDate, String deliveryAddress, String note,
+            List<OrderItem> items, boolean vatIncluded, LocalDate dueDate,
+            DeliverySnapshot delivery, String note,
             long createdBy, OffsetDateTime now) {
-        long totalAmount = calculateTotal(unitPrice, quantity, vatIncluded);
-        return new Order(0, clientId, clientName, clientPhone, productId, productName,
-                unitPrice, quantity, vatIncluded, totalAmount, dueDate, deliveryAddress,
+        long totalAmount = calculateTotal(items, vatIncluded);
+        return new Order(0, clientId, clientName, clientPhone, items,
+                vatIncluded, totalAmount, dueDate, delivery,
                 note, OrderStatus.PENDING_PAYMENT, null, createdBy, now, now);
     }
 
     public static Order reconstitute(long id, long clientId, String clientName, String clientPhone,
-            long productId, String productName, long unitPrice, int quantity,
-            boolean vatIncluded, long totalAmount, LocalDate dueDate, String deliveryAddress,
+            List<OrderItem> items, boolean vatIncluded, long totalAmount, LocalDate dueDate,
+            DeliverySnapshot delivery,
             String note, OrderStatus status, String cancellationReason, long createdBy,
             OffsetDateTime createdAt, OffsetDateTime updatedAt) {
-        return new Order(id, clientId, clientName, clientPhone, productId, productName,
-                unitPrice, quantity, vatIncluded, totalAmount, dueDate, deliveryAddress,
+        return new Order(id, clientId, clientName, clientPhone, items,
+                vatIncluded, totalAmount, dueDate, delivery,
                 note, status, cancellationReason, createdBy, createdAt, updatedAt);
     }
 
-    public void update(long productId, String productName, long unitPrice, int quantity,
-            boolean vatIncluded, LocalDate dueDate, String deliveryAddress, String note,
+    public void update(List<OrderItem> items, boolean vatIncluded, LocalDate dueDate,
+            DeliverySnapshot delivery, String note,
             OffsetDateTime now) {
         ensurePendingPayment();
-        if (productId <= 0) throw new IllegalArgumentException("품목 식별자는 양수여야 합니다.");
-        this.productId = productId;
-        this.productNameSnapshot = requireText(productName, "품목명이 필요합니다.");
-        this.unitPriceSnapshot = unitPrice;
-        this.quantity = quantity;
+        this.items = validateItems(items);
         this.vatIncluded = vatIncluded;
-        this.totalAmount = calculateTotal(unitPrice, quantity, vatIncluded);
+        this.totalAmount = calculateTotal(items, vatIncluded);
         this.dueDate = Objects.requireNonNull(dueDate, "납기일이 필요합니다.");
-        this.deliveryAddress = normalize(deliveryAddress);
+        this.delivery = Objects.requireNonNull(delivery, "배송 정보가 필요합니다.");
         this.note = normalize(note);
         updatedAt = Objects.requireNonNull(now);
     }
@@ -120,17 +112,34 @@ public final class Order {
         }
     }
 
-    static long calculateTotal(long unitPrice, int quantity, boolean vatIncluded) {
-        if (unitPrice < 0 || quantity <= 0) {
-            throw new IllegalArgumentException("단가와 수량이 올바르지 않습니다.");
+    static long calculateTotal(List<OrderItem> items, boolean vatIncluded) {
+        List<OrderItem> validated = validateItems(items);
+        long subtotal;
+        try {
+            subtotal = validated.stream().mapToLong(OrderItem::lineAmount)
+                    .reduce(0L, Math::addExact);
+        } catch (ArithmeticException exception) {
+            throw new OrderException(OrderErrorCode.INVALID_ORDER_REQUEST, "계산된 수주 금액이 너무 큽니다.");
         }
-        BigDecimal amount = BigDecimal.valueOf(unitPrice).multiply(BigDecimal.valueOf(quantity));
+        BigDecimal amount = BigDecimal.valueOf(subtotal);
         if (vatIncluded) amount = amount.multiply(new BigDecimal("1.1"));
         try {
             return amount.setScale(0, RoundingMode.HALF_UP).longValueExact();
         } catch (ArithmeticException exception) {
             throw new OrderException(OrderErrorCode.INVALID_ORDER_REQUEST, "계산된 수주 금액이 너무 큽니다.");
         }
+    }
+
+    private static List<OrderItem> validateItems(List<OrderItem> items) {
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("주문 품목이 하나 이상 필요합니다.");
+        }
+        List<OrderItem> copy = List.copyOf(items);
+        HashSet<Long> productIds = new HashSet<>();
+        if (copy.stream().anyMatch(item -> !productIds.add(item.productId()))) {
+            throw new IllegalArgumentException("같은 품목을 중복해서 추가할 수 없습니다.");
+        }
+        return copy;
     }
 
     private static String requireText(String value, String message) {
@@ -151,14 +160,12 @@ public final class Order {
     public long clientId() { return clientId; }
     public String clientNameSnapshot() { return clientNameSnapshot; }
     public String clientPhoneSnapshot() { return clientPhoneSnapshot; }
-    public long productId() { return productId; }
-    public String productNameSnapshot() { return productNameSnapshot; }
-    public long unitPriceSnapshot() { return unitPriceSnapshot; }
-    public int quantity() { return quantity; }
+    public List<OrderItem> items() { return items; }
     public boolean vatIncluded() { return vatIncluded; }
     public long totalAmount() { return totalAmount; }
     public LocalDate dueDate() { return dueDate; }
-    public String deliveryAddress() { return deliveryAddress; }
+    public DeliverySnapshot delivery() { return delivery; }
+    public String deliveryAddress() { return delivery.addressLine1(); }
     public String note() { return note; }
     public OrderStatus status() { return status; }
     public String cancellationReason() { return cancellationReason; }
