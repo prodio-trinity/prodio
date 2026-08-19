@@ -89,27 +89,35 @@ class OrderStatViewEntity {
     static OrderStatViewEntity from(OrderStatView view) {
         return new OrderStatViewEntity(view);
     }
-
+    
     void markProductionStarted(OffsetDateTime startedAt) {
+        if (isTerminal()) return;
         this.status = OrderViewStatus.IN_PRODUCTION;
         this.productionStartedAt = startedAt;
     }
 
     void markShipped(OffsetDateTime shippedAt) {
+        if (isTerminal()) return;
         this.status = OrderViewStatus.IN_DELIVERY;
         this.shippedAt = shippedAt;
     }
 
     void markCompleted(OffsetDateTime completedAt, boolean onTime) {
+        if (isTerminal()) return;
         this.status = OrderViewStatus.COMPLETED;
         this.completedAt = completedAt;
         this.onTime = onTime;
     }
 
     void markCancelled(String cancellationReason, OffsetDateTime cancelledAt) {
+        if (isTerminal()) return;
         this.status = OrderViewStatus.CANCELLED;
         this.cancellationReason = cancellationReason;
         this.cancelledAt = cancelledAt;
+    }
+
+    private boolean isTerminal() {
+        return status == OrderViewStatus.CANCELLED || status == OrderViewStatus.COMPLETED;
     }
 
     void confirmPayment() {
