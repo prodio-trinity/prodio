@@ -20,7 +20,7 @@ public class StatSummaryService {
     private final AiClient aiClient;
     private final AiQueryLogRepository aiQueryLogRepository;
 
-    public AiQueryLog summarize(StatFilter filter) {
+    public AiQueryLog summarize(long adminId, StatFilter filter) {
         validate(filter);
 
         DashboardSummary summary = statDashboardRepository.summarize(filter);
@@ -29,11 +29,11 @@ public class StatSummaryService {
         String question = describeFilter(filter);
         String response = aiClient.generateText(buildPrompt(filter, summary, distribution));
 
-        return aiQueryLogRepository.save(AiQueryLog.summary(question, response));
+        return aiQueryLogRepository.save(AiQueryLog.summary(adminId, question, response));
     }
 
-    public AiQueryLogPage getSummaryLogs(int page, int size) {
-        return aiQueryLogRepository.findPage(QueryType.STATS_SUMMARY, page, size);
+    public AiQueryLogPage getSummaryLogs(long adminId, int page, int size) {
+        return aiQueryLogRepository.findPage(adminId, QueryType.STATS_SUMMARY, page, size);
     }
 
     private void validate(StatFilter filter) {

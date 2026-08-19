@@ -28,6 +28,9 @@ class AiQueryLogEntity {
     @Column(name = "source_type", length = 20)
     private SourceType sourceType;
 
+    @Column(name = "requested_by", nullable = false)
+    private long requestedBy;
+
     @Column(nullable = false, length = 500)
     private String question;
 
@@ -40,6 +43,7 @@ class AiQueryLogEntity {
     private AiQueryLogEntity(AiQueryLog log) {
         queryType = log.queryType();
         sourceType = log.sourceType();
+        requestedBy = log.requestedBy();
         question = log.question();
         response = log.response();
         requestedAt = OffsetDateTime.now();
@@ -50,6 +54,6 @@ class AiQueryLogEntity {
     }
 
     AiQueryLog toDomain() {
-        return new AiQueryLog(id, queryType, sourceType, question, response, requestedAt);
+        return new AiQueryLog(id, queryType, sourceType, requestedBy, question, response, requestedAt);
     }
 }

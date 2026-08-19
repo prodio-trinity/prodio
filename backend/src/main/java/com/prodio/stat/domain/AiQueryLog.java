@@ -7,14 +7,15 @@ public record AiQueryLog(
         UUID id,
         QueryType queryType,
         SourceType sourceType,
+        long requestedBy,
         String question,
         String response,
         OffsetDateTime requestedAt
 ) {
-    public static AiQueryLog summary(String question, String response) {
+    public static AiQueryLog summary(long requestedBy, String question, String response) {
         return new AiQueryLog(
             null, QueryType.STATS_SUMMARY, null,
-            question, response, null
+            requestedBy, question, response, null
         );
     }
 }

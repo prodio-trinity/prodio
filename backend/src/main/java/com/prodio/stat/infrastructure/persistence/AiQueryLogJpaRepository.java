@@ -8,5 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 interface AiQueryLogJpaRepository extends JpaRepository<AiQueryLogEntity, UUID> {
-    Page<AiQueryLogEntity> findByQueryTypeOrderByRequestedAtDesc(QueryType queryType, Pageable pageable);
+    Page<AiQueryLogEntity> findByRequestedByAndQueryTypeOrderByRequestedAtDesc(
+            long requestedBy, QueryType queryType, Pageable pageable);
 }

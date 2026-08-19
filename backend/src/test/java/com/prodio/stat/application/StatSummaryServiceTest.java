@@ -50,10 +50,10 @@ class StatSummaryServiceTest {
         when(statDashboardRepository.productDistribution(filter)).thenReturn(distribution);
         when(aiClient.generateText(any())).thenReturn("이번 달 주문은 총 11건입니다.");
         AiQueryLog saved = new AiQueryLog(null, QueryType.STATS_SUMMARY, null,
-                "2026-08-01 ~ 2026-08-31", "이번 달 주문은 총 11건입니다.", null);
+                42L, "2026-08-01 ~ 2026-08-31", "이번 달 주문은 총 11건입니다.", null);
         when(aiQueryLogRepository.save(any())).thenReturn(saved);
 
-        AiQueryLog result = service.summarize(filter);
+        AiQueryLog result = service.summarize(42L, filter);
 
         assertThat(result).isSameAs(saved);
         ArgumentCaptor<String> promptCaptor = ArgumentCaptor.forClass(String.class);
@@ -67,6 +67,7 @@ class StatSummaryServiceTest {
         verify(aiQueryLogRepository).save(logCaptor.capture());
         assertThat(logCaptor.getValue().queryType()).isEqualTo(QueryType.STATS_SUMMARY);
         assertThat(logCaptor.getValue().sourceType()).isNull();
+        assertThat(logCaptor.getValue().requestedBy()).isEqualTo(42L);
         assertThat(logCaptor.getValue().question()).isEqualTo("2026-08-01 ~ 2026-08-31");
         assertThat(logCaptor.getValue().response()).isEqualTo("이번 달 주문은 총 11건입니다.");
     }
@@ -76,7 +77,7 @@ class StatSummaryServiceTest {
     void summarizeRejectsFromAfterTo() {
         StatFilter filter = new StatFilter(LocalDate.parse("2026-09-01"), LocalDate.parse("2026-08-01"), null);
 
-        assertThatThrownBy(() -> service.summarize(filter))
+        assertThatThrownBy(() -> service.summarize(42L, filter))
                 .isInstanceOfSatisfying(StatException.class,
                         exception -> assertThat(exception.getErrorCode()).isEqualTo(StatErrorCode.STAT_INVALID_FILTER));
         verifyNoInteractions(aiClient, aiQueryLogRepository);
@@ -87,9 +88,9 @@ class StatSummaryServiceTest {
     @DisplayName("STATS_SUMMARY 타입으로 로그 페이지를 조회한다")
     void getSummaryLogsDelegatesToRepository() {
         AiQueryLogPage page = new AiQueryLogPage(List.of(), 0, 10, 0);
-        when(aiQueryLogRepository.findPage(QueryType.STATS_SUMMARY, 0, 10)).thenReturn(page);
+        when(aiQueryLogRepository.findPage(42L, QueryType.STATS_SUMMARY, 0, 10)).thenReturn(page);
 
-        AiQueryLogPage result = service.getSummaryLogs(0, 10);
+        AiQueryLogPage result = service.getSummaryLogs(42L, 0, 10);
 
         assertThat(result).isSameAs(page);
     }

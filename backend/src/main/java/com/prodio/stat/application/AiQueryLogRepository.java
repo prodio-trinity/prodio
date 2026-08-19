@@ -5,5 +5,5 @@ import com.prodio.stat.domain.QueryType;
 
 public interface AiQueryLogRepository {
     AiQueryLog save(AiQueryLog log);
-    AiQueryLogPage findPage(QueryType queryType, int page, int size);
+    AiQueryLogPage findPage(long requestedBy, QueryType queryType, int page, int size);
 }

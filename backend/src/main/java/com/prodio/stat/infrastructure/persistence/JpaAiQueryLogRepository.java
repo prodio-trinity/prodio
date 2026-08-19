@@ -20,9 +20,9 @@ class JpaAiQueryLogRepository implements AiQueryLogRepository {
     }
 
     @Override
-    public AiQueryLogPage findPage(QueryType queryType, int page, int size) {
-        Page<AiQueryLogEntity> result = aiQueryLogs.findByQueryTypeOrderByRequestedAtDesc(
-                queryType, PageRequest.of(page, size));
+    public AiQueryLogPage findPage(long requestedBy, QueryType queryType, int page, int size) {
+        Page<AiQueryLogEntity> result = aiQueryLogs.findByRequestedByAndQueryTypeOrderByRequestedAtDesc(
+                requestedBy, queryType, PageRequest.of(page, size));
 
         return new AiQueryLogPage(result.getContent().stream().map(AiQueryLogEntity::toDomain).toList(),
                 page, size, result.getTotalElements());
