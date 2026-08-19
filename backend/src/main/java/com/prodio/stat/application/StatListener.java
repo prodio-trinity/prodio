@@ -26,7 +26,7 @@ public class StatListener {
         for (OrderItemEventData item : event.items()) {
             repository.create(OrderStatView.create(event.orderId(), event.clientId(), event.clientName(),
                     item.productId(), item.productName(), item.quantity(), item.lineAmount(),
-                    event.dueDate(), event.createdAt()));
+                    event.createdAt()));
         }
     }
 
@@ -42,13 +42,7 @@ public class StatListener {
 
     @ApplicationModuleListener
     public void handle(OrderCompleted event) {
-        List<OrderStatView> views = repository.findAllByOrderId(event.orderId());
-        if (views.isEmpty()) {
-            throw new IllegalStateException("OrderStatView를 찾을 수 없습니다. orderId=" + event.orderId());
-        }
-        boolean onTime = !event.completedAt().toLocalDate().isAfter(views.get(0).dueDate());
-
-        repository.markCompleted(event.orderId(), event.completedAt(), onTime);
+        repository.markCompleted(event.orderId(), event.completedAt());
     }
 
     @ApplicationModuleListener
@@ -62,15 +56,13 @@ public class StatListener {
         if (existing.isEmpty()) {
             throw new IllegalStateException("OrderStatView를 찾을 수 없습니다. orderId=" + event.orderId());
         }
-
         OffsetDateTime orderCreatedAt = existing.get(0).orderCreatedAt();
 
         repository.deleteAllByOrderId(event.orderId());
-        
         for (OrderItemEventData item : event.items()) {
             repository.create(OrderStatView.create(event.orderId(), event.clientId(), event.clientName(),
                     item.productId(), item.productName(), item.quantity(), item.lineAmount(),
-                    event.dueDate(), orderCreatedAt));
+                    orderCreatedAt));
         }
     }
 }

@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -40,18 +39,12 @@ class OrderStatViewEntity {
     @Column(name = "line_amount", nullable = false)
     private long lineAmount;
 
-    @Column(name = "due_date", nullable = false)
-    private LocalDate dueDate;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderViewStatus status;
 
     @Column(name = "payment_confirmed", nullable = false)
     private boolean paymentConfirmed;
-
-    @Column(name = "on_time")
-    private Boolean onTime;
 
     @Column(name = "order_created_at", nullable = false)
     private OffsetDateTime orderCreatedAt;
@@ -80,7 +73,6 @@ class OrderStatViewEntity {
         productName = view.productName();
         quantity = view.quantity();
         lineAmount = view.lineAmount();
-        dueDate = view.dueDate();
         status = OrderViewStatus.PENDING;
         paymentConfirmed = false;
         orderCreatedAt = view.orderCreatedAt();
@@ -102,11 +94,10 @@ class OrderStatViewEntity {
         this.shippedAt = shippedAt;
     }
 
-    void markCompleted(OffsetDateTime completedAt, boolean onTime) {
+    void markCompleted(OffsetDateTime completedAt) {
         if (isTerminal()) return;
         this.status = OrderViewStatus.COMPLETED;
         this.completedAt = completedAt;
-        this.onTime = onTime;
     }
 
     void markCancelled(String cancellationReason, OffsetDateTime cancelledAt) {
@@ -126,7 +117,7 @@ class OrderStatViewEntity {
 
     OrderStatView toDomain() {
         return new OrderStatView(id, orderId, clientId, clientName, productId, productName,
-                quantity, lineAmount, dueDate, status, paymentConfirmed, onTime,
+                quantity, lineAmount, status, paymentConfirmed,
                 orderCreatedAt, productionStartedAt, shippedAt, completedAt,
                 cancellationReason, cancelledAt);
     }

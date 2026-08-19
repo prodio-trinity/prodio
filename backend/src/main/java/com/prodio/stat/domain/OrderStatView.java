@@ -1,6 +1,5 @@
 package com.prodio.stat.domain;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 /**
@@ -18,10 +17,8 @@ public record OrderStatView(
         String productName,
         int quantity,
         long lineAmount,
-        LocalDate dueDate,
         OrderViewStatus status,
         boolean paymentConfirmed,
-        Boolean onTime,
         OffsetDateTime orderCreatedAt,
         OffsetDateTime productionStartedAt,
         OffsetDateTime shippedAt,
@@ -31,13 +28,13 @@ public record OrderStatView(
 ) {
     public static OrderStatView create(long orderId, long clientId, String clientName,
             long productId, String productName, int quantity, long lineAmount,
-            LocalDate dueDate, OffsetDateTime orderCreatedAt
+            OffsetDateTime orderCreatedAt
     ) {
         return new OrderStatView(
             null, orderId, clientId,
             clientName, productId, productName,
-            quantity, lineAmount, dueDate,
-            OrderViewStatus.PENDING, false, null,
+            quantity, lineAmount,
+            OrderViewStatus.PENDING, false,
             orderCreatedAt, null, null, null,
             null, null
         );

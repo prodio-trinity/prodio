@@ -29,8 +29,8 @@ class JpaOrderStatViewRepository implements OrderStatViewRepository {
     }
 
     @Override
-    public void markCompleted(long orderId, OffsetDateTime completedAt, boolean onTime) {
-        findEntities(orderId).forEach(entity -> entity.markCompleted(completedAt, onTime));
+    public void markCompleted(long orderId, OffsetDateTime completedAt) {
+        findEntities(orderId).forEach(entity -> entity.markCompleted(completedAt));
     }
 
     @Override

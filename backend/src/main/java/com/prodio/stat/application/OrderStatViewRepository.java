@@ -9,7 +9,7 @@ public interface OrderStatViewRepository {
     OrderStatView create(OrderStatView view);
     void markProductionStarted(long orderId, OffsetDateTime startedAt);
     void markShipped(long orderId, OffsetDateTime shippedAt);
-    void markCompleted(long orderId, OffsetDateTime completedAt, boolean onTime);
+    void markCompleted(long orderId, OffsetDateTime completedAt);
     void markCancelled(long orderId, String cancellationReason, OffsetDateTime cancelledAt);
     void confirmPayment(long orderId);
     void deleteAllByOrderId(long orderId);

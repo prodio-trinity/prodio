@@ -24,8 +24,7 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
             @Param("status") OrderViewStatus status);
 
     @Query("""
-            select coalesce(sum(v.quantity), 0) as totalQuantity,
-                   avg(case when v.onTime = true then 1.0 else 0.0 end) as onTimeRate
+            select coalesce(sum(v.quantity), 0) as totalQuantity
             from OrderStatViewEntity v
             where v.status = com.prodio.stat.domain.OrderViewStatus.COMPLETED
               and (:from is null or v.orderCreatedAt >= :from)
@@ -54,7 +53,6 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
 
     interface CompletedAggregate {
         long getTotalQuantity();
-        Double getOnTimeRate();
     }
 
     interface ProductDistributionRow {

@@ -64,8 +64,7 @@ class StatController {
         long completedCount,
         long cancelledCount,
         long totalCount,
-        long completedQuantity,
-        Double onTimeRate
+        long completedQuantity
     ) {
         static DashboardResponse from(DashboardSummary summary) {
             return new DashboardResponse(
@@ -75,8 +74,7 @@ class StatController {
                 summary.completedCount(),
                 summary.cancelledCount(),
                 summary.totalCount(),
-                summary.completedQuantity(),
-                summary.onTimeRate()
+                summary.completedQuantity()
             );
         }
     }
