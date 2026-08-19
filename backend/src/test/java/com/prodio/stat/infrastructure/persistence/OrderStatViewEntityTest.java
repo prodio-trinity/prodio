@@ -5,7 +5,6 @@ import com.prodio.stat.domain.OrderViewStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +28,7 @@ class OrderStatViewEntityTest {
     @DisplayName("COMPLETED 이후 markCancelled를 호출해도 상태가 바뀌지 않는다")
     void ignoresMarkCancelledAfterCompleted() {
         OrderStatViewEntity entity = OrderStatViewEntity.from(view());
-        entity.markCompleted(OffsetDateTime.parse("2026-08-25T09:00:00+09:00"), true);
+        entity.markCompleted(OffsetDateTime.parse("2026-08-25T09:00:00+09:00"));
 
         entity.markCancelled("고객 요청", OffsetDateTime.parse("2026-08-26T09:00:00+09:00"));
 
@@ -51,6 +50,6 @@ class OrderStatViewEntityTest {
 
     private OrderStatView view() {
         return OrderStatView.create(1L, 2L, "거래처", 3L, "정밀 샤프트", 10, 85_000L,
-                LocalDate.parse("2026-09-01"), OffsetDateTime.parse("2026-08-18T10:00:00+09:00"));
+                OffsetDateTime.parse("2026-08-18T10:00:00+09:00"));
     }
 }
