@@ -1,10 +1,10 @@
 package com.prodio.production.infrastructure.persistence;
 
 import com.prodio.production.application.ProductionRepository;
-import com.prodio.production.application.ShipInfo;
 import com.prodio.production.domain.ProductionRecord;
 import com.prodio.production.exception.ProductionErrorCode;
 import com.prodio.production.exception.ProductionException;
+import java.util.function.UnaryOperator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -26,13 +26,23 @@ public class JpaProductionRepository implements ProductionRepository {
     }
 
     @Override
-    public ShipInfo updateShipInfo(Long productionId) {
+    public ProductionRecord markShipped(Long productionId) {
+        return transition(productionId, ProductionRecord::markShipped);
+    }
+
+    @Override
+    public ProductionRecord markCompleted(Long productionId) {
+        return transition(productionId, ProductionRecord::markCompleted);
+    }
+
+    /** id로 조회 → 넘겨받은 상태 전이(action)를 적용 → 저장, 까지의 공통 절차. */
+    private ProductionRecord transition(Long productionId, UnaryOperator<ProductionRecord> action) {
         ProductionRecordEntity entity = springDataProductionRepository.findById(productionId)
                 .orElseThrow(() -> new ProductionException(ProductionErrorCode.PRODUCTION_NOT_FOUND));
 
-        ProductionRecord shipped = entity.toDomain().markShipped();
-        springDataProductionRepository.save(ProductionRecordEntity.from(shipped));
+        ProductionRecord next = action.apply(entity.toDomain());
+        springDataProductionRepository.save(ProductionRecordEntity.from(next));
 
-        return new ShipInfo(shipped.orderId(), shipped.phone(), shipped.shippedAt());
+        return next;
     }
 }
