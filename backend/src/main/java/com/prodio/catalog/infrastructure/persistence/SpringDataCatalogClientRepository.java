@@ -10,34 +10,29 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SpringDataCatalogClientRepository extends JpaRepository<CatalogClientEntity, Long> {
+
+    String KEYWORD_FILTER = """
+            (:isActive IS NULL OR c.active = :isActive)
+              AND (:keyword IS NULL
+                   OR LOWER(c.companyName) LIKE CONCAT('%', LOWER(:keyword), '%') ESCAPE '\\'
+                   OR LOWER(COALESCE(c.ceoName, '')) LIKE CONCAT('%', LOWER(:keyword), '%') ESCAPE '\\'
+                   OR LOWER(COALESCE(c.phone, '')) LIKE CONCAT('%', LOWER(:keyword), '%') ESCAPE '\\'
+                   OR LOWER(COALESCE(c.address, '')) LIKE CONCAT('%', LOWER(:keyword), '%') ESCAPE '\\'
+                   OR LOWER(COALESCE(c.managerName, '')) LIKE CONCAT('%', LOWER(:keyword), '%') ESCAPE '\\')
+            """;
+
     Optional<CatalogClientEntity> findByUserId(Long userId);
 
-    @Query("""
-        SELECT c FROM CatalogClientEntity c
-        WHERE (:isActive IS NULL OR c.active = :isActive)
-          AND (:keyword IS NULL
-               OR LOWER(c.companyName) LIKE CONCAT('%', LOWER(:keyword), '%')
-               OR LOWER(COALESCE(c.ceoName, '')) LIKE CONCAT('%', LOWER(:keyword), '%')
-               OR LOWER(COALESCE(c.phone, '')) LIKE CONCAT('%', LOWER(:keyword), '%')
-               OR LOWER(COALESCE(c.address, '')) LIKE CONCAT('%', LOWER(:keyword), '%')
-               OR LOWER(COALESCE(c.managerName, '')) LIKE CONCAT('%', LOWER(:keyword), '%'))
-        """)
+    // 목록 화면 — Page (총 개수 필요, COUNT 쿼리 발생해도 됨)
+    @Query("SELECT c FROM CatalogClientEntity c WHERE " + KEYWORD_FILTER)
     Page<CatalogClientEntity> findClients(
             @Param("keyword") String keyword,
             @Param("isActive") Boolean isActive,
             Pageable pageable);
-
-    @Query("""
-        SELECT c FROM CatalogClientEntity c
-        WHERE c.active = true
-          AND (:keyword IS NULL
-               OR LOWER(c.companyName) LIKE CONCAT('%', LOWER(:keyword), '%')
-               OR LOWER(COALESCE(c.ceoName, '')) LIKE CONCAT('%', LOWER(:keyword), '%')
-               OR LOWER(COALESCE(c.phone, '')) LIKE CONCAT('%', LOWER(:keyword), '%')
-               OR LOWER(COALESCE(c.address, '')) LIKE CONCAT('%', LOWER(:keyword), '%')
-               OR LOWER(COALESCE(c.managerName, '')) LIKE CONCAT('%', LOWER(:keyword), '%'))
-        ORDER BY c.companyName
-        """)
-    List<CatalogClientEntity> findActiveClients(@Param("keyword") String keyword, Pageable pageable);
-
+    
+    @Query("SELECT c FROM CatalogClientEntity c WHERE " + KEYWORD_FILTER)
+    List<CatalogClientEntity> findClientsForAutocomplete(
+            @Param("keyword") String keyword,
+            @Param("isActive") Boolean isActive,
+            Pageable pageable);
 }
