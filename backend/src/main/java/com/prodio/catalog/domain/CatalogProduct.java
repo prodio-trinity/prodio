@@ -36,4 +36,20 @@ public record CatalogProduct(
                 true
         );
     }
+
+    /** id/productCode는 그대로 두고 편집 가능한 필드만 업데이트. */
+    public CatalogProduct update(String productName, Long subCategoryId, BigDecimal unitPrice, Unit unit,
+            String description, String memo, boolean active) {
+        return new CatalogProduct(
+                id,
+                productCode,
+                productName,
+                subCategoryId,
+                unitPrice,
+                unit,
+                description,
+                memo,
+                active
+        );
+    }
 }
