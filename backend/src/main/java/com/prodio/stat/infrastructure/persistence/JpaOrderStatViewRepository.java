@@ -34,6 +34,11 @@ class JpaOrderStatViewRepository implements OrderStatViewRepository {
     }
 
     @Override
+    public void markCancelled(long orderId, String cancellationReason, OffsetDateTime cancelledAt) {
+        findEntity(orderId).markCancelled(cancellationReason, cancelledAt);
+    }
+
+    @Override
     public void confirmPayment(long orderId) {
         findEntity(orderId).confirmPayment();
     }

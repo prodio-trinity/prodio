@@ -44,6 +44,7 @@ class JpaStatDashboardRepository implements StatDashboardRepository {
                 counts.get(OrderViewStatus.IN_PRODUCTION),
                 counts.get(OrderViewStatus.IN_DELIVERY),
                 counts.get(OrderViewStatus.COMPLETED),
+                counts.get(OrderViewStatus.CANCELLED),
                 total,
                 completed.getTotalQuantity(),
                 completed.getOnTimeRate());

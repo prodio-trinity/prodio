@@ -10,6 +10,7 @@ public record DashboardSummary(
         long inProductionCount,
         long inDeliveryCount,
         long completedCount,
+        long cancelledCount,
         long totalCount,
         long completedQuantity,
         Double onTimeRate

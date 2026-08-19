@@ -39,13 +39,13 @@ class StatControllerTest {
     void dashboardBuildsFilterFromQueryParams() {
         LocalDate from = LocalDate.parse("2026-08-01");
         LocalDate to = LocalDate.parse("2026-08-31");
-        DashboardSummary summary = new DashboardSummary(1, 2, 3, 4, 10, 40, 0.5);
+        DashboardSummary summary = new DashboardSummary(1, 2, 3, 4, 1, 11, 40, 0.5);
         when(statDashboardService.getDashboard(new StatFilter(from, to, OrderViewStatus.COMPLETED)))
                 .thenReturn(summary);
 
         ApiResponse<StatController.DashboardResponse> response = controller.dashboard(from, to, "completed");
 
-        assertThat(response.data()).isEqualTo(new StatController.DashboardResponse(1, 2, 3, 4, 10, 40, 0.5));
+        assertThat(response.data()).isEqualTo(new StatController.DashboardResponse(1, 2, 3, 4, 1, 11, 40, 0.5));
     }
 
     @Test

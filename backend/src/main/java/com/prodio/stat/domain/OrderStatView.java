@@ -23,7 +23,9 @@ public record OrderStatView(
         OffsetDateTime orderCreatedAt,
         OffsetDateTime productionStartedAt,
         OffsetDateTime shippedAt,
-        OffsetDateTime completedAt
+        OffsetDateTime completedAt,
+        String cancellationReason,
+        OffsetDateTime cancelledAt
 ) {
     public static OrderStatView create(long orderId, long clientId, String clientName,
             long productId, String productName, int quantity, long totalAmount,
@@ -34,7 +36,8 @@ public record OrderStatView(
             clientName, productId, productName,
                 quantity, totalAmount, dueDate,
             OrderViewStatus.PENDING, false, null,
-            orderCreatedAt, null, null, null
+            orderCreatedAt, null, null, null,
+            null, null
         );
     }
 }

@@ -62,6 +62,7 @@ class StatController {
         long inProductionCount,
         long inDeliveryCount,
         long completedCount,
+        long cancelledCount,
         long totalCount,
         long completedQuantity,
         Double onTimeRate
@@ -72,6 +73,7 @@ class StatController {
                 summary.inProductionCount(),
                 summary.inDeliveryCount(),
                 summary.completedCount(),
+                summary.cancelledCount(),
                 summary.totalCount(),
                 summary.completedQuantity(),
                 summary.onTimeRate()
