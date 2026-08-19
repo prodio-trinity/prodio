@@ -1,6 +1,8 @@
 package com.prodio.production.domain;
 
 import com.prodio.production.application.ProductionStatus;
+import com.prodio.production.exception.ProductionErrorCode;
+import com.prodio.production.exception.ProductionException;
 import java.time.LocalDateTime;
 
 public record ProductionRecord(
@@ -26,4 +28,11 @@ public record ProductionRecord(
         );
     }
 
+    public ProductionRecord markShipped() {
+        if (status != ProductionStatus.IN_PRODUCTION) {
+            throw new ProductionException(ProductionErrorCode.INVALID_PRODUCTION_STATUS);
+        }
+        return new ProductionRecord(id, orderId, ProductionStatus.IN_DELIVERY, memo, phone,
+                startedAt, LocalDateTime.now(), completedAt);
+    }
 }
