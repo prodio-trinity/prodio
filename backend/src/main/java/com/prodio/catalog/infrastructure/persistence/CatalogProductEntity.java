@@ -56,7 +56,25 @@ class CatalogProductEntity {
         entity.description = domain.description();
         entity.memo = domain.memo();
         entity.active = domain.active();
+        entity.createdAt = Instant.now();
+        entity.updatedAt = Instant.now();
         return entity;
+    }
+
+    void assignProductCode(String productCode) {
+        this.productCode = productCode;
+    }
+
+    /** 편집 가능한 필드만 갱신 */
+    void update(CatalogProduct domain) {
+        this.productName = domain.productName();
+        this.subCategoryId = domain.subCategoryId();
+        this.unitPrice = domain.unitPrice();
+        this.unit = domain.unit();
+        this.description = domain.description();
+        this.memo = domain.memo();
+        this.active = domain.active();
+        this.updatedAt = Instant.now();
     }
 
     CatalogProduct toDomain() {

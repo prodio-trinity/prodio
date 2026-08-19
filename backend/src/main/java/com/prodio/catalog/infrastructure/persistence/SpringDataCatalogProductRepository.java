@@ -24,4 +24,7 @@ public interface SpringDataCatalogProductRepository extends JpaRepository<Catalo
             @Param("categoryId") Long categoryId,
             @Param("isActive") Boolean isActive,
             Pageable pageable);
+
+    @Query(value = "SELECT nextval(:seqName)", nativeQuery = true)
+    Long nextSequenceValue(@Param("seqName") String seqName);
 }
