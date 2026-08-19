@@ -25,6 +25,9 @@
  *
  * - `onProductIdChangeAction(productId: number): void`
  *   기존 품목 선택 또는 신규 품목 저장이 완료되면 실제 품목 ID만 전달합니다.
+ *
+ * - `clientReadOnly?: boolean`
+ *   `true`이면 기존 주문의 거래처를 표시만 하고 변경·신규 등록을 막습니다.
  */
 
 import { ClientSelector, ProductSelector } from "./DummyCatalogSelectors";
@@ -33,6 +36,7 @@ import styles from "./CatalogOrderSection.module.css";
 export type CatalogOrderSectionProps = {
   clientId?: number;
   productId?: number;
+  clientReadOnly?: boolean;
   onClientIdChangeAction: (clientId: number) => void;
   onProductIdChangeAction: (productId: number) => void;
 };
@@ -40,13 +44,18 @@ export type CatalogOrderSectionProps = {
 export function CatalogOrderSection({
   clientId,
   productId,
+  clientReadOnly = false,
   onClientIdChangeAction,
   onProductIdChangeAction,
 }: CatalogOrderSectionProps) {
   return (
     <section className={styles.card}>
       <h2>1. 수주 정보</h2>
-      <ClientSelector value={clientId} onChange={(client) => onClientIdChangeAction(client.id)} />
+      <ClientSelector
+        value={clientId}
+        readOnly={clientReadOnly}
+        onChange={(client) => onClientIdChangeAction(client.id)}
+      />
       <ProductSelector value={productId} onChange={(product) => onProductIdChangeAction(product.id)} />
     </section>
   );

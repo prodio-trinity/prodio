@@ -32,7 +32,7 @@ class OrderEntity {
     @Column private String note;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false) private OrderStatus status;
-    @Column(name = "payment_confirmed", nullable = false) private boolean paymentConfirmed;
+    @Column(name = "cancellation_reason") private String cancellationReason;
     @Column(name = "created_by", nullable = false) private long createdBy;
     @Column(name = "created_at", nullable = false) private OffsetDateTime createdAt;
     @Column(name = "updated_at", nullable = false) private OffsetDateTime updatedAt;
@@ -57,7 +57,7 @@ class OrderEntity {
         deliveryAddress = order.deliveryAddress();
         note = order.note();
         status = order.status();
-        paymentConfirmed = order.paymentConfirmed();
+        cancellationReason = order.cancellationReason();
         createdBy = order.createdBy();
         createdAt = order.createdAt();
         updatedAt = order.updatedAt();
@@ -66,7 +66,7 @@ class OrderEntity {
     Order toDomain() {
         return Order.reconstitute(id, clientId, clientNameSnapshot, clientPhoneSnapshot,
                 productId, productNameSnapshot, unitPriceSnapshot, quantity, vatIncluded,
-                totalAmount, dueDate, deliveryAddress, note, status, paymentConfirmed,
+                totalAmount, dueDate, deliveryAddress, note, status, cancellationReason,
                 createdBy, createdAt, updatedAt);
     }
 }

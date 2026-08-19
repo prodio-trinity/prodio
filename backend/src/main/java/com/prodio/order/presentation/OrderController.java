@@ -3,6 +3,7 @@ package com.prodio.order.presentation;
 import com.prodio.order.application.CreateOrderCommand;
 import com.prodio.order.application.OrderPage;
 import com.prodio.order.application.OrderService;
+import com.prodio.order.application.UpdateOrderCommand;
 import com.prodio.order.domain.Order;
 import com.prodio.order.domain.OrderStatus;
 import com.prodio.order.exception.OrderErrorCode;
@@ -74,19 +75,30 @@ class OrderController {
         return ApiResponse.success("수주를 등록했습니다.", OrderResponse.from(orderService.create(command)));
     }
 
-    @PatchMapping("/{id}/start-production")
+    @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
-    ApiResponse<OrderResponse> startProduction(@PathVariable String id) {
-        return ApiResponse.success("생산을 시작했습니다.",
-                OrderResponse.from(orderService.startProduction(parseId(id))));
+    ApiResponse<OrderResponse> update(@PathVariable String id,
+            @Valid @RequestBody UpdateOrderRequest request) {
+        UpdateOrderCommand command = new UpdateOrderCommand(parseId(request.productId()),
+                request.quantity(), request.vatIncluded(), request.dueDate(),
+                request.deliveryAddress(), request.note());
+        return ApiResponse.success("수주를 수정했습니다.",
+                OrderResponse.from(orderService.update(parseId(id), command)));
     }
 
-    @PatchMapping("/{id}/payment")
+    @PatchMapping("/{id}/confirm")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
-    ApiResponse<OrderResponse> updatePayment(@PathVariable String id,
-            @Valid @RequestBody PaymentRequest request) {
-        return ApiResponse.success("입금 상태를 변경했습니다.",
-                OrderResponse.from(orderService.updatePayment(parseId(id), request.confirmed())));
+    ApiResponse<OrderResponse> confirm(@PathVariable String id) {
+        return ApiResponse.success("입금을 확인하고 주문을 확정했습니다.",
+                OrderResponse.from(orderService.confirm(parseId(id))));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    ApiResponse<OrderResponse> cancel(@PathVariable String id,
+            @Valid @RequestBody CancelOrderRequest request) {
+        return ApiResponse.success("주문을 취소했습니다.",
+                OrderResponse.from(orderService.cancel(parseId(id), request.reason())));
     }
 
     private long parseId(String value) {
@@ -117,12 +129,16 @@ class OrderController {
             @Positive int quantity, boolean vatIncluded, @NotNull LocalDate dueDate,
             @Size(max = 2000) String deliveryAddress, @Size(max = 2000) String note) {}
 
-    record PaymentRequest(@NotNull Boolean confirmed) {}
+    record UpdateOrderRequest(@NotBlank String productId, @Positive int quantity,
+            boolean vatIncluded, @NotNull LocalDate dueDate,
+            @Size(max = 2000) String deliveryAddress, @Size(max = 2000) String note) {}
+
+    record CancelOrderRequest(@NotBlank @Size(max = 1000) String reason) {}
 
     record OrderResponse(String id, String clientId, String clientName, String clientPhone,
             String productId, String productName, long unitPrice, int quantity,
             boolean vatIncluded, long totalAmount, LocalDate dueDate,
-            String deliveryAddress, String status, boolean paymentConfirmed,
+            String deliveryAddress, String status, String cancellationReason,
             String createdBy, String note, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
         static OrderResponse from(Order order) {
             return new OrderResponse(Long.toString(order.id()), Long.toString(order.clientId()),
@@ -130,7 +146,7 @@ class OrderController {
                     Long.toString(order.productId()), order.productNameSnapshot(),
                     order.unitPriceSnapshot(), order.quantity(), order.vatIncluded(),
                     order.totalAmount(), order.dueDate(), order.deliveryAddress(),
-                    order.status().name(), order.paymentConfirmed(), Long.toString(order.createdBy()),
+                    order.status().name(), order.cancellationReason(), Long.toString(order.createdBy()),
                     order.note(), order.createdAt(), order.updatedAt());
         }
     }

@@ -1,4 +1,10 @@
-export type OrderStatus = "PENDING" | "IN_PRODUCTION";
+export type OrderStatus = "PENDING_PAYMENT" | "CONFIRMED" | "CANCELLED";
+
+export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  PENDING_PAYMENT: "입금 대기",
+  CONFIRMED: "주문 확정",
+  CANCELLED: "주문 취소",
+};
 
 export interface Order {
   id: string;
@@ -15,7 +21,7 @@ export interface Order {
   deliveryAddress: string | null;
   note: string | null;
   status: OrderStatus;
-  paymentConfirmed: boolean;
+  cancellationReason: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -38,6 +44,15 @@ export interface OrderFilters {
 
 export interface CreateOrderCommand {
   clientId: string;
+  productId: string;
+  quantity: number;
+  vatIncluded: boolean;
+  dueDate: string;
+  deliveryAddress?: string;
+  note?: string;
+}
+
+export interface UpdateOrderCommand {
   productId: string;
   quantity: number;
   vatIncluded: boolean;

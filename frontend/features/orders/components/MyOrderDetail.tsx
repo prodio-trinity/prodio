@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { orderService } from "../services/orderService";
-import type { Order } from "../types/order";
+import { ORDER_STATUS_LABELS, type Order } from "../types/order";
 import styles from "./orders.module.css";
 
 export function MyOrderDetail({ id }: { id: string }) {
@@ -21,14 +21,14 @@ export function MyOrderDetail({ id }: { id: string }) {
   return <main className={styles.shell}>
     <header className={styles.header}><div><Link className={styles.back} href="/my-orders">← 내 주문 현황</Link><h1>주문 #{order.id}</h1><p>{order.productName} 주문의 진행 상황입니다.</p></div></header>
     <section className={styles.progressGrid}>
-      <article className={styles.progressItem}><span>주문</span><strong>{order.status === "PENDING" ? "접수 완료" : "생산 전환"}</strong></article>
-      <article className={styles.progressItem}><span>생산</span><strong>{order.status === "PENDING" ? "시작 전" : "진행 중"}</strong></article>
+      <article className={styles.progressItem}><span>주문</span><strong>{ORDER_STATUS_LABELS[order.status]}</strong></article>
+      <article className={styles.progressItem}><span>생산</span><strong>생산 정보 연동 전</strong></article>
       <article className={styles.progressItem}><span>납품</span><strong>납품 정보 연동 전</strong></article>
-      <article className={styles.progressItem}><span>결제</span><strong>{order.paymentConfirmed ? "결제 확인" : "미확인"}</strong></article>
+      <article className={styles.progressItem}><span>결제</span><strong>{order.status === "CONFIRMED" ? "결제 확인" : order.status === "CANCELLED" ? "주문 취소" : "미확인"}</strong></article>
     </section>
     <section className={styles.detailGrid}>
       <article className={styles.card}><h2>주문 정보</h2><dl className={styles.details}><div><dt>거래처</dt><dd>{order.clientName}</dd></div><div><dt>품목</dt><dd>{order.productName}</dd></div><div><dt>단가</dt><dd>{order.unitPrice.toLocaleString()}원</dd></div><div><dt>수량</dt><dd>{order.quantity.toLocaleString()}</dd></div><div><dt>총액</dt><dd><strong>{order.totalAmount.toLocaleString()}원</strong></dd></div></dl></article>
-      <article className={styles.card}><h2>납기 및 결제</h2><dl className={styles.details}><div><dt>납기일</dt><dd>{order.dueDate}</dd></div><div><dt>납품 주소</dt><dd>{order.deliveryAddress || "-"}</dd></div><div><dt>결제 상태</dt><dd>{order.paymentConfirmed ? "확인" : "미확인"}</dd></div><div><dt>등록일</dt><dd>{new Date(order.createdAt).toLocaleString("ko-KR")}</dd></div></dl></article>
+      <article className={styles.card}><h2>납기 및 결제</h2><dl className={styles.details}><div><dt>납기일</dt><dd>{order.dueDate}</dd></div><div><dt>납품 주소</dt><dd>{order.deliveryAddress || "-"}</dd></div><div><dt>결제 상태</dt><dd>{order.status === "CONFIRMED" ? "확인" : order.status === "CANCELLED" ? "취소" : "미확인"}</dd></div><div><dt>등록일</dt><dd>{new Date(order.createdAt).toLocaleString("ko-KR")}</dd></div>{order.cancellationReason && <div><dt>취소 사유</dt><dd>{order.cancellationReason}</dd></div>}</dl></article>
       <article className={`${styles.card} ${styles.full}`}><h2>요청 메모</h2><p>{order.note || "-"}</p></article>
     </section>
   </main>;

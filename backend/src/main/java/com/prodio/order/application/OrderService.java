@@ -1,7 +1,10 @@
 package com.prodio.order.application;
 
 import com.prodio.catalog.CatalogOrderLookup;
-import com.prodio.order.OrderCreated;
+import com.prodio.order.OrderCancelledEvent;
+import com.prodio.order.OrderConfirmedEvent;
+import com.prodio.order.OrderCreatedEvent;
+import com.prodio.order.OrderUpdatedEvent;
 import com.prodio.order.domain.Order;
 import com.prodio.order.domain.OrderStatus;
 import com.prodio.order.exception.OrderErrorCode;
@@ -33,7 +36,9 @@ public class OrderService {
                 product.id(), product.name(), product.unitPrice(), command.quantity(),
                 command.vatIncluded(), command.dueDate(), command.deliveryAddress(),
                 command.note(), command.createdBy(), now);
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+        eventPublisher.publishEvent(OrderCreatedEvent.from(saved));
+        return saved;
     }
 
     @Transactional(readOnly = true)
@@ -81,19 +86,34 @@ public class OrderService {
     }
 
     @Transactional
-    public Order startProduction(long id) {
+    public Order update(long id, UpdateOrderCommand command) {
         Order order = findForUpdate(id);
-        order.startProduction(OffsetDateTime.now(clock));
+        CatalogOrderLookup.ProductSnapshot product = catalogOrderLookup.findProduct(command.productId())
+                .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_NOT_FOUND));
+        order.update(product.id(), product.name(), product.unitPrice(), command.quantity(),
+                command.vatIncluded(), command.dueDate(), command.deliveryAddress(), command.note(),
+                OffsetDateTime.now(clock));
         Order saved = orderRepository.save(order);
-        eventPublisher.publishEvent(OrderCreated.from(saved));
+        eventPublisher.publishEvent(OrderUpdatedEvent.from(saved));
         return saved;
     }
 
     @Transactional
-    public Order updatePayment(long id, boolean confirmed) {
+    public Order confirm(long id) {
         Order order = findForUpdate(id);
-        order.changePaymentConfirmation(confirmed, OffsetDateTime.now(clock));
-        return orderRepository.save(order);
+        order.confirm(OffsetDateTime.now(clock));
+        Order saved = orderRepository.save(order);
+        eventPublisher.publishEvent(OrderConfirmedEvent.from(saved));
+        return saved;
+    }
+
+    @Transactional
+    public Order cancel(long id, String reason) {
+        Order order = findForUpdate(id);
+        order.cancel(reason, OffsetDateTime.now(clock));
+        Order saved = orderRepository.save(order);
+        eventPublisher.publishEvent(OrderCancelledEvent.from(saved));
+        return saved;
     }
 
     private Order findForUpdate(long id) {
