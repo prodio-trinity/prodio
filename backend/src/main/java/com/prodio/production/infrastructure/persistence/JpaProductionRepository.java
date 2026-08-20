@@ -7,7 +7,6 @@ import com.prodio.production.exception.ProductionErrorCode;
 import com.prodio.production.exception.ProductionException;
 import com.prodio.shared.PageResult;
 
-import java.util.Optional;
 import java.util.function.UnaryOperator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -67,5 +66,15 @@ public class JpaProductionRepository implements ProductionRepository {
         ProductionRecordEntity entity = springDataProductionRepository.findById(productionId)
                 .orElseThrow(() -> new ProductionException(ProductionErrorCode.PRODUCTION_NOT_FOUND));
         return entity.toDomain();
+    }
+
+    @Override
+    public ProductionRecord addMemo(Long productionId, String note) {
+        return transition(productionId, record -> record.appendMemo(note));
+    }
+
+    @Override
+    public ProductionRecord clearMemo(Long productionId) {
+        return transition(productionId, ProductionRecord::clearMemo);
     }
 }

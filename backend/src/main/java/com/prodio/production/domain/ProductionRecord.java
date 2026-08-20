@@ -44,4 +44,13 @@ public record ProductionRecord(
         return new ProductionRecord(id, orderId, clientId, ProductionStatus.COMPLETED, memo, phone,
                 startedAt, shippedAt, LocalDateTime.now());
     }
+    public ProductionRecord appendMemo(String note) {
+        String tagged = "[" + status.name() + "] " + note;
+        String updated = (memo == null || memo.isBlank()) ? tagged : memo + "\n" + tagged;
+        return new ProductionRecord(id, orderId, clientId, status, updated, phone, startedAt, shippedAt, completedAt);
+    }
+
+    public ProductionRecord clearMemo() {
+        return new ProductionRecord(id, orderId, clientId, status, null, phone, startedAt, shippedAt, completedAt);
+    }
 }

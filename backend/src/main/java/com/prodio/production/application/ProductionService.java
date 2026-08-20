@@ -3,10 +3,12 @@ package com.prodio.production.application;
 import com.prodio.production.domain.ProductionRecord;
 import com.prodio.production.event.OrderCompleted;
 import com.prodio.production.event.OrderShipped;
+import com.prodio.production.event.ProductionMemo;
 import com.prodio.shared.PageResult;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -64,5 +66,17 @@ public class ProductionService {
     @Transactional(readOnly = true)
     public ProductionRecord getProductionInfo(Long productionId) {
         return repository.findProductionInfo(productionId);
+    }
+
+    @Transactional
+    public void addMemo(Long productionId, String note) {
+        ProductionRecord updated = repository.addMemo(productionId, note);
+        eventPublisher.publishEvent(new ProductionMemo(updated.orderId(), updated.memo()));
+    }
+
+    @Transactional
+    public void clearMemo(Long productionId) {
+        ProductionRecord updated = repository.clearMemo(productionId);
+        eventPublisher.publishEvent(new ProductionMemo(updated.orderId(), updated.memo()));
     }
 }
