@@ -1,6 +1,6 @@
 package com.prodio.production.application;
 
-import com.prodio.order.OrderCreatedEvent;
+import com.prodio.order.OrderConfirmedEvent;
 import com.prodio.production.domain.ProductionRecord;
 import com.prodio.production.exception.ProductionErrorCode;
 import com.prodio.production.exception.ProductionException;
@@ -14,9 +14,9 @@ public class ProductionListener {
     private final ProductionRepository repository;
 
     @ApplicationModuleListener
-    public void handle(OrderCreatedEvent orderCreated){
-        if(repository.existsByOrderId(orderCreated.orderId())) throw new ProductionException(ProductionErrorCode.ALREADY_EXISTS_ORDER);
-        ProductionRecord record = ProductionRecord.create(orderCreated.orderId(), orderCreated.clientContact());
+    public void handle(OrderConfirmedEvent orderConfirmed){
+        if(repository.existsByOrderId(orderConfirmed.orderId())) throw new ProductionException(ProductionErrorCode.ALREADY_EXISTS_ORDER);
+        ProductionRecord record = ProductionRecord.create(orderConfirmed.orderId(), orderConfirmed.clientContact());
         repository.save(record);
     }
 }
