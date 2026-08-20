@@ -7,8 +7,11 @@ import com.prodio.production.exception.ProductionErrorCode;
 import com.prodio.production.exception.ProductionException;
 import com.prodio.shared.ApiResponse;
 import com.prodio.shared.PageResult;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +46,18 @@ public class ProductionAdminController {
         return ApiResponse.success(result.map(ProductionResponse::from));
     }
 
+    @PatchMapping("/{productionId}/memo")
+    ApiResponse<Void> memo(@PathVariable Long productionId, @Valid @RequestBody MemoRequest request){
+        productService.addMemo(productionId, request.memo());
+        return ApiResponse.success(null);
+    }
+
+    @DeleteMapping("/{productionId}/memo")
+    ApiResponse<Void> clearMemo(@PathVariable Long productionId){
+        productService.clearMemo(productionId);
+        return ApiResponse.success(null);
+    }
+
     private ProductionStatus parseStatus(String value) {
         if (value == null || value.isBlank()) return null;
         try {
@@ -51,4 +66,6 @@ public class ProductionAdminController {
             throw new ProductionException(ProductionErrorCode.INVALID_PRODUCTION_STATUS);
         }
     }
+
+    record MemoRequest(@NotBlank @Size(max = 2000) String memo) {}
 }

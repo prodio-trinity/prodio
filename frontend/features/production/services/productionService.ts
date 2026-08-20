@@ -53,4 +53,17 @@ export const productionService = {
       method: "PATCH",
     });
   },
+
+  addMemo(id: string, memo: string) {
+    return request<void>(`/api/admin/production/${id}/memo`, {
+      method: "PATCH",
+      body: JSON.stringify({ memo }),
+    });
+  },
+
+  clearMemo(id: string) {
+    return request<void>(`/api/admin/production/${id}/memo`, {
+      method: "DELETE",
+    });
+  },
 };

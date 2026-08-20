@@ -14,4 +14,8 @@ public interface ProductionRepository {
     PageResult<ProductionRecord> findAll(ProductionStatus status, int page, int size);
 
     ProductionRecord findProductionInfo(Long productionId);
+
+    ProductionRecord addMemo(Long productionId, String memo);
+
+    ProductionRecord clearMemo(Long productionId);
 }
