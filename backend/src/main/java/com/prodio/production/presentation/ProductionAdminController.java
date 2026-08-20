@@ -52,6 +52,12 @@ public class ProductionAdminController {
         return ApiResponse.success(null);
     }
 
+    @DeleteMapping("/{productionId}/memo")
+    ApiResponse<Void> clearMemo(@PathVariable Long productionId){
+        productService.clearMemo(productionId);
+        return ApiResponse.success(null);
+    }
+
     private ProductionStatus parseStatus(String value) {
         if (value == null || value.isBlank()) return null;
         try {
