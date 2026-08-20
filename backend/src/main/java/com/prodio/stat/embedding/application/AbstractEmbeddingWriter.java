@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * mbed 호출은 NOT_SUPPORTED로 분리해 트랜잭션과 얽히지 않게 하고,
+ * embed 호출은 NOT_SUPPORTED로 분리해 트랜잭션과 얽히지 않게 하고,
  * 실제 upsert만 레포지토리 쪽의 짧은 트랜잭션으로 처리한다.
  */
 @RequiredArgsConstructor
