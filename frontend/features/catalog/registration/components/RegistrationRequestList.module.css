@@ -1,0 +1,70 @@
+.shell { composes: shell from "../../../shared/styles/pageShell.module.css"; }
+.header { display: grid; gap: 6px; }
+.eyebrow { color: var(--color-primary); font-size: 11px; font-weight: 800; letter-spacing: 0.18em; }
+.header h1 { font-size: 28px; font-weight: 850; letter-spacing: -0.04em; }
+.header p { color: var(--color-text-secondary); font-size: 13px; }
+
+.card { composes: panel from "../../../shared/styles/panel.module.css"; }
+
+/* 조회 조건 — 상태 select는 onChange 즉시 조회, 검색어는 버튼을 눌러야 조회 */
+.filters { display: flex; align-items: flex-end; gap: 10px; padding: 16px; border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-card-background); }
+.filterField { display: grid; gap: 7px; }
+.filterField span { color: var(--color-text-secondary); font-size: 11px; font-weight: 800; }
+.filterField select { height: 40px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: 9px; background: var(--color-background); font-size: 12px; }
+.searchField { flex: 1 1 auto; min-width: 0; }
+.searchField input { width: 100%; height: 40px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: 9px; background: var(--color-background); font-size: 12px; }
+.searchField input:focus { outline: none; border-color: var(--color-primary); }
+.searchButton { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border: none; border-radius: 9px; background: var(--color-primary); color: white; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.searchButton:hover { background: var(--color-primary-hover); }
+
+.error { padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--color-danger) 10%, transparent); color: var(--color-danger); font-size: 13px; }
+.success { padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--color-success) 10%, transparent); color: var(--color-success); font-size: 13px; }
+
+.count { color: var(--color-text-secondary); font-size: 12px; font-weight: 700; }
+
+.tableWrap { overflow-x: auto; }
+.tableWrap table { width: 100%; min-width: 760px; }
+.tableWrap th { padding: 10px 11px; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 11px; font-weight: 800; text-align: left; white-space: nowrap; }
+.tableWrap td { padding: 12px 11px; border-bottom: 1px solid var(--color-border); font-size: 12px; }
+.row { cursor: pointer; }
+.row:hover td { background: var(--color-page-background); }
+.mono { font-variant-numeric: tabular-nums; }
+.muted { color: var(--color-text-secondary); font-size: 11px; }
+.empty { padding: 42px; text-align: center; color: var(--color-text-secondary); }
+
+.badge { display: inline-flex; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+:global(:root[data-theme="light"]) .badgePENDING { background: #fff3d6; color: #8a6100; }
+:global(:root[data-theme="light"]) .badgeAPPROVED { background: color-mix(in srgb, var(--color-success) 14%, transparent); color: var(--color-success); }
+:global(:root[data-theme="light"]) .badgeREJECTED { background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger); }
+:global(:root[data-theme="dark"]) .badgePENDING { background: #3a3015; color: #fde047; }
+:global(:root[data-theme="dark"]) .badgeAPPROVED { background: color-mix(in srgb, var(--color-success) 22%, transparent); color: var(--color-success); }
+:global(:root[data-theme="dark"]) .badgeREJECTED { background: color-mix(in srgb, var(--color-danger) 22%, transparent); color: var(--color-danger); }
+
+/* 모달 공통 */
+.modalBackdrop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px; background: rgb(15 23 42 / 58%); }
+.modal { width: min(640px, 100%); max-height: 85vh; display: flex; flex-direction: column; border-radius: 16px; background: var(--color-card-background); box-shadow: 0 24px 70px rgb(15 23 42 / 30%); }
+.modalHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid var(--color-border); }
+.modalHead h2 { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; }
+.modalClose { border: none; background: none; padding: 4px; color: var(--color-text-secondary); font-size: 16px; }
+.modalBody { padding: 20px 22px; overflow-y: auto; }
+.modalFoot { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 22px; border-top: 1px solid var(--color-border); }
+
+.fieldGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+.fieldRow { display: grid; gap: 3px; padding-bottom: 10px; border-bottom: 1px dashed var(--color-border); }
+.fieldRow label { color: var(--color-text-secondary); font-size: 11px; font-weight: 700; }
+.fieldRow .value { font-size: 13px; }
+.rejectReasonBox { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--color-danger) 8%, transparent); color: var(--color-danger); font-size: 12.5px; line-height: 1.6; }
+
+.primary { min-height: 40px; padding: 0 18px; border: none; border-radius: 10px; background: var(--color-primary); color: white; font-size: 13px; font-weight: 800; }
+.primary:hover { background: var(--color-primary-hover); }
+.primary:disabled { opacity: 0.55; cursor: not-allowed; }
+.secondary { min-height: 40px; padding: 0 18px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-card-background); color: var(--color-text-primary); font-size: 13px; font-weight: 700; }
+.danger { min-height: 40px; padding: 0 18px; border: 1px solid color-mix(in srgb, var(--color-danger) 40%, transparent); border-radius: 10px; background: none; color: var(--color-danger); font-size: 13px; font-weight: 800; }
+.danger:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.rejectTextarea { width: 100%; min-height: 100px; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-page-background); font-size: 13px; font-family: inherit; resize: vertical; }
+.rejectTextarea:focus { outline: none; border-color: var(--color-primary); }
+
+@media (max-width: 760px) {
+  .filters { flex-direction: column; align-items: stretch; }
+}

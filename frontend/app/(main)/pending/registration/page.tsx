@@ -1,5 +1,5 @@
-import { PendingRegistrationPreview } from "@/features/pending/components/PendingRegistrationPreview";
+import { ClientRegistrationPage } from "@/features/catalog/registration/components/ClientRegistrationPage";
 
 export default function PendingRegistrationPage() {
-  return <PendingRegistrationPreview />;
+  return <ClientRegistrationPage />;
 }
