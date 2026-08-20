@@ -4,9 +4,9 @@ import com.prodio.stat.application.AiClient;
 import org.springframework.stereotype.Component;
 
 @Component
-class OrderEmbeddingWriter extends AbstractEmbeddingWriter {
+class ClientEmbeddingWriter extends AbstractEmbeddingWriter {
 
-    OrderEmbeddingWriter(OrderEmbeddingRepository repository, AiClient aiClient) {
+    ClientEmbeddingWriter(ClientEmbeddingRepository repository, AiClient aiClient) {
         super(repository, aiClient);
     }
 }
