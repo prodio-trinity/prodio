@@ -31,7 +31,7 @@ class ClientRegistrationAdminController {
 
     @GetMapping
     ApiResponse<List<RegistrationRequestResponse>> getRegistrationRequests(
-            @RequestParam(defaultValue = "PENDING") String status) {
+            @RequestParam(required = false) String status) {
         List<ClientRegistration> requests = clientRegistrationService.getRegistrationList(parseStatus(status));
         return ApiResponse.success(requests.stream().map(RegistrationRequestResponse::from).toList());
     }
@@ -47,8 +47,11 @@ class ClientRegistrationAdminController {
         clientRegistrationService.reject(id, request.reason());
         return ApiResponse.success("등록 신청을 반려했습니다.", null);
     }
-
+    
     private RegistrationStatus parseStatus(String value) {
+        if (value == null) {
+            return null;
+        }
         try {
             return RegistrationStatus.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
