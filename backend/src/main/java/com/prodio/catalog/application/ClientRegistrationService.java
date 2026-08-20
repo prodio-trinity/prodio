@@ -41,7 +41,7 @@ public class ClientRegistrationService {
     /** 거래처 등록 신청
      userId 기준 upsert — 있으면 덮어쓰고 PENDING으로 리셋, 없으면 신규 신청. */
     @Transactional
-    public ClientRegistration submit(long userId, String companyName, String ceoName,
+    public ClientRegistrationStatusResult submit(long userId, String companyName, String ceoName,
             String businessRegNo, String phone, String address, String managerName) {
         // 이미 승인된 거래처인지 확인
         if (clientRepository.findByUserId(userId).isPresent()) {
@@ -57,7 +57,8 @@ public class ClientRegistrationService {
             toSave = existing.resubmit(companyName, ceoName, businessRegNo, phone, address, managerName);
         }
 
-        return registrationRepository.save(toSave);
+        ClientRegistration saved = registrationRepository.save(toSave);
+        return ClientRegistrationStatusResult.fromRequest(saved);
     }
 
     /** status가 null이면 전체 조회 */

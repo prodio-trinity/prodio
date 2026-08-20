@@ -16,6 +16,15 @@ public record ClientRegistration(
         Instant createdAt,
         Instant reviewedAt
 ) {
+    public ClientRegistration {
+        if (companyName == null || companyName.isBlank()) {
+            throw new IllegalArgumentException("companyName은 비어 있을 수 없습니다.");
+        }
+        if (businessRegNo == null || businessRegNo.isBlank()) {
+            throw new IllegalArgumentException("businessRegNo는 비어 있을 수 없습니다.");
+        }
+    }
+
     /** 거래처 등록 신청 */
     public static ClientRegistration submit(long userId, String companyName, String ceoName,
             String businessRegNo, String phone, String address, String managerName) {
