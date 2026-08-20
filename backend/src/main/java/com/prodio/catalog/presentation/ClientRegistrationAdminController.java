@@ -1,5 +1,6 @@
 package com.prodio.catalog.presentation;
 
+import com.prodio.catalog.application.ClientRegistrationListItem;
 import com.prodio.catalog.application.ClientRegistrationService;
 import com.prodio.catalog.domain.CatalogClient;
 import com.prodio.catalog.domain.ClientRegistration;
@@ -31,9 +32,11 @@ class ClientRegistrationAdminController {
 
     @GetMapping
     ApiResponse<List<RegistrationRequestResponse>> getRegistrationRequests(
-            @RequestParam(defaultValue = "PENDING") String status) {
-        List<ClientRegistration> requests = clientRegistrationService.getRegistrationList(parseStatus(status));
-        return ApiResponse.success(requests.stream().map(RegistrationRequestResponse::from).toList());
+            @RequestParam(required = false) String status) {
+        List<ClientRegistrationListItem> items = clientRegistrationService.getRegistrationList(parseStatus(status));
+        return ApiResponse.success(items.stream()
+                .map(RegistrationRequestResponse::from)
+                .toList());
     }
 
     @PatchMapping("/{id}/approve")
@@ -47,8 +50,11 @@ class ClientRegistrationAdminController {
         clientRegistrationService.reject(id, request.reason());
         return ApiResponse.success("등록 신청을 반려했습니다.", null);
     }
-
+    
     private RegistrationStatus parseStatus(String value) {
+        if (value == null) {
+            return null;
+        }
         try {
             return RegistrationStatus.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -65,13 +71,16 @@ class ClientRegistrationAdminController {
         }
     }
 
-    record RegistrationRequestResponse(String id, String companyName, String ceoName, String businessRegNo,
-            String phone, String address, String managerName, String status, String rejectReason,
-            Instant createdAt, Instant reviewedAt) {
-        static RegistrationRequestResponse from(ClientRegistration request) {
-            return new RegistrationRequestResponse(String.valueOf(request.id()), request.companyName(),
-                    request.ceoName(), request.businessRegNo(), request.phone(), request.address(),
-                    request.managerName(), request.status().name(), request.rejectReason(),
+    record RegistrationRequestResponse(String id, String userEmail, String companyName, String ceoName,
+            String businessRegNo, String phone, String address, String managerName, String status,
+            String rejectReason, Instant createdAt, Instant reviewedAt) {
+        
+        static RegistrationRequestResponse from(ClientRegistrationListItem item) {
+            ClientRegistration request = item.registration();
+            
+            return new RegistrationRequestResponse(String.valueOf(request.id()), item.userEmail(),
+                    request.companyName(), request.ceoName(), request.businessRegNo(), request.phone(),
+                    request.address(), request.managerName(), request.status().name(), request.rejectReason(),
                     request.createdAt(), request.reviewedAt());
         }
     }
