@@ -1,0 +1,46 @@
+.shell { composes: shell from "../../../shared/styles/pageShell.module.css"; }
+.header { display: grid; gap: 6px; }
+.eyebrow { color: var(--color-primary); font-size: 11px; font-weight: 800; letter-spacing: 0.18em; }
+.header h1 { font-size: 28px; font-weight: 850; letter-spacing: -0.04em; }
+
+.card { composes: panel from "../../../shared/styles/panel.module.css"; }
+
+.loading { padding: 40px; text-align: center; color: var(--color-text-secondary); }
+
+.error { padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--color-danger) 10%, transparent); color: var(--color-danger); font-size: 13px; }
+
+/* 상태 배너 */
+.alert { padding: 14px 16px; border-radius: 12px; font-size: 13px; line-height: 1.6; }
+.alertTitle { font-weight: 800; margin-bottom: 4px; }
+.alertHint { margin-top: 4px; opacity: 0.85; }
+.alertPending { border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent); background: color-mix(in srgb, var(--color-primary) 10%, transparent); color: var(--color-primary); }
+.alertRejected { border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent); background: color-mix(in srgb, var(--color-danger) 10%, transparent); color: var(--color-danger); }
+.alertApproved { border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent); background: color-mix(in srgb, var(--color-success) 10%, transparent); color: var(--color-success); }
+
+/* 미신청 안내 — 아래 입력 카드와 같은 패널 톤으로 맞춤 */
+.emptyNotice { composes: panel from "../../../shared/styles/panel.module.css"; display: flex; flex-direction: row; align-items: flex-start; gap: 14px; }
+.emptyIcon { font-size: 22px; line-height: 1; }
+.emptyTitle { margin-bottom: 4px; font-weight: 800; }
+.emptyBody { color: var(--color-text-secondary); font-size: 13px; line-height: 1.6; }
+
+/* 폼 */
+.form { display: grid; gap: 24px; padding: 0 15px; }
+.sectionTitle { padding-bottom: 10px; border-bottom: 1px solid var(--color-border); font-size: 18px; font-weight: 800; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+.grid label { display: grid; gap: 7px; color: var(--color-text-secondary); font-size: 12px; font-weight: 700; }
+.grid input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-page-background); font-size: 13px; font-family: inherit; }
+.grid input:focus { outline: none; border-color: var(--color-primary); }
+.labelText { display: inline-flex; align-items: center; gap: 2px; }
+.required { color: var(--color-danger); }
+.fieldError { color: var(--color-danger); font-size: 11px; font-weight: 600; }
+.wide { grid-column: 1 / -1; }
+
+.actions { display: flex; justify-content: flex-end; }
+.primary { min-height: 44px; padding: 0 20px; border: none; border-radius: 11px; background: var(--color-primary); color: white; font-size: 13px; font-weight: 800; }
+.primary:hover { background: var(--color-primary-hover); }
+.primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .wide { grid-column: auto; }
+}
