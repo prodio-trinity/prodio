@@ -21,6 +21,9 @@ class ProductionRecordEntity {
     @Column(name = "order_id", nullable = false)
     private Long orderId;
 
+    @Column(name = "client_id")
+    private Long clientId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ProductionStatus productionStatus;
@@ -52,6 +55,7 @@ class ProductionRecordEntity {
         ProductionRecordEntity entity = new ProductionRecordEntity();
         entity.id = domain.id();
         entity.orderId = domain.orderId();
+        entity.clientId = domain.clientId();
         entity.productionStatus = domain.status();
         entity.memo = domain.memo();
         entity.phone = domain.phone();
@@ -64,6 +68,7 @@ class ProductionRecordEntity {
         return new ProductionRecord(
                 id,
                 orderId,
+                clientId,
                 productionStatus,
                 memo,
                 phone,

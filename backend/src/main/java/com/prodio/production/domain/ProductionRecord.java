@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public record ProductionRecord(
         Long id,
         Long orderId,
+        Long clientId,
         ProductionStatus status,
         String memo,
         String phone,
@@ -15,10 +16,11 @@ public record ProductionRecord(
         LocalDateTime shippedAt,
         LocalDateTime completedAt
 ) {
-    public static ProductionRecord create(Long orderId, String phone) {
+    public static ProductionRecord create(Long orderId, Long clientId, String phone) {
         return new ProductionRecord(
                 null,
                 orderId,
+                clientId,
                 ProductionStatus.IN_PRODUCTION,
                 null,
                 phone,
@@ -32,14 +34,14 @@ public record ProductionRecord(
         if (status != ProductionStatus.IN_PRODUCTION) {
             throw new ProductionException(ProductionErrorCode.INVALID_PRODUCTION_STATUS);
         }
-        return new ProductionRecord(id, orderId, ProductionStatus.IN_DELIVERY, memo, phone,
+        return new ProductionRecord(id, orderId, clientId, ProductionStatus.IN_DELIVERY, memo, phone,
                 startedAt, LocalDateTime.now(), completedAt);
     }
     public ProductionRecord markCompleted() {
         if (status != ProductionStatus.IN_DELIVERY) {
             throw new ProductionException(ProductionErrorCode.INVALID_PRODUCTION_STATUS);
         }
-        return new ProductionRecord(id, orderId, ProductionStatus.COMPLETED, memo, phone,
+        return new ProductionRecord(id, orderId, clientId, ProductionStatus.COMPLETED, memo, phone,
                 startedAt, shippedAt, LocalDateTime.now());
     }
 }

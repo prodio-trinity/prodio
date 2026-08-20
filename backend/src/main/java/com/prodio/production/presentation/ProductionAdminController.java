@@ -9,7 +9,6 @@ import com.prodio.shared.ApiResponse;
 import com.prodio.shared.PageResult;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -50,15 +49,6 @@ public class ProductionAdminController {
             return ProductionStatus.from(value);
         } catch (IllegalArgumentException e) {
             throw new ProductionException(ProductionErrorCode.INVALID_PRODUCTION_STATUS);
-        }
-    }
-
-    record ProductionResponse(String id, String orderId, String status, String memo,
-            String phone, LocalDateTime startedAt, LocalDateTime shippedAt, LocalDateTime completedAt) {
-        static ProductionResponse from(ProductionRecord record) {
-            return new ProductionResponse(String.valueOf(record.id()), String.valueOf(record.orderId()),
-                    record.status().name(), record.memo(), record.phone(),
-                    record.startedAt(), record.shippedAt(), record.completedAt());
         }
     }
 }
