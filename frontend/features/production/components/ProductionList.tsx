@@ -41,6 +41,22 @@ export function ProductionList() {
   const [actingId, setActingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [memoTarget, setMemoTarget] = useState<ProductionRecord | null>(null);
+  const [memoDraft, setMemoDraft] = useState("");
+  const [memoSaving, setMemoSaving] = useState(false);
+  const [memoError, setMemoError] = useState("");
+  const [confirmingClear, setConfirmingClear] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    function closeOnOutsideClick(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+      if (!target.closest(`[data-menu-root]`)) setOpenMenuId(null);
+    }
+    window.addEventListener("mousedown", closeOnOutsideClick);
+    return () => window.removeEventListener("mousedown", closeOnOutsideClick);
+  }, [openMenuId]);
 
   const load = useCallback(
     () =>
@@ -81,6 +97,55 @@ export function ProductionList() {
       setActingId(null);
     }
   }
+
+  function openMemo(record: ProductionRecord) {
+    setMemoTarget(record);
+    setMemoDraft("");
+    setMemoError("");
+    setConfirmingClear(false);
+  }
+
+  /** 메모 처리 후 목록을 다시 불러와서, 화면 테이블과 지금 열려있는 모달 둘 다 최신 값으로 맞춘다. */
+  async function refreshAfterMemoChange() {
+    const result = await productionService.list({ status: status || undefined, page, size: 20 });
+    setData(result);
+    setMemoTarget((current) => {
+      if (!current) return current;
+      return result.records.find((r) => r.id === current.id) ?? current;
+    });
+  }
+
+  async function submitMemo() {
+    if (!memoTarget || !memoDraft.trim()) return;
+    setMemoSaving(true);
+    setMemoError("");
+    try {
+      await productionService.addMemo(memoTarget.id, memoDraft.trim());
+      setMemoDraft("");
+      await refreshAfterMemoChange();
+    } catch (cause) {
+      setMemoError(cause instanceof Error ? cause.message : "메모를 추가하지 못했습니다.");
+    } finally {
+      setMemoSaving(false);
+    }
+  }
+
+  async function submitClearMemo() {
+    if (!memoTarget) return;
+    setMemoSaving(true);
+    setMemoError("");
+    try {
+      await productionService.clearMemo(memoTarget.id);
+      setConfirmingClear(false);
+      await refreshAfterMemoChange();
+    } catch (cause) {
+      setMemoError(cause instanceof Error ? cause.message : "메모를 비우지 못했습니다.");
+    } finally {
+      setMemoSaving(false);
+    }
+  }
+
+  const memoEntries = (memoTarget?.memo ?? "").split("\n").filter((line) => line.trim() !== "");
 
   return (
     <main className={styles.shell}>
@@ -148,28 +213,60 @@ export function ProductionList() {
                     <td>{formatDate(record.shippedAt)}</td>
                     <td>{formatDate(record.completedAt)}</td>
                     <td>
-                      <div className={styles.rowActions}>
-                        {record.status === "IN_PRODUCTION" && (
-                          <button
-                            type="button"
-                            className={styles.textButton}
-                            disabled={actingId === record.id}
-                            onClick={() => setPendingAction({ record, action: "ship" })}
-                          >
-                            배송 시작
-                          </button>
+                      <div className={styles.actionMenu} data-menu-root>
+                        <button
+                          type="button"
+                          className={styles.menuTrigger}
+                          aria-haspopup="true"
+                          aria-expanded={openMenuId === record.id}
+                          disabled={actingId === record.id}
+                          onClick={() =>
+                            setOpenMenuId((current) => (current === record.id ? null : record.id))
+                          }
+                        >
+                          ⋮
+                        </button>
+                        {openMenuId === record.id && (
+                          <div className={styles.menuDropdown} role="menu">
+                            {record.status === "IN_PRODUCTION" && (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                className={styles.menuItem}
+                                onClick={() => {
+                                  setPendingAction({ record, action: "ship" });
+                                  setOpenMenuId(null);
+                                }}
+                              >
+                                배송 시작
+                              </button>
+                            )}
+                            {record.status === "IN_DELIVERY" && (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                className={styles.menuItem}
+                                onClick={() => {
+                                  setPendingAction({ record, action: "complete" });
+                                  setOpenMenuId(null);
+                                }}
+                              >
+                                완료 처리
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className={styles.menuItem}
+                              onClick={() => {
+                                openMemo(record);
+                                setOpenMenuId(null);
+                              }}
+                            >
+                              메모
+                            </button>
+                          </div>
                         )}
-                        {record.status === "IN_DELIVERY" && (
-                          <button
-                            type="button"
-                            className={styles.textButton}
-                            disabled={actingId === record.id}
-                            onClick={() => setPendingAction({ record, action: "complete" })}
-                          >
-                            완료 처리
-                          </button>
-                        )}
-                        {record.status === "COMPLETED" && "-"}
                       </div>
                     </td>
                   </tr>
@@ -228,6 +325,97 @@ export function ProductionList() {
               >
                 {ACTION_LABELS[pendingAction.action]}
               </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {memoTarget && (
+        <div
+          className={styles.modalBackdrop}
+          role="presentation"
+          onMouseDown={() => !memoSaving && setMemoTarget(null)}
+        >
+          <section
+            className={styles.memoModal}
+            role="dialog"
+            aria-modal="true"
+            aria-label="메모"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div>
+              <h2>메모</h2>
+              <p>
+                생산번호 #{memoTarget.id}(주문번호 #{memoTarget.orderId})
+              </p>
+            </div>
+
+            <div className={styles.memoList}>
+              {memoEntries.length === 0 ? (
+                <p>등록된 메모가 없습니다.</p>
+              ) : (
+                memoEntries.map((entry, index) => (
+                  <div key={index} className={styles.memoEntry}>
+                    {entry}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {memoError && <p className={styles.error}>{memoError}</p>}
+
+            <div className={styles.memoForm}>
+              <textarea
+                rows={3}
+                maxLength={2000}
+                value={memoDraft}
+                disabled={memoSaving}
+                onChange={(event) => setMemoDraft(event.target.value)}
+                placeholder="메모를 입력하세요."
+              />
+              <div className={styles.memoModalFooter}>
+                <button
+                  type="button"
+                  className={styles.primary}
+                  disabled={memoSaving || !memoDraft.trim()}
+                  onClick={() => void submitMemo()}
+                >
+                  추가
+                </button>
+              </div>
+            </div>
+
+            <div className={styles.memoModalActions}>
+              {confirmingClear ? (
+                <>
+                  <span className={styles.dangerText}>정말 전체 메모를 삭제할까요?</span>
+                  <div className={styles.memoModalFooter}>
+                    <button type="button" className={styles.secondary} disabled={memoSaving}
+                      onClick={() => setConfirmingClear(false)}>
+                      취소
+                    </button>
+                    <button type="button" className={styles.primary} disabled={memoSaving}
+                      onClick={() => void submitClearMemo()}>
+                      삭제
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className={styles.dangerText}
+                    disabled={memoSaving || memoEntries.length === 0}
+                    onClick={() => setConfirmingClear(true)}
+                  >
+                    전체 메모 삭제
+                  </button>
+                  <button type="button" className={styles.secondary} disabled={memoSaving}
+                    onClick={() => setMemoTarget(null)}>
+                    닫기
+                  </button>
+                </>
+              )}
             </div>
           </section>
         </div>

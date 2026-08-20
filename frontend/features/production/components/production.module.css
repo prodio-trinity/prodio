@@ -14,7 +14,7 @@
 .error { padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--color-danger) 10%, transparent); color: var(--color-danger); font-size: 13px; }
 .empty { padding: 42px; text-align: center; color: var(--color-text-secondary); }
 
-.tableWrap { overflow: auto; }
+.tableWrap { overflow-x: auto; overflow-y: visible; }
 .tableWrap table { width: 100%; min-width: 860px; }
 .tableWrap th { padding: 11px; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); text-align: left; font-size: 11px; }
 .tableWrap td { padding: 14px 11px; border-bottom: 1px solid var(--color-border); font-size: 12px; }
@@ -28,20 +28,43 @@
 :global(:root[data-theme="dark"]) .statusIN_DELIVERY { background: #142a4a; color: #93c5fd !important; }
 :global(:root[data-theme="dark"]) .statusCOMPLETED { background: #153522; color: #4ade80 !important; }
 
-.rowActions { display: flex; align-items: center; gap: 6px; }
-.textButton { color: var(--color-primary); font-size: 12px; font-weight: 800; }
-.textButton:hover { text-decoration: underline; }
-.textButton:disabled { opacity: 0.5; text-decoration: none; }
+.actionMenu { position: relative; display: inline-block; }
+.menuTrigger { border: none; padding: 4px 10px; border-radius: 7px; background: none; color: var(--color-text-secondary); font-size: 15px; line-height: 1.2; }
+.menuTrigger:hover { background: var(--color-background); color: var(--color-text-primary); }
+.menuTrigger:disabled { opacity: 0.5; }
+.menuDropdown { position: absolute; top: calc(100% + 4px); right: 0; z-index: 20; display: grid; min-width: 128px; padding: 6px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-card-background); box-shadow: 0 16px 36px rgb(15 23 42 / 20%); }
+.menuItem { border: none; padding: 9px 10px; border-radius: 7px; background: none; color: var(--color-text-primary); font-size: 12px; font-weight: 700; text-align: left; }
+.menuItem:hover { background: var(--color-background); }
 
 .modalBackdrop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px; background: rgb(15 23 42 / 58%); }
 .confirmModal { width: min(400px, 100%); display: grid; gap: 18px; padding: 24px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-card-background); box-shadow: 0 24px 70px rgb(15 23 42 / 30%); }
 .confirmModal h2 { font-size: 18px; }
 .confirmModal p { color: var(--color-text-secondary); font-size: 13px; }
 .confirmModalActions { display: flex; justify-content: flex-end; gap: 8px; }
-.confirmModalActions button { min-height: 40px; padding: 0 16px; border-radius: 9px; font-size: 12px; font-weight: 800; }
-.confirmModalActions .secondary { border: 1px solid var(--color-border); background: var(--color-card-background); color: var(--color-text-primary); }
-.confirmModalActions .primary { background: var(--color-primary); color: white; }
-.confirmModalActions button:disabled { opacity: 0.5; }
+.confirmModalActions button { min-height: 40px; padding: 0 16px; }
+
+.primary,
+.secondary,
+.dangerText { border: none; padding: 0; background: none; border-radius: 9px; font-size: 12px; font-weight: 800; }
+.primary { background: var(--color-primary); color: white; }
+.secondary { border: 1px solid var(--color-border); background: var(--color-card-background); color: var(--color-text-primary); }
+.dangerText { color: var(--color-danger); }
+.primary:disabled,
+.secondary:disabled,
+.dangerText:disabled { opacity: 0.5; }
+
+.memoModal { width: min(480px, 100%); display: grid; gap: 16px; padding: 24px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-card-background); box-shadow: 0 24px 70px rgb(15 23 42 / 30%); }
+.memoModal h2 { font-size: 18px; }
+.memoModal > p { color: var(--color-text-secondary); font-size: 12px; }
+.memoList { display: grid; gap: 8px; max-height: 240px; overflow-y: auto; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-background); }
+.memoList p { color: var(--color-text-secondary); font-size: 12px; text-align: center; }
+.memoEntry { padding: 8px 10px; border-radius: 8px; background: var(--color-card-background); font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+.memoForm { display: grid; gap: 8px; }
+.memoForm textarea { padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-card-background); font-size: 12px; resize: vertical; }
+.memoModalActions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.memoModalFooter { display: flex; justify-content: flex-end; gap: 8px; }
+.memoModalActions > button,
+.memoModalFooter button { min-height: 38px; padding: 0 14px; }
 
 .pagination { display: flex; align-items: center; justify-content: center; gap: 16px; }
 .pagination button { padding: 7px 12px; border: 1px solid var(--color-border); border-radius: 8px; }
