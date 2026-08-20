@@ -9,6 +9,6 @@ public record ClientBulkUpsertRequest(
         String address,
         String managerName,
         String memo,
-        boolean isActive
+        Boolean isActive
 ) {
 }

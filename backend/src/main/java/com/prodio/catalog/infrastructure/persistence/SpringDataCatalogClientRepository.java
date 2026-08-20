@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +38,16 @@ public interface SpringDataCatalogClientRepository extends JpaRepository<Catalog
             Pageable pageable);
 
     Optional<CatalogClientEntity> findByBusinessRegNo(String businessRegNo);
+
+    @Query("SELECT c.businessRegNo AS businessRegNo, c.id AS id "
+            + "FROM CatalogClientEntity c "
+            + "WHERE c.businessRegNo IN :businessRegNos")
+    List<BusinessRegNoIdView> findIdsByBusinessRegNoIn(@Param("businessRegNos") Collection<String> businessRegNos);
+
+    interface BusinessRegNoIdView {
+        String getBusinessRegNo();
+        Long getId();
+    }
 
     @Query(value = "SELECT nextval('catalog_client_code_seq')", nativeQuery = true)
     Long nextClientCodeSequence();
