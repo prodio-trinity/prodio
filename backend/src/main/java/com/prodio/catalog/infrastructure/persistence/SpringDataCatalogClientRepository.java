@@ -2,6 +2,7 @@ package com.prodio.catalog.infrastructure.persistence;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,6 +37,12 @@ public interface SpringDataCatalogClientRepository extends JpaRepository<Catalog
             @Param("keyword") String keyword,
             @Param("isActive") Boolean isActive,
             Pageable pageable);
+
+    @Query("SELECT c FROM CatalogClientEntity c WHERE " + KEYWORD_FILTER)
+    List<CatalogClientEntity> findClientsForExport(
+            @Param("keyword") String keyword,
+            @Param("isActive") Boolean isActive,
+            Sort sort);
 
     Optional<CatalogClientEntity> findByBusinessRegNo(String businessRegNo);
 

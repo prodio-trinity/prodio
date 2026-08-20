@@ -3,6 +3,7 @@ package com.prodio.catalog.application;
 import com.prodio.catalog.domain.CatalogClient;
 import com.prodio.catalog.exception.CatalogException;
 import com.prodio.catalog.infrastructure.excel.ClientExcelParser;
+import com.prodio.catalog.infrastructure.excel.ClientExcelWriter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -22,9 +23,15 @@ public class CatalogClientService {
     private final CatalogClientRepository clientRepository;
     private final CatalogClientRowUpsertService rowUpsertService;
     private final ClientExcelParser clientExcelParser;
+    private final ClientExcelWriter clientExcelWriter;
 
     public Page<ClientListItem> getClientList(String keyword, Boolean isActive, int page, int size, String sort) {
         return queryRepository.findClients(normalize(keyword), isActive, page, size, sort);
+    }
+
+    public byte[] exportClients(String keyword, Boolean isActive, String sort) {
+        List<ClientListItem> clients = queryRepository.findAllForExport(normalize(keyword), isActive, sort);
+        return clientExcelWriter.write(clients);
     }
 
     public List<ClientAutocompleteItem> getAutocomplete(String keyword, int size) {
