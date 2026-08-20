@@ -6,13 +6,17 @@ import com.prodio.catalog.domain.ClientRegistration;
 import com.prodio.catalog.domain.RegistrationStatus;
 import com.prodio.catalog.exception.CatalogErrorCode;
 import com.prodio.catalog.exception.CatalogException;
+import com.prodio.user.UserDirectory;
+import com.prodio.user.UserRef;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +24,7 @@ public class ClientRegistrationService {
     private final CatalogClientRepository clientRepository;
     private final ClientRegistrationRepository registrationRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserDirectory userDirectory;
 
     /** 1. 승인된 거래처(카탈로그) 존재 2.신청 존재(PENDING/REJECTED) 3.둘 다 없으면 미등록(empty). */
     @Transactional(readOnly = true)
@@ -63,8 +68,18 @@ public class ClientRegistrationService {
 
     /** status가 null이면 전체 조회 */
     @Transactional(readOnly = true)
-    public List<ClientRegistration> getRegistrationList(RegistrationStatus status) {
-        return registrationRepository.findAll(status);
+    public List<ClientRegistrationListItem> getRegistrationList(RegistrationStatus status) {
+        List<ClientRegistration> requests = registrationRepository.findAll(status);
+
+        List<Long> userIds = requests.stream().map(ClientRegistration::userId).toList();
+        List<UserRef> users = userDirectory.findActiveByIds(userIds);
+
+        Map<Long, String> emailsByUserId = users.stream()
+                .collect(Collectors.toMap(UserRef::id, UserRef::email));
+
+        return requests.stream()
+                .map(request -> new ClientRegistrationListItem(request, emailsByUserId.get(request.userId())))
+                .toList();
     }
 
     /** 관리자 신청 승인
