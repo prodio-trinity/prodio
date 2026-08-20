@@ -60,4 +60,9 @@ public class ProductionService {
     private OffsetDateTime toOffsetDateTime(LocalDateTime time) {
         return time.atZone(ZoneId.systemDefault()).toOffsetDateTime();
     }
+
+    @Transactional(readOnly = true)
+    public ProductionRecord getProductionInfo(Long productionId) {
+        return repository.findProductionInfo(productionId);
+    }
 }

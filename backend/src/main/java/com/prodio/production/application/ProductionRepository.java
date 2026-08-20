@@ -12,4 +12,6 @@ public interface ProductionRepository {
     ProductionRecord markCompleted(Long productionId);
 
     PageResult<ProductionRecord> findAll(ProductionStatus status, int page, int size);
+
+    ProductionRecord findProductionInfo(Long productionId);
 }
