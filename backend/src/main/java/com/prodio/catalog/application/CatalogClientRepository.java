@@ -11,6 +11,8 @@ public interface CatalogClientRepository {
 
     Optional<CatalogClient> findByBusinessRegNo(String businessRegNo);
 
+    Optional<CatalogClient> findByUserId(Long userId);
+
     /** businessRegNo -> id. 엑셀 일괄 업로드 사 N+1 방지 위함. */
     Map<String, Long> findIdsByBusinessRegNoIn(Collection<String> businessRegNos);
 
