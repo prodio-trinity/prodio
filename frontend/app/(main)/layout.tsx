@@ -6,7 +6,7 @@ import {
   LayoutDashboard,
   ClipboardList,
   Factory,
-  BookOpen,
+  ClipboardCheck,
   BarChart2,
   Users,
   PlusCircle,
@@ -18,7 +18,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "대시보드", icon: LayoutDashboard },
   { href: "/orders", label: "수주 관리", icon: ClipboardList },
   { href: "/production", label: "생산 관리", icon: Factory },
-  { href: "/catalog", label: "카탈로그", icon: BookOpen },
+  { href: "/catalog/registration", label: "등록 신청 관리", icon: ClipboardCheck },
   { href: "/statistics", label: "통계", icon: BarChart2 },
   { href: "/admin/members", label: "멤버 관리", icon: Users },
 ];
