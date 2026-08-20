@@ -55,7 +55,7 @@ public class JpaProductionRepository implements ProductionRepository {
     @Override
     public PageResult<ProductionRecord> findAll(ProductionStatus status, int page, int size) {
         Page<ProductionRecordEntity> result = springDataProductionRepository.search(status,
-                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
 
         return new PageResult<>(result.getContent().stream().map(ProductionRecordEntity::toDomain).toList(),
                 page, size, result.getTotalElements(), result.getTotalPages());
