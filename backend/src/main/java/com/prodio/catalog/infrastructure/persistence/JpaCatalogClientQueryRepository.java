@@ -28,6 +28,14 @@ class JpaCatalogClientQueryRepository implements CatalogClientQueryRepository {
     }
 
     @Override
+    public List<ClientListItem> findAllForExport(String keyword, Boolean isActive, String sort) {
+        return springDataCatalogClientRepository
+                .findClientsForExport(escapeLike(keyword), isActive, parseSort(sort)).stream()
+                .map(JpaCatalogClientQueryRepository::toListItem)
+                .toList();
+    }
+
+    @Override
     public List<ClientAutocompleteItem> findClientsForAutocomplete(String keyword, int size) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.ASC, "companyName"));
         return springDataCatalogClientRepository

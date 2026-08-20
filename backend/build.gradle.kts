@@ -52,6 +52,10 @@ dependencies {
     // SMS — Coolsms
     implementation("net.nurigo:sdk:4.3.2")
 
+    // 엑셀 업로드 — 거래처 일괄 등록/수정
+    implementation("org.apache.poi:poi:5.4.1")
+    implementation("org.apache.poi:poi-ooxml:5.4.1")
+
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")

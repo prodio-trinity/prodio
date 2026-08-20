@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/products")
+@RequestMapping("/api/admin/catalog/products")
 @RequiredArgsConstructor
 @Validated
 class CatalogProductAdminController {

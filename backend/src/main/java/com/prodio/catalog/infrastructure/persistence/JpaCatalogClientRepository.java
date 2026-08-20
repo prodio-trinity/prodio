@@ -7,7 +7,10 @@ import com.prodio.catalog.exception.CatalogException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -24,6 +27,14 @@ class JpaCatalogClientRepository implements CatalogClientRepository {
     public Optional<CatalogClient> findByBusinessRegNo(String businessRegNo) {
         return springDataCatalogClientRepository.findByBusinessRegNo(businessRegNo)
                 .map(CatalogClientEntity::toDomain);
+    }
+
+    @Override
+    public Map<String, Long> findIdsByBusinessRegNoIn(Collection<String> businessRegNos) {
+        if (businessRegNos.isEmpty()) return Map.of();
+        return springDataCatalogClientRepository.findIdsByBusinessRegNoIn(businessRegNos).stream()
+                .collect(Collectors.toMap(SpringDataCatalogClientRepository.BusinessRegNoIdView::getBusinessRegNo,
+                        SpringDataCatalogClientRepository.BusinessRegNoIdView::getId));
     }
 
     @Override

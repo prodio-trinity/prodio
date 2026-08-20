@@ -4,11 +4,15 @@ import com.prodio.catalog.application.CatalogClientService;
 import com.prodio.catalog.application.ClientBulkUpsertRequest;
 import com.prodio.catalog.application.ClientBulkUpsertResult;
 import com.prodio.catalog.application.ClientListItem;
+import com.prodio.catalog.application.ExcelUploadResult;
 import com.prodio.shared.ApiResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,12 +20,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/clients")
+@RequestMapping("/api/admin/catalog/clients")
 @RequiredArgsConstructor
 @Validated
 class CatalogClientAdminController {
@@ -41,6 +48,25 @@ class CatalogClientAdminController {
     @PostMapping("/bulk")
     ApiResponse<List<ClientBulkUpsertResult>> upsertClients(@RequestBody List<ClientBulkUpsertRequest> requests) {
         return ApiResponse.success(catalogClientService.upsertRows(requests));
+    }
+
+    @PostMapping(value = "/excel/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ApiResponse<ExcelUploadResult> uploadClientExcel(@RequestParam("file") MultipartFile file) {
+        return ApiResponse.success(catalogClientService.upsertRowsFromExcel(file));
+    }
+
+    @GetMapping("/excel/export")
+    ResponseEntity<byte[]> exportClientExcel(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(defaultValue = "") String sort) {
+        byte[] excel = catalogClientService.exportClients(keyword, isActive, sort);
+        String filename = "[prodio]거래처목록_" + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE) + ".xlsx";
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(excel);
     }
 
     record ClientListItemResponse(Long id, String clientCode, String companyName, String ceoName,

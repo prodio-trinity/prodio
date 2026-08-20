@@ -9,4 +9,7 @@ public interface CatalogClientQueryRepository {
 
     /** keyword가 companyName/ceoName/phone/address/managerName 중 하나라도 매칭되면 포함. */
     List<ClientAutocompleteItem> findClientsForAutocomplete(String keyword, int size);
+
+    /** 엑셀 내보내기 */
+    List<ClientListItem> findAllForExport(String keyword, Boolean isActive, String sort);
 }
