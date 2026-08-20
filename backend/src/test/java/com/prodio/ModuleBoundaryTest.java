@@ -54,12 +54,12 @@ class ModuleBoundaryTest {
 
     @Test
     @DisplayName("stat 모듈은 다른 도메인 모듈의 내부 패키지를 직접 참조할 수 없다"
-            + " (order/production이 공개한 이벤트 패키지는 예외)")
+            + " (catalog/order/production이 공개한 이벤트 패키지는 예외)")
     void stat_should_not_depend_on_domain_modules() {
         DescribedPredicate<JavaClass> forbidden = JavaClass.Predicates.resideInAnyPackage(
                         "com.prodio.catalog..", "com.prodio.order..", "com.prodio.production..")
                 .and(DescribedPredicate.not(JavaClass.Predicates.resideInAnyPackage(
-                        "com.prodio.order", "com.prodio.production.event")));
+                        "com.prodio.catalog", "com.prodio.order", "com.prodio.production.event")));
 
         ArchRule rule = noClasses()
                 .that().resideInAPackage("com.prodio.stat..")
