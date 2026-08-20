@@ -30,6 +30,11 @@ class JpaCatalogClientRepository implements CatalogClientRepository {
     }
 
     @Override
+    public Optional<CatalogClient> findByUserId(Long userId) {
+        return springDataCatalogClientRepository.findByUserId(userId).map(CatalogClientEntity::toDomain);
+    }
+
+    @Override
     public Map<String, Long> findIdsByBusinessRegNoIn(Collection<String> businessRegNos) {
         if (businessRegNos.isEmpty()) return Map.of();
         return springDataCatalogClientRepository.findIdsByBusinessRegNoIn(businessRegNos).stream()

@@ -54,4 +54,21 @@ public record CatalogClient(
                 active
         );
     }
+
+    /** 거래처 등록 신청 승인 — userId만 연결 */
+    public CatalogClient linkUser(Long userId) {
+        return new CatalogClient(
+                id,
+                clientCode,
+                companyName,
+                ceoName,
+                businessRegNo,
+                phone,
+                address,
+                managerName,
+                userId,
+                memo,
+                active
+        );
+    }
 }

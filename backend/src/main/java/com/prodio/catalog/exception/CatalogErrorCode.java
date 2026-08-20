@@ -11,7 +11,10 @@ public enum CatalogErrorCode {
     INVALID_TOP_CATEGORY(HttpStatus.BAD_REQUEST, "존재하지 않는 대분류 코드입니다."),
     DUPLICATE_SUB_CATEGORY_CODE(HttpStatus.CONFLICT, "이미 존재하는 소분류 코드입니다."),
     INVALID_EXCEL_FILE(HttpStatus.BAD_REQUEST, "엑셀 파일을 읽을 수 없습니다."),
-    EXCEL_EXPORT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "엑셀 파일 생성 중 오류가 발생했습니다.");
+    EXCEL_EXPORT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "엑셀 파일 생성 중 오류가 발생했습니다."),
+    CLIENT_ALREADY_REGISTERED(HttpStatus.CONFLICT, "이미 등록된 거래처 계정입니다."),
+    REGISTRATION_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "등록 신청을 찾을 수 없습니다."),
+    REGISTRATION_ALREADY_LINKED(HttpStatus.CONFLICT, "이미 다른 계정에 연결된 거래처입니다.");
 
     private final HttpStatus status;
     private final String message;
