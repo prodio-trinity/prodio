@@ -5,7 +5,6 @@ import com.prodio.order.OrderCreatedEvent;
 import com.prodio.order.OrderDeliveryEventData;
 import com.prodio.order.OrderItemEventData;
 import com.prodio.order.OrderUpdatedEvent;
-import com.prodio.stat.application.AiClient;
 import com.prodio.stat.application.OrderStatViewRepository;
 import com.prodio.stat.domain.OrderStatView;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -30,30 +28,26 @@ import static org.mockito.Mockito.when;
 @DisplayName("OrderEmbeddingListener")
 class OrderEmbeddingListenerTest {
     private static final long ORDER_ID = 1L;
-    private static final float[] EMBEDDING = new float[] {0.1f, 0.2f};
 
     @Mock private OrderEmbeddingRepository orderEmbeddingRepository;
     @Mock private OrderStatViewRepository orderStatViewRepository;
-    @Mock private AiClient aiClient;
+    @Mock private OrderEmbeddingWriter orderEmbeddingWriter;
     private OrderEmbeddingListener listener;
 
     @BeforeEach
     void setUp() {
-        listener = new OrderEmbeddingListener(orderEmbeddingRepository, orderStatViewRepository, aiClient);
+        listener = new OrderEmbeddingListener(orderEmbeddingRepository, orderStatViewRepository, orderEmbeddingWriter);
     }
 
     @Test
-    @DisplayName("생성 이벤트에 note가 있으면 텍스트를 임베딩해 저장한다")
-    void createdEventWithNoteEmbedsAndUpserts() {
+    @DisplayName("생성 이벤트에 note가 있으면 조합한 텍스트를 writer에 넘긴다")
+    void createdEventWithNoteDelegatesToWriter() {
         OrderCreatedEvent event = createdEvent("급하게 부탁드려요");
         when(orderEmbeddingRepository.findNoteText(ORDER_ID)).thenReturn(Optional.empty());
-        when(aiClient.embed(any())).thenReturn(EMBEDDING);
 
         listener.handle(event);
 
-        String expectedText = "[정밀 샤프트 3개, ○○상사 주문] 급하게 부탁드려요";
-        verify(aiClient).embed(expectedText);
-        verify(orderEmbeddingRepository).upsert(ORDER_ID, expectedText, EMBEDDING);
+        verify(orderEmbeddingWriter).upsert(ORDER_ID, "[정밀 샤프트 3개, ○○상사 주문] 급하게 부탁드려요");
     }
 
     @Test
@@ -61,7 +55,7 @@ class OrderEmbeddingListenerTest {
     void createdEventWithoutNoteSkips() {
         listener.handle(createdEvent(""));
 
-        verifyNoInteractions(orderEmbeddingRepository, aiClient);
+        verifyNoInteractions(orderEmbeddingRepository, orderEmbeddingWriter);
     }
 
     @Test
@@ -72,58 +66,62 @@ class OrderEmbeddingListenerTest {
 
         listener.handle(updatedEvent("급하게 부탁드려요"));
 
-        verify(aiClient, never()).embed(any());
-        verify(orderEmbeddingRepository, never()).upsert(anyLong(), any(), any());
+        verifyNoInteractions(orderEmbeddingWriter);
     }
 
     @Test
-    @DisplayName("수정 이벤트로 조합한 텍스트가 기존과 다르면 다시 임베딩한다")
-    void updatedEventEmbedsWhenTextChanged() {
+    @DisplayName("수정 이벤트로 조합한 텍스트가 기존과 다르면 writer에 새 텍스트를 넘긴다")
+    void updatedEventDelegatesWhenTextChanged() {
         when(orderEmbeddingRepository.findNoteText(ORDER_ID)).thenReturn(Optional.of("[정밀 샤프트 3개, ○○상사 주문] 이전 요청"));
-        when(aiClient.embed(any())).thenReturn(EMBEDDING);
 
         listener.handle(updatedEvent("변경된 요청사항"));
 
-        String expectedText = "[정밀 샤프트 3개, ○○상사 주문] 변경된 요청사항";
-        verify(aiClient).embed(expectedText);
-        verify(orderEmbeddingRepository).upsert(ORDER_ID, expectedText, EMBEDDING);
+        verify(orderEmbeddingWriter).upsert(ORDER_ID, "[정밀 샤프트 3개, ○○상사 주문] 변경된 요청사항");
     }
 
     @Test
-    @DisplayName("기존 note_text가 있으면 취소사유를 이어붙여 재임베딩한다")
+    @DisplayName("기존 note_text가 있으면 취소사유를 이어붙여 writer에 넘긴다")
     void cancelledEventAppendsToExistingText() {
         when(orderEmbeddingRepository.findNoteText(ORDER_ID))
                 .thenReturn(Optional.of("[정밀 샤프트 3개, ○○상사 주문] 급하게 부탁드려요"));
-        when(aiClient.embed(any())).thenReturn(EMBEDDING);
 
         listener.handle(new OrderCancelledEvent(ORDER_ID, "재고 부족으로 취소",
                 OffsetDateTime.parse("2026-08-20T10:00:00+09:00")));
 
-        String expectedText = "[정밀 샤프트 3개, ○○상사 주문] 급하게 부탁드려요\n[취소사유] 재고 부족으로 취소";
-        verify(aiClient).embed(expectedText);
-        verify(orderEmbeddingRepository).upsert(ORDER_ID, expectedText, EMBEDDING);
+        verify(orderEmbeddingWriter).upsert(ORDER_ID,
+                "[정밀 샤프트 3개, ○○상사 주문] 급하게 부탁드려요\n[취소사유] 재고 부족으로 취소");
         verifyNoInteractions(orderStatViewRepository);
     }
 
     @Test
-    @DisplayName("기존 note_text가 없으면 OrderStatView로 문맥을 새로 조회해 취소사유를 임베딩한다")
+    @DisplayName("기존 note_text가 없으면 OrderStatView로 문맥을 새로 조회해 취소사유를 writer에 넘긴다")
     void cancelledEventRebuildsContextWhenNoExistingText() {
         when(orderEmbeddingRepository.findNoteText(ORDER_ID)).thenReturn(Optional.empty());
         OrderStatView shaft = OrderStatView.create(ORDER_ID, 2L, "○○상사", 3L, "정밀 샤프트", 3, 25_500L,
                 OffsetDateTime.parse("2026-08-18T10:00:00+09:00"));
         when(orderStatViewRepository.findAllByOrderId(ORDER_ID)).thenReturn(List.of(shaft));
-        when(aiClient.embed(any())).thenReturn(EMBEDDING);
 
         listener.handle(new OrderCancelledEvent(ORDER_ID, "재고 부족으로 취소",
                 OffsetDateTime.parse("2026-08-20T10:00:00+09:00")));
 
-        String expectedText = "[정밀 샤프트 3개, ○○상사 주문] [취소사유] 재고 부족으로 취소";
-        verify(aiClient).embed(expectedText);
-        verify(orderEmbeddingRepository).upsert(ORDER_ID, expectedText, EMBEDDING);
+        verify(orderEmbeddingWriter).upsert(ORDER_ID, "[정밀 샤프트 3개, ○○상사 주문] [취소사유] 재고 부족으로 취소");
     }
 
     @Test
-    @DisplayName("이미 취소사유가 반영돼 있으면 이벤트 재발행에도 중복 append하지 않는다")
+    @DisplayName("OrderStatView가 아직 없으면 예외를 던져 이벤트를 미완료 상태로 남긴다")
+    void cancelledEventThrowsWhenOrderStatViewMissing() {
+        when(orderEmbeddingRepository.findNoteText(ORDER_ID)).thenReturn(Optional.empty());
+        when(orderStatViewRepository.findAllByOrderId(ORDER_ID)).thenReturn(List.of());
+
+        assertThatThrownBy(() -> listener.handle(new OrderCancelledEvent(ORDER_ID, "재고 부족으로 취소",
+                OffsetDateTime.parse("2026-08-20T10:00:00+09:00"))))
+                .isInstanceOf(IllegalStateException.class);
+
+        verifyNoInteractions(orderEmbeddingWriter);
+    }
+
+    @Test
+    @DisplayName("이미 이번 취소사유가 반영돼 있으면 이벤트 재발행에도 중복 append하지 않는다")
     void cancelledEventSkipsWhenAlreadyApplied() {
         when(orderEmbeddingRepository.findNoteText(ORDER_ID))
                 .thenReturn(Optional.of("[정밀 샤프트 3개, ○○상사 주문] 급하게 부탁드려요\n[취소사유] 재고 부족으로 취소"));
@@ -131,9 +129,20 @@ class OrderEmbeddingListenerTest {
         listener.handle(new OrderCancelledEvent(ORDER_ID, "재고 부족으로 취소",
                 OffsetDateTime.parse("2026-08-20T10:00:00+09:00")));
 
-        verify(aiClient, never()).embed(any());
-        verify(orderEmbeddingRepository, never()).upsert(anyLong(), any(), any());
-        verifyNoInteractions(orderStatViewRepository);
+        verifyNoInteractions(orderEmbeddingWriter, orderStatViewRepository);
+    }
+
+    @Test
+    @DisplayName("note 안에 우연히 [취소사유] 문구가 있어도, 이번 취소사유와 다르면 정상적으로 append한다")
+    void cancelledEventDoesNotFalsePositiveOnUnrelatedBracketText() {
+        when(orderEmbeddingRepository.findNoteText(ORDER_ID))
+                .thenReturn(Optional.of("[정밀 샤프트 3개, ○○상사 주문] 이전에 [취소사유] 관련 문의 남겼었어요"));
+
+        listener.handle(new OrderCancelledEvent(ORDER_ID, "재고 부족으로 취소",
+                OffsetDateTime.parse("2026-08-20T10:00:00+09:00")));
+
+        verify(orderEmbeddingWriter).upsert(ORDER_ID,
+                "[정밀 샤프트 3개, ○○상사 주문] 이전에 [취소사유] 관련 문의 남겼었어요\n[취소사유] 재고 부족으로 취소");
     }
 
     private OrderCreatedEvent createdEvent(String note) {

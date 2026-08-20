@@ -36,7 +36,11 @@ final class OrderEmbeddingTextBuilder {
                 : existingText + "\n" + reasonLine;
     }
 
-    static String cancelledWithoutNote(List<OrderStatView> views, String cancellationReason) {
+    static String cancelledWithoutNote(long orderId, List<OrderStatView> views, String cancellationReason) {
+        if (views.isEmpty()) {
+            throw new IllegalStateException("OrderStatView를 찾을 수 없습니다. orderId=" + orderId);
+        }
+
         String clientName = views.get(0).clientName();
         String itemSummary = views.stream()
                 .map(view -> view.productName() + " " + view.quantity() + "개")

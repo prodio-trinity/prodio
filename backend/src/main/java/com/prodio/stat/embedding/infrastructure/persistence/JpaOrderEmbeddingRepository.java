@@ -4,6 +4,7 @@ import com.prodio.stat.embedding.application.OrderEmbeddingRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,9 @@ class JpaOrderEmbeddingRepository implements OrderEmbeddingRepository {
         return result.stream().findFirst();
     }
 
+    /** OrderEmbeddingWriter가 NOT_SUPPORTED로 트랜잭션을 비운 채 호출하므로, 이 upsert만의 짧은 트랜잭션을 새로 연다. */
     @Override
+    @Transactional
     public void upsert(long orderId, String noteText, float[] embedding) {
         entityManager.createNativeQuery("""
                 INSERT INTO statistics_order_embeddings (order_id, note_text, embedding)

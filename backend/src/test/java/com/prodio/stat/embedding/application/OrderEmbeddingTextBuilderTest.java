@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("OrderEmbeddingTextBuilder")
 class OrderEmbeddingTextBuilderTest {
@@ -94,9 +95,17 @@ class OrderEmbeddingTextBuilderTest {
         OrderStatView shaft = OrderStatView.create(1L, 2L, "○○상사", 3L, "정밀 샤프트", 3, 25_500L, createdAt);
         OrderStatView bearing = OrderStatView.create(1L, 2L, "○○상사", 4L, "베어링", 5, 25_000L, createdAt);
 
-        String result = OrderEmbeddingTextBuilder.cancelledWithoutNote(List.of(shaft, bearing), "재고 부족으로 취소");
+        String result = OrderEmbeddingTextBuilder.cancelledWithoutNote(1L, List.of(shaft, bearing), "재고 부족으로 취소");
 
         assertThat(result).isEqualTo("[정밀 샤프트 3개, 베어링 5개, ○○상사 주문] [취소사유] 재고 부족으로 취소");
+    }
+
+    @Test
+    @DisplayName("OrderStatView가 비어 있으면 예외를 던진다")
+    void cancelledWithoutNoteThrowsWhenViewsEmpty() {
+        assertThatThrownBy(() -> OrderEmbeddingTextBuilder.cancelledWithoutNote(1L, List.of(), "재고 부족으로 취소"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("1");
     }
 
     private OrderDeliveryEventData delivery() {
