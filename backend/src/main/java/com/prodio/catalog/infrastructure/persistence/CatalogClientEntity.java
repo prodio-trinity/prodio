@@ -71,7 +71,9 @@ class CatalogClientEntity {
         this.clientCode = clientCode;
     }
 
-    /** 그리드에서 편집 가능한 필드만 갱신 */
+    /**
+     * 그리드에서 편집 가능한 필드만 갱신 
+     * BUT 등록 신청 승인 연동 시 userId 갱신도 필요 */
     void update(CatalogClient domain) {
         this.companyName = domain.companyName();
         this.ceoName = domain.ceoName();
@@ -79,6 +81,7 @@ class CatalogClientEntity {
         this.phone = domain.phone();
         this.address = domain.address();
         this.managerName = domain.managerName();
+        this.userId = domain.userId();
         this.memo = domain.memo();
         this.active = domain.active();
         this.updatedAt = Instant.now();
