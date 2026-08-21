@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AdminGridFooter } from "@/features/catalog/shared/components/AdminGridFooter";
 import { AdminGridHeader } from "@/features/catalog/shared/components/AdminGridHeader";
 import gridStyles from "@/features/catalog/shared/components/AdminGrid.module.css";
@@ -87,7 +88,16 @@ export function ProductListView({
     <main className={gridStyles.shell}>
       <header className={gridStyles.header}>
         <span className={gridStyles.eyebrow}>PRODUCTS</span>
-        <h1>품목 관리</h1>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <h1>품목 관리</h1>
+          <Link
+            href="/catalog/categories"
+            className={`${gridStyles.btn} ${gridStyles.btnPrimary}`}
+            style={{ transform: "scale(1.1)" }}
+          >
+            카테고리 관리
+          </Link>
+        </div>
         <p>품목을 조회하고 정보를 관리할 수 있습니다.</p>
       </header>
 
