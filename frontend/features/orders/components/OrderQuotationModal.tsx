@@ -1,7 +1,7 @@
 "use client";
 
-import type { OrderClientContext, OrderProductContext } from "../types/order";
-import type { OrderItemSelection } from "./OrderCatalogSection";
+import type { SelectedProduct } from "@/features/catalog/product/utils/product";
+import type { OrderClientContext } from "../types/order";
 import styles from "./orders.module.css";
 
 type QuotationItem = {
@@ -17,19 +17,15 @@ function currency(value: number) {
   return `${value.toLocaleString("ko-KR")}원`;
 }
 
-function quotationItems(products: OrderProductContext[], items: OrderItemSelection[]) {
-  return items.map((item) => {
-    const product = products.find((candidate) => Number(candidate.productId) === item.productId);
-    const unitPrice = product?.unitPrice ?? 0;
-    return {
-      code: product?.productCode ?? `#${item.productId}`,
-      name: product?.name ?? `품목 #${item.productId}`,
-      unit: product?.unit ?? "EA",
-      quantity: item.quantity,
-      unitPrice,
-      amount: unitPrice * item.quantity,
-    } satisfies QuotationItem;
-  });
+function quotationItems(items: SelectedProduct[]) {
+  return items.map((item) => ({
+    code: item.productCode,
+    name: item.productName,
+    unit: item.unit,
+    quantity: item.quantity,
+    unitPrice: item.unitPrice,
+    amount: item.unitPrice * item.quantity,
+  } satisfies QuotationItem));
 }
 
 function saveQuotationPng(client: OrderClientContext, items: QuotationItem[], vatIncluded: boolean) {
@@ -124,14 +120,13 @@ function saveQuotationPng(client: OrderClientContext, items: QuotationItem[], va
   }, "image/png");
 }
 
-export function OrderQuotationModal({ client, products, items, vatIncluded, onCloseAction }: {
+export function OrderQuotationModal({ client, items, vatIncluded, onCloseAction }: {
   client: OrderClientContext;
-  products: OrderProductContext[];
-  items: OrderItemSelection[];
+  items: SelectedProduct[];
   vatIncluded: boolean;
   onCloseAction: () => void;
 }) {
-  const quoteItems = quotationItems(products, items);
+  const quoteItems = quotationItems(items);
   const subtotal = quoteItems.reduce((sum, item) => sum + item.amount, 0);
   const vat = vatIncluded ? Math.round(subtotal * 0.1) : 0;
   const total = subtotal + vat;

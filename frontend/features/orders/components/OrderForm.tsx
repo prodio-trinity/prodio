@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { SelectedProduct } from "@/features/catalog/product/utils/product";
 import { orderService } from "../services/orderService";
 import type { DeliveryAddress, Order, OrderFormContext } from "../types/order";
 import { OrderCatalogSection } from "./OrderCatalogSection";
@@ -16,7 +17,10 @@ export function OrderForm({ initialOrder, mine = false }: { initialOrder?: Order
   const [formContext, setFormContext] = useState<OrderFormContext>();
   const [clientLoading, setClientLoading] = useState(true);
   const [clientLookupError, setClientLookupError] = useState("");
-  const [items, setItems] = useState(() => initialOrder?.items.map((item) => ({ productId: Number(item.productId), quantity: item.quantity })) ?? []);
+  const [items, setItems] = useState<SelectedProduct[]>(() => initialOrder?.items.map((item) => ({
+    productId: Number(item.productId), productCode: "", productName: item.productName,
+    categoryDisplayName: "", unit: "", unitPrice: item.unitPrice, quantity: item.quantity,
+  })) ?? []);
   const [orderName, setOrderName] = useState(initialOrder?.orderName ?? "");
   const [vatIncluded, setVatIncluded] = useState(initialOrder?.vatIncluded ?? true);
   const [delivery, setDelivery] = useState<DeliveryAddress | undefined>(() => initialOrder
@@ -60,7 +64,6 @@ export function OrderForm({ initialOrder, mine = false }: { initialOrder?: Order
       <form className={styles.form} onSubmit={submit}>
         <OrderCatalogSection
           client={formContext.client}
-          products={formContext.products}
           orderName={orderName}
           items={items}
           vatIncluded={vatIncluded}
