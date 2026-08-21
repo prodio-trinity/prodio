@@ -1,0 +1,79 @@
+/*
+ * 관리자 목록 화면(조회 패널 + 그리드 인라인 편집)의 공용 스타일.
+ */
+.shell { composes: shell from "../../../shared/styles/pageShell.module.css"; }
+.header { display: grid; gap: 6px; }
+.eyebrow { display: flex; align-items: center; gap: 7px; color: var(--color-primary); font-size: 11px; font-weight: 800; letter-spacing: 0.18em; }
+.header h1 { font-size: 28px; font-weight: 850; letter-spacing: -0.04em; }
+.header p { color: var(--color-text-secondary); font-size: 13px; }
+
+.searchCard { composes: panel from "../../../shared/styles/panel.module.css"; }
+.filters { display: grid; grid-template-columns: 3fr 1fr; align-items: flex-end; gap: 12px; }
+.filterField { display: grid; gap: 7px; min-width: 0; }
+.filterField span { color: var(--color-text-secondary); font-size: 11px; font-weight: 800; }
+.filterField input,
+.filterField select { height: 40px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: 9px; background: var(--color-background); font-size: 12px; width: 100%; }
+.filterField input:focus,
+.filterField select:focus { outline: none; border-color: var(--color-primary); }
+.filterActions { display: flex; justify-content: flex-end; gap: 8px; }
+
+.error { padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--color-danger) 10%, transparent); color: var(--color-danger); font-size: 13px; }
+
+.card { composes: panel from "../../../shared/styles/panel.module.css"; padding: 0; gap: 0; }
+
+.listHead { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; flex-wrap: wrap; gap: 10px; }
+.listHeadLeft { display: flex; align-items: center; gap: 10px; }
+.countChip { font-size: 12px; font-weight: 700; color: var(--color-text-secondary); background: var(--color-page-background); border: 1px solid var(--color-border); padding: 5px 10px; border-radius: 999px; }
+.dirtyChip { font-size: 12px; font-weight: 700; color: #8a6100; background: #fff3d6; border: 1px solid #f0d999; padding: 5px 10px; border-radius: 999px; }
+:global(:root[data-theme="dark"]) .dirtyChip { background: #3a3015; color: #fde047; border-color: #5a4a1f; }
+.toolbarRight { display: flex; align-items: center; gap: 8px; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: 1px solid var(--color-border); border-radius: 9px; background: var(--color-card-background); color: var(--color-text-primary); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.btn:hover:not(:disabled) { background: var(--color-page-background); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btnPrimary { border-color: var(--color-primary); background: var(--color-primary); color: white; }
+.btnPrimary:hover:not(:disabled) { background: var(--color-primary-hover); }
+
+.tableWrap { overflow-x: auto; padding: 0 8px; }
+.tableWrap table { width: 100%; min-width: 1180px; border-collapse: collapse; font-size: 12.5px; }
+.tableWrap thead th { text-align: left; padding: 10px 11px; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 11px; font-weight: 800; white-space: nowrap; }
+.tableWrap tbody td { padding: 6px 8px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.rowNew td { background: color-mix(in srgb, var(--color-primary) 6%, transparent); }
+.rowDirty td { background: #fff8e6; }
+:global(:root[data-theme="dark"]) .rowDirty td { background: #332a10; }
+.rowError td { background: color-mix(in srgb, var(--color-danger) 8%, transparent); }
+.codeCell { font-weight: 700; color: var(--color-primary); font-variant-numeric: tabular-nums; white-space: nowrap; padding: 8px 10px !important; }
+.newBadge { display: inline-flex; margin-left: 6px; padding: 2px 6px; border-radius: 4px; background: color-mix(in srgb, var(--color-primary) 16%, transparent); color: var(--color-primary); font-size: 10px; font-weight: 800; }
+.removeNewBtn { border: none; background: none; margin-left: 6px; color: var(--color-text-secondary); cursor: pointer; font-size: 12px; }
+.removeNewBtn:hover { color: var(--color-danger); }
+
+.cellInput { width: 100%; min-width: 90px; border: 1px solid transparent; background: transparent; padding: 7px 6px; border-radius: 6px; font: inherit; color: var(--color-text-primary); }
+.cellInput:hover { border-color: var(--color-border); }
+.cellInput:focus { outline: none; border-color: var(--color-primary); background: var(--color-background); }
+
+.mutedCell { color: var(--color-text-secondary); font-size: 11px; white-space: nowrap; }
+.rowErrorMsg { margin-top: 3px; color: var(--color-danger); font-size: 10px; font-weight: 700; }
+
+.activeCol { text-align: center; width: 92px; white-space: nowrap; }
+.activeBadge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; cursor: pointer; user-select: none; white-space: nowrap; background: var(--color-card-background); border: 1px solid var(--color-border); }
+.activeBadge input { width: 13px; height: 13px; margin: 0; cursor: pointer; accent-color: var(--color-primary); }
+.activeBadgeOn { color: var(--color-success); }
+.activeBadgeOff { color: var(--color-text-secondary); }
+
+.emptyRows { padding: 42px; text-align: center; color: var(--color-text-secondary); font-size: 12px; }
+
+.footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 12px 18px; background: var(--color-card-background); border-radius: 0 0 16px 16px; gap: 10px; }
+.footerHint { justify-self: end; font-size: 11px; color: var(--color-text-secondary); text-align: right; }
+.footerLeft { display: flex; align-items: center; gap: 8px; }
+
+.pager { display: flex; align-items: center; justify-self: center; gap: 4px; }
+.pager button { width: 28px; height: 28px; border: 1px solid var(--color-border); border-radius: 7px; background: var(--color-card-background); color: var(--color-text-secondary); font-size: 12px; font-weight: 700; }
+.pager button:disabled { opacity: 0.4; cursor: not-allowed; }
+.pagerActive { background: var(--color-primary) !important; color: white !important; border-color: var(--color-primary) !important; }
+
+@media (max-width: 760px) {
+  .filters { grid-template-columns: 1fr; }
+  .listHead { flex-direction: column; align-items: stretch; }
+  .footer { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .footerHint { justify-self: center; text-align: center; }
+}

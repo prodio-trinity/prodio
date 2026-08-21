@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import gridStyles from "@/features/catalog/shared/components/AdminGrid.module.css";
 import type { EditableClientRow } from "../types/client";
 import type { EditableTextField } from "../utils/clientRow";
 import styles from "./ClientList.module.css";
@@ -28,14 +29,14 @@ function formatCreatedAt(value: string): string {
 
 export function ClientGridTable({ rows, loading, onCellChange, onToggleActive, onRemoveNewRow }: ClientGridTableProps) {
   if (loading) {
-    return <p className={styles.emptyRows}>불러오는 중...</p>;
+    return <p className={gridStyles.emptyRows}>불러오는 중...</p>;
   }
   if (rows.length === 0) {
-    return <p className={styles.emptyRows}>조회된 거래처가 없습니다.</p>;
+    return <p className={gridStyles.emptyRows}>조회된 거래처가 없습니다.</p>;
   }
 
   return (
-    <div className={styles.tableWrap}>
+    <div className={gridStyles.tableWrap}>
       <table>
         <thead>
           <tr>
@@ -47,22 +48,28 @@ export function ClientGridTable({ rows, loading, onCellChange, onToggleActive, o
             ))}
             <th style={{ width: "8%" }}>계정연동</th>
             <th style={{ width: "8%" }}>등록일</th>
-            <th className={styles.activeCol}>사용여부</th>
+            <th className={gridStyles.activeCol}>사용여부</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => {
-            const rowClass = row.error ? styles.rowError : row.isNew ? styles.rowNew : row.dirty ? styles.rowDirty : "";
+            const rowClass = row.error
+              ? gridStyles.rowError
+              : row.isNew
+                ? gridStyles.rowNew
+                : row.dirty
+                  ? gridStyles.rowDirty
+                  : "";
             return (
               <tr key={row.id} className={rowClass}>
-                <td className={styles.codeCell}>
+                <td className={gridStyles.codeCell}>
                   {row.isNew ? "(자동생성)" : row.clientCode}
                   {row.isNew ? (
                     <>
-                      <span className={styles.newBadge}>NEW</span>
+                      <span className={gridStyles.newBadge}>NEW</span>
                       <button
                         type="button"
-                        className={styles.removeNewBtn}
+                        className={gridStyles.removeNewBtn}
                         title="이 행 삭제"
                         onClick={() => onRemoveNewRow(row.id)}
                       >
@@ -70,12 +77,12 @@ export function ClientGridTable({ rows, loading, onCellChange, onToggleActive, o
                       </button>
                     </>
                   ) : null}
-                  {row.error ? <div className={styles.rowErrorMsg}>{row.error}</div> : null}
+                  {row.error ? <div className={gridStyles.rowErrorMsg}>{row.error}</div> : null}
                 </td>
                 {TEXT_COLUMNS.map((col) => (
                   <td key={col.field}>
                     <input
-                      className={styles.cellInput}
+                      className={gridStyles.cellInput}
                       value={row[col.field]}
                       placeholder={col.placeholder}
                       onChange={(event) => onCellChange(row.id, col.field, event.target.value)}
@@ -94,9 +101,11 @@ export function ClientGridTable({ rows, loading, onCellChange, onToggleActive, o
                     </span>
                   )}
                 </td>
-                <td className={styles.mutedCell}>{row.isNew ? "-" : formatCreatedAt(row.createdAt)}</td>
-                <td className={styles.activeCol}>
-                  <label className={`${styles.activeBadge} ${row.isActive ? styles.activeBadgeOn : styles.activeBadgeOff}`}>
+                <td className={gridStyles.mutedCell}>{row.isNew ? "-" : formatCreatedAt(row.createdAt)}</td>
+                <td className={gridStyles.activeCol}>
+                  <label
+                    className={`${gridStyles.activeBadge} ${row.isActive ? gridStyles.activeBadgeOn : gridStyles.activeBadgeOff}`}
+                  >
                     <input
                       type="checkbox"
                       checked={row.isActive}

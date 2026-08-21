@@ -1,4 +1,4 @@
-import styles from "./ClientList.module.css";
+import styles from "@/features/catalog/shared/components/AdminGrid.module.css";
 
 interface ClientSearchProps {
   keyword: string;

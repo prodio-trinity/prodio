@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import gridStyles from "@/features/catalog/shared/components/AdminGrid.module.css";
 import { catalogClientAdminService } from "../services/catalogClientAdminService";
 import type { ExcelUploadResult } from "../types/client";
 import styles from "./ClientList.module.css";
@@ -57,7 +58,7 @@ export function ExcelUploadModal({ onClose, onUploaded }: ExcelUploadModalProps)
             }}
           />
 
-          {error ? <p className={styles.error}>{error}</p> : null}
+          {error ? <p className={gridStyles.error}>{error}</p> : null}
 
           {result ? (
             <>
@@ -96,12 +97,12 @@ export function ExcelUploadModal({ onClose, onUploaded }: ExcelUploadModalProps)
           ) : null}
         </div>
         <div className={styles.modalFoot}>
-          <button type="button" className={styles.btn} onClick={onClose}>
+          <button type="button" className={gridStyles.btn} onClick={onClose}>
             닫기
           </button>
           <button
             type="button"
-            className={`${styles.btn} ${styles.btnPrimary}`}
+            className={`${gridStyles.btn} ${gridStyles.btnPrimary}`}
             disabled={!file || uploading}
             onClick={() => void handleUpload()}
           >

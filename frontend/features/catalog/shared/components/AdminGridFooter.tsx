@@ -1,13 +1,15 @@
 import { Download, Upload } from "lucide-react";
-import styles from "./ClientList.module.css";
+import styles from "./AdminGrid.module.css";
 
-interface ClientListFooterProps {
+interface AdminGridFooterProps {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
   onOpenUpload: () => void;
   onExport: () => void;
   exporting: boolean;
+  uploadDisabled?: boolean;
+  exportDisabled?: boolean;
 }
 
 function pageNumbers(page: number, totalPages: number): number[] {
@@ -18,14 +20,23 @@ function pageNumbers(page: number, totalPages: number): number[] {
   return Array.from({ length: Math.max(0, to - from) }, (_, i) => from + i);
 }
 
-export function ClientListFooter({ page, totalPages, onPageChange, onOpenUpload, onExport, exporting }: ClientListFooterProps) {
+export function AdminGridFooter({
+  page,
+  totalPages,
+  onPageChange,
+  onOpenUpload,
+  onExport,
+  exporting,
+  uploadDisabled,
+  exportDisabled,
+}: AdminGridFooterProps) {
   return (
     <div className={styles.footer}>
       <div className={styles.footerLeft}>
-        <button type="button" className={styles.btn} onClick={onOpenUpload}>
+        <button type="button" className={styles.btn} disabled={uploadDisabled} onClick={onOpenUpload}>
           <Upload size={14} /> 엑셀 업로드
         </button>
-        <button type="button" className={styles.btn} disabled={exporting} onClick={onExport}>
+        <button type="button" className={styles.btn} disabled={exportDisabled || exporting} onClick={onExport}>
           <Download size={14} /> {exporting ? "다운로드 중..." : "엑셀 다운로드"}
         </button>
       </div>

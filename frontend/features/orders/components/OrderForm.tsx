@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { SelectedProduct } from "@/features/catalog/product/utils/product";
+import type { SelectedProduct } from "@/features/catalog/products/utils/product";
 import { orderService } from "../services/orderService";
 import type { DeliveryAddress, Order, OrderFormContext } from "../types/order";
 import { OrderCatalogSection } from "./OrderCatalogSection";

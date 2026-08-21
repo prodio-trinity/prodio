@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ProductPicker } from "@/features/catalog/product/components/ProductPicker";
-import type { SelectedProduct } from "@/features/catalog/product/utils/product";
+import { ProductPicker } from "@/features/catalog/products/components/ProductPicker";
+import type { SelectedProduct } from "@/features/catalog/products/utils/product";
 import type { OrderClientContext } from "../types/order";
 import { OrderQuotationModal } from "./OrderQuotationModal";
 import styles from "./orders.module.css";
