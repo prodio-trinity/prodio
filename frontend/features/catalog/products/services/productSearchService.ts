@@ -37,7 +37,9 @@ export const productSearchService = {
     return result.products;
   },
 
-  getCategories(): Promise<CatalogCategoryList> {
-    return request<CatalogCategoryList>("/api/catalog/categories?isActive=true");
+  /** isActive 생략하면 비활성 포함 전체 조회 */
+  getCategories(isActive?: boolean): Promise<CatalogCategoryList> {
+    const query = isActive === undefined ? "" : `?isActive=${isActive}`;
+    return request<CatalogCategoryList>(`/api/catalog/categories${query}`);
   },
 };

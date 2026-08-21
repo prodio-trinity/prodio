@@ -27,7 +27,7 @@ export function useProductPicker(items: SelectedProduct[], onItemsChange: (items
   const debounceTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    void productSearchService.getCategories().then((result) => {
+    void productSearchService.getCategories(true).then((result) => {
       // 카테고리 가져오기
       setTopCategories(result.topCategories);
       setSubCategories(result.subCategories);

@@ -35,7 +35,7 @@ export function useProductList() {
   const nextTempId = useRef(-1);
 
   useEffect(() => {
-    void productSearchService.getCategories().then((result) => {
+    void productSearchService.getCategories(true).then((result) => {
       setTopCategories(result.topCategories);
       setSubCategories(result.subCategories);
     });
