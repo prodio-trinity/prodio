@@ -18,4 +18,11 @@ public record AiQueryLog(
             requestedBy, question, response, null
         );
     }
+
+    public static AiQueryLog ragQa(long requestedBy, SourceType sourceType, String question, String response) {
+        return new AiQueryLog(
+            null, QueryType.RAG_QA, sourceType,
+            requestedBy, question, response, null
+        );
+    }
 }
