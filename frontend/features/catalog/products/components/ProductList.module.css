@@ -1,0 +1,10 @@
+/* 품목 화면 전용 — 공용 그리드 스타일은 features/catalog/shared/components/AdminGrid.module.css */
+
+/* 저장 완료 토스트 */
+.toast { position: fixed; bottom: 32px; left: 50%; z-index: 80; display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 12px; background: var(--color-success); color: white; font-size: 13px; font-weight: 700; box-shadow: 0 12px 30px rgb(15 23 42 / 20%); pointer-events: none; animation: toastLife 3s ease forwards; }
+@keyframes toastLife {
+  0% { opacity: 0; transform: translate(-50%, 8px); }
+  8% { opacity: 1; transform: translate(-50%, 0); }
+  85% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 0); }
+}
