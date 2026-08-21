@@ -47,6 +47,7 @@ export function ProductPicker({ items, onItemsChange }: ProductPickerProps) {
 
   return (
     <div className={styles.wrap} ref={wrapRef}>
+      <div className={styles.subheading}>품목 선택</div>
       <ProductSearchPanel
         topCategories={topCategories}
         subCategories={visibleSubCategories}
