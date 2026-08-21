@@ -1,4 +1,4 @@
-import { BUSINESS_REG_NO_PATTERN, PHONE_PATTERN } from "../../utils/validationPatterns";
+import { BUSINESS_REG_NO_PATTERN, PHONE_PATTERN } from "../../shared/utils/validationPatterns";
 import type { ClientBulkUpsertRequest, ClientFilters, ClientListItem, EditableClientRow } from "../types/client";
 
 export type EditableTextField =

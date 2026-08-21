@@ -1,12 +1,12 @@
 import { Building2 } from "lucide-react";
+import { AdminGridFooter } from "@/features/catalog/shared/components/AdminGridFooter";
+import { AdminGridHeader } from "@/features/catalog/shared/components/AdminGridHeader";
+import gridStyles from "@/features/catalog/shared/components/AdminGrid.module.css";
 import type { EditableClientRow } from "../types/client";
 import type { EditableTextField } from "../utils/clientRow";
 import { ClientGridTable } from "./ClientGridTable";
-import { ClientListFooter } from "./ClientListFooter";
-import { ClientListHeader } from "./ClientListHeader";
 import { ClientSearch } from "./ClientSearch";
 import { SaveToast } from "./SaveToast";
-import styles from "./ClientList.module.css";
 
 interface ClientListViewProps {
   keyword: string;
@@ -68,9 +68,9 @@ export function ClientListView({
   exporting,
 }: ClientListViewProps) {
   return (
-    <main className={styles.shell}>
-      <header className={styles.header}>
-        <span className={styles.eyebrow}>
+    <main className={gridStyles.shell}>
+      <header className={gridStyles.header}>
+        <span className={gridStyles.eyebrow}>
           <Building2 size={14} /> CLIENTS
         </span>
         <h1>거래처 관리</h1>
@@ -85,11 +85,11 @@ export function ClientListView({
         onSearchSubmit={onSearchSubmit}
       />
 
-      {loadError ? <p className={styles.error}>{loadError}</p> : null}
-      {exportError ? <p className={styles.error}>{exportError}</p> : null}
+      {loadError ? <p className={gridStyles.error}>{loadError}</p> : null}
+      {exportError ? <p className={gridStyles.error}>{exportError}</p> : null}
 
-      <section className={styles.card}>
-        <ClientListHeader
+      <section className={gridStyles.card}>
+        <AdminGridHeader
           totalElements={totalElements}
           dirtyCount={dirtyCount}
           onAddRow={onAddRow}
@@ -105,7 +105,7 @@ export function ClientListView({
           onRemoveNewRow={onRemoveNewRow}
         />
 
-        <ClientListFooter
+        <AdminGridFooter
           page={page}
           totalPages={totalPages}
           onPageChange={onPageChange}

@@ -1,7 +1,7 @@
 import { Plus, Save } from "lucide-react";
-import styles from "./ClientList.module.css";
+import styles from "./AdminGrid.module.css";
 
-interface ClientListHeaderProps {
+interface AdminGridHeaderProps {
   totalElements: number;
   dirtyCount: number;
   onAddRow: () => void;
@@ -9,7 +9,7 @@ interface ClientListHeaderProps {
   saving: boolean;
 }
 
-export function ClientListHeader({ totalElements, dirtyCount, onAddRow, onSave, saving }: ClientListHeaderProps) {
+export function AdminGridHeader({ totalElements, dirtyCount, onAddRow, onSave, saving }: AdminGridHeaderProps) {
   return (
     <div className={styles.listHead}>
       <div className={styles.listHeadLeft}>

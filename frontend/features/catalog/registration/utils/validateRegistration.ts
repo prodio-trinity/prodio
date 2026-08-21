@@ -1,4 +1,4 @@
-import { BUSINESS_REG_NO_PATTERN, PHONE_PATTERN } from "../../utils/validationPatterns";
+import { BUSINESS_REG_NO_PATTERN, PHONE_PATTERN } from "../../shared/utils/validationPatterns";
 import type { RegistrationSubmitRequest } from "../types/clientRegistration";
 
 export interface RegistrationFormErrors {
