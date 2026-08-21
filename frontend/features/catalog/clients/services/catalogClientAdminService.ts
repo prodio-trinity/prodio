@@ -57,8 +57,8 @@ async function downloadFile(path: string, filenameFallback: string): Promise<voi
     throw new Error("파일을 내려받지 못했습니다.");
   }
   const disposition = response.headers.get("Content-Disposition") ?? "";
-  const match = disposition.match(/filename="?([^";]+)"?/);
-  const filename = match ? decodeURIComponent(match[1]) : filenameFallback;
+  const encoded = disposition.split("filename*=UTF-8''")[1]?.split(";")[0];
+  const filename = encoded ? decodeURIComponent(encoded) : filenameFallback;
 
   const blob = await response.blob();
   const url = URL.createObjectURL(blob);
