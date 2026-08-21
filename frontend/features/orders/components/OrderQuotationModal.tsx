@@ -1,6 +1,6 @@
 "use client";
 
-import type { SelectedProduct } from "@/features/catalog/product/utils/product";
+import type { SelectedProduct } from "@/features/catalog/products/utils/product";
 import type { OrderClientContext } from "../types/order";
 import styles from "./orders.module.css";
 
