@@ -1,4 +1,3 @@
-import { Building2 } from "lucide-react";
 import { AdminGridFooter } from "@/features/catalog/shared/components/AdminGridFooter";
 import { AdminGridHeader } from "@/features/catalog/shared/components/AdminGridHeader";
 import gridStyles from "@/features/catalog/shared/components/AdminGrid.module.css";
@@ -70,9 +69,7 @@ export function ClientListView({
   return (
     <main className={gridStyles.shell}>
       <header className={gridStyles.header}>
-        <span className={gridStyles.eyebrow}>
-          <Building2 size={14} /> CLIENTS
-        </span>
+        <span className={gridStyles.eyebrow}>CLIENTS</span>
         <h1>거래처 관리</h1>
         <p>거래처 정보를 조회하고 그리드에서 바로 수정합니다.</p>
       </header>

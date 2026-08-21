@@ -1,4 +1,3 @@
-import { Package } from "lucide-react";
 import { AdminGridFooter } from "@/features/catalog/shared/components/AdminGridFooter";
 import { AdminGridHeader } from "@/features/catalog/shared/components/AdminGridHeader";
 import gridStyles from "@/features/catalog/shared/components/AdminGrid.module.css";
@@ -87,9 +86,7 @@ export function ProductListView({
   return (
     <main className={gridStyles.shell}>
       <header className={gridStyles.header}>
-        <span className={gridStyles.eyebrow}>
-          <Package size={14} /> PRODUCTS
-        </span>
+        <span className={gridStyles.eyebrow}>PRODUCTS</span>
         <h1>품목 관리</h1>
         <p>품목을 조회하고 정보를 관리할 수 있습니다.</p>
       </header>
