@@ -31,7 +31,6 @@ interface ClientListViewProps {
   onAddRow: () => void;
   onSave: () => void;
   saving: boolean;
-  saveError: string;
   saveMessage: string;
   toastId: number;
 
@@ -61,7 +60,6 @@ export function ClientListView({
   onAddRow,
   onSave,
   saving,
-  saveError,
   saveMessage,
   toastId,
   exportError,
@@ -88,7 +86,6 @@ export function ClientListView({
       />
 
       {loadError ? <p className={styles.error}>{loadError}</p> : null}
-      {saveError ? <p className={styles.error}>{saveError}</p> : null}
       {exportError ? <p className={styles.error}>{exportError}</p> : null}
 
       <section className={styles.card}>
