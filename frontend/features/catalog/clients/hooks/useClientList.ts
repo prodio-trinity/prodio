@@ -7,6 +7,7 @@ import {
   mergeFailedDrafts,
   toBulkUpsertRequest,
   toEditableRow,
+  validateClientRow,
   type EditableTextField,
 } from "../utils/clientRow";
 
@@ -66,6 +67,18 @@ export function useClientList() {
     // 저장할 행만 선택
     const targets = rows.filter((row) => row.dirty || row.isNew);
     if (targets.length === 0) return;
+
+    // 서버로 보내기 전에 사업자등록번호/연락처 형식 검사
+    const invalidDrafts = targets
+      .map((row) => ({ row, error: validateClientRow(row) }))
+      .filter((entry): entry is { row: EditableClientRow; error: string } => entry.error !== null)
+      .map(({ row, error }) => ({ ...row, dirty: true, error }));
+    if (invalidDrafts.length > 0) {
+      setRows((current) => mergeFailedDrafts(current, invalidDrafts));
+      setSaveError(invalidDrafts.map((row) => `${row.companyName || "(회사명 없음)"}: ${row.error}`).join(" / "));
+      return;
+    }
+
     setSaving(true);
     setSaveError("");
     setSaveMessage("");
