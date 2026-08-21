@@ -31,7 +31,6 @@ export function ClientListPage() {
         onAddRow={list.addRow}
         onSave={() => void list.save()}
         saving={list.saving}
-        saveError={list.saveError}
         saveMessage={list.saveMessage}
         toastId={list.toastId}
         exportError={excel.exportError}

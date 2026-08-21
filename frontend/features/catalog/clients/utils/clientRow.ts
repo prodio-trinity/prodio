@@ -1,3 +1,4 @@
+import { BUSINESS_REG_NO_PATTERN, PHONE_PATTERN } from "../../utils/validationPatterns";
 import type { ClientBulkUpsertRequest, ClientFilters, ClientListItem, EditableClientRow } from "../types/client";
 
 export type EditableTextField =
@@ -74,6 +75,16 @@ export function mergeFailedDrafts(
   );
 
   return [...merged, ...appended];
+}
+
+export function validateClientRow(row: EditableClientRow): string | null {
+  if (row.businessRegNo && !BUSINESS_REG_NO_PATTERN.test(row.businessRegNo)) {
+    return "사업자등록번호는 000-00-00000 형식으로 입력해 주세요.";
+  }
+  if (row.phone && !PHONE_PATTERN.test(row.phone)) {
+    return "연락처는 010-0000-0000 또는 02-0000-0000 형식으로 입력해 주세요.";
+  }
+  return null;
 }
 
 export function toBulkUpsertRequest(row: EditableClientRow): ClientBulkUpsertRequest {

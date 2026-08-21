@@ -1,7 +1,5 @@
+import { BUSINESS_REG_NO_PATTERN, PHONE_PATTERN } from "../../utils/validationPatterns";
 import type { RegistrationSubmitRequest } from "../types/clientRegistration";
-
-const BUSINESS_REG_NO_PATTERN = /^\d{3}-\d{2}-\d{5}$/;
-const PHONE_PATTERN = /^\d{2,3}-\d{3,4}-\d{4}$/;
 
 export interface RegistrationFormErrors {
   companyName?: string;
