@@ -13,14 +13,16 @@ import java.util.Optional;
 
 public interface SpringDataCatalogClientRepository extends JpaRepository<CatalogClientEntity, Long> {
 
+    // :keyword를 CAST(... AS string)로 감싸는 이유: 
+    // null을 바인딩할 때 타입을 못 정하면 pgjdbc가 bytea로 잘못 추론해서 LOWER(bytea) 함수 에러가 남
     String KEYWORD_FILTER = """
             (:isActive IS NULL OR c.active = :isActive)
               AND (:keyword IS NULL
-                   OR LOWER(c.companyName) LIKE CONCAT('%', LOWER(:keyword), '%') ESCAPE '\\'
-                   OR LOWER(COALESCE(c.ceoName, '')) LIKE CONCAT('%', LOWER(:keyword), '%') ESCAPE '\\'
-                   OR LOWER(COALESCE(c.phone, '')) LIKE CONCAT('%', LOWER(:keyword), '%') ESCAPE '\\'
-                   OR LOWER(COALESCE(c.address, '')) LIKE CONCAT('%', LOWER(:keyword), '%') ESCAPE '\\'
-                   OR LOWER(COALESCE(c.managerName, '')) LIKE CONCAT('%', LOWER(:keyword), '%') ESCAPE '\\')
+                   OR LOWER(c.companyName) LIKE CONCAT('%', LOWER(CAST(:keyword AS string)), '%') ESCAPE '\\'
+                   OR LOWER(COALESCE(c.ceoName, '')) LIKE CONCAT('%', LOWER(CAST(:keyword AS string)), '%') ESCAPE '\\'
+                   OR LOWER(COALESCE(c.phone, '')) LIKE CONCAT('%', LOWER(CAST(:keyword AS string)), '%') ESCAPE '\\'
+                   OR LOWER(COALESCE(c.address, '')) LIKE CONCAT('%', LOWER(CAST(:keyword AS string)), '%') ESCAPE '\\'
+                   OR LOWER(COALESCE(c.managerName, '')) LIKE CONCAT('%', LOWER(CAST(:keyword AS string)), '%') ESCAPE '\\')
             """;
 
     Optional<CatalogClientEntity> findByUserId(Long userId);
