@@ -6,40 +6,23 @@ import com.prodio.stat.domain.ProductDistribution;
 import com.prodio.stat.domain.StatFilter;
 import com.prodio.stat.exception.StatErrorCode;
 import com.prodio.stat.exception.StatException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-/**
- * 기존 StatDashboardService를 감싸 문자열 인자(from/to/status)를 받는 얇은 어댑터.
- * RAG QA의 queryOrderStats 도구가 실행할 실제 조회 로직.
- */
-@Service
-@RequiredArgsConstructor
-public class QueryOrderStatsService {
+/** queryOrderStats 도구의 순수 로직(파싱/검증/포맷)만 모아둔 정적 유틸. 조회(I/O)는 RagQaService가 직접 수행한다. */
+final class QueryOrderStatsSupport {
 
-    private final StatDashboardRepository statDashboardRepository;
+    private QueryOrderStatsSupport() {}
 
-    public String queryOrderStats(String from, String to, String status) {
-        StatFilter filter = new StatFilter(parseDate(from), parseDate(to), parseStatus(status));
-        validate(filter);
-
-        DashboardSummary summary = statDashboardRepository.summarize(filter);
-        List<ProductDistribution> distribution = statDashboardRepository.productDistribution(filter);
-
-        return format(filter, summary, distribution);
-    }
-
-    private void validate(StatFilter filter) {
+    static void validate(StatFilter filter) {
         if (filter.from() != null && filter.to() != null && filter.from().isAfter(filter.to())) {
             throw new StatException(StatErrorCode.STAT_INVALID_FILTER);
         }
     }
 
-    private LocalDate parseDate(String value) {
+    static LocalDate parseDate(String value) {
         if (value == null || value.isBlank()) {
             return null;
         }
@@ -50,7 +33,7 @@ public class QueryOrderStatsService {
         }
     }
 
-    private OrderViewStatus parseStatus(String value) {
+    static OrderViewStatus parseStatus(String value) {
         if (value == null || value.isBlank()) {
             return null;
         }
@@ -61,7 +44,7 @@ public class QueryOrderStatsService {
         }
     }
 
-    private String format(StatFilter filter, DashboardSummary summary, List<ProductDistribution> distribution) {
+    static String format(StatFilter filter, DashboardSummary summary, List<ProductDistribution> distribution) {
         StringBuilder result = new StringBuilder();
         result.append("조회 조건: ").append(describeFilter(filter)).append("\n");
         result.append("대기: ").append(summary.pendingCount()).append("건\n");
@@ -85,7 +68,7 @@ public class QueryOrderStatsService {
         return result.toString();
     }
 
-    private String describeFilter(StatFilter filter) {
+    private static String describeFilter(StatFilter filter) {
         String from = filter.from() != null ? filter.from().toString() : "전체";
         String to = filter.to() != null ? filter.to().toString() : "전체";
         String description = from + " ~ " + to;

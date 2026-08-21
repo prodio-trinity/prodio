@@ -3,19 +3,30 @@ package com.prodio.stat.application;
 import com.prodio.infra.exception.InfraErrorCode;
 import com.prodio.infra.exception.InfraException;
 import com.prodio.stat.domain.AiQueryLog;
+import com.prodio.stat.domain.DashboardSummary;
+import com.prodio.stat.domain.ProductDistribution;
 import com.prodio.stat.domain.QueryType;
 import com.prodio.stat.domain.SourceType;
+import com.prodio.stat.domain.StatFilter;
+import com.prodio.stat.embedding.application.ClientEmbeddingRepository;
+import com.prodio.stat.embedding.application.EmbeddingMatch;
+import com.prodio.stat.embedding.application.EmbeddingRepository;
+import com.prodio.stat.embedding.application.OrderEmbeddingRepository;
+import com.prodio.stat.embedding.application.ProductionEmbeddingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * 사용자 질문에 대해 searchNotes/queryOrderStats 중 필요한 도구를 Gemini가 골라 쓰도록 오케스트레이션하고,
- * 결과를 AiQueryLog로 남긴다.
- * */
+ * 결과를 AiQueryLog로 남긴다. 두 도구의 순수 로직은 SearchNotesSupport/QueryOrderStatsSupport에,
+ * 실제 조회(I/O)는 이 클래스가 리포지토리를 직접 호출해 수행한다(다른 @Service를 거치지 않는다).
+ */
 @Service
 @RequiredArgsConstructor
 public class RagQaService {
@@ -24,8 +35,10 @@ public class RagQaService {
     private static final String QUERY_ORDER_STATS = "queryOrderStats";
 
     private final AiClient aiClient;
-    private final SearchNotesService searchNotesService;
-    private final QueryOrderStatsService queryOrderStatsService;
+    private final OrderEmbeddingRepository orderEmbeddingRepository;
+    private final ClientEmbeddingRepository clientEmbeddingRepository;
+    private final ProductionEmbeddingRepository productionEmbeddingRepository;
+    private final StatDashboardRepository statDashboardRepository;
     private final AiQueryLogRepository aiQueryLogRepository;
 
     public AiQueryLog ask(long adminId, String question) {
@@ -46,12 +59,45 @@ public class RagQaService {
             case SEARCH_NOTES -> {
                 SourceType sourceType = parseSourceType(call.args().get("sourceType"));
                 usedSourceTypes.add(sourceType);
-                yield searchNotesService.searchNotes(call.args().get("query"), sourceType);
+                yield searchNotes(call.args().get("query"), sourceType);
             }
-            case QUERY_ORDER_STATS -> queryOrderStatsService.queryOrderStats(
+            case QUERY_ORDER_STATS -> queryOrderStats(
                     call.args().get("from"), call.args().get("to"), call.args().get("status"));
             default -> throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED);
         };
+    }
+
+    private String searchNotes(String query, SourceType sourceType) {
+        float[] queryVector = aiClient.embed(query);
+
+        Map<SourceType, List<EmbeddingMatch>> matchesByType = new EnumMap<>(SourceType.class);
+        for (SourceType target : SearchNotesSupport.targetsFor(sourceType)) {
+            matchesByType.put(target, repositoryFor(target).search(queryVector, SearchNotesSupport.TOP_K));
+        }
+
+        return SearchNotesSupport.format(SearchNotesSupport.mergeTopK(matchesByType, SearchNotesSupport.TOP_K));
+    }
+
+    private EmbeddingRepository repositoryFor(SourceType sourceType) {
+        return switch (sourceType) {
+            case ORDER_NOTE -> orderEmbeddingRepository;
+            case CLIENT_MEMO -> clientEmbeddingRepository;
+            case PRODUCTION_MEMO -> productionEmbeddingRepository;
+            case ALL -> throw new IllegalArgumentException("ALL은 개별 검색 대상이 아닙니다.");
+        };
+    }
+
+    private String queryOrderStats(String from, String to, String status) {
+        StatFilter filter = new StatFilter(
+                QueryOrderStatsSupport.parseDate(from),
+                QueryOrderStatsSupport.parseDate(to),
+                QueryOrderStatsSupport.parseStatus(status));
+        QueryOrderStatsSupport.validate(filter);
+
+        DashboardSummary summary = statDashboardRepository.summarize(filter);
+        List<ProductDistribution> distribution = statDashboardRepository.productDistribution(filter);
+
+        return QueryOrderStatsSupport.format(filter, summary, distribution);
     }
 
     private SourceType parseSourceType(String value) {
