@@ -197,6 +197,17 @@ class RagQaServiceTest {
     }
 
     @Test
+    @DisplayName("tool 이름이 null이면 AI_REQUEST_FAILED 예외를 던지고 로그를 저장하지 않는다")
+    void throwsOnNullToolName() {
+        simulateToolCalls("무시됨", new ToolCall(null, Map.of()));
+
+        assertThatThrownBy(() -> service.ask(42L, "질문"))
+                .isInstanceOfSatisfying(InfraException.class,
+                        exception -> assertThat(exception.getErrorCode()).isEqualTo(InfraErrorCode.AI_REQUEST_FAILED));
+        verifyNoInteractions(aiQueryLogRepository);
+    }
+
+    @Test
     @DisplayName("RAG_QA 타입으로 로그 페이지를 조회한다")
     void getAskLogsDelegatesToRepository() {
         AiQueryLogPage page = new AiQueryLogPage(List.of(), 0, 10, 0);

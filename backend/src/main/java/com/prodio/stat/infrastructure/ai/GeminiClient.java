@@ -154,17 +154,23 @@ class GeminiClient implements AiClient {
     }
 
     private String extractText(AskContent content) {
-        return content.parts().stream()
+        String text = content.parts().stream()
                 .map(AskPart::text)
-                .filter(text -> text != null && !text.isBlank())
-                .findFirst()
-                .orElseThrow(() -> new InfraException(InfraErrorCode.AI_REQUEST_FAILED));
+                .filter(part -> part != null && !part.isBlank())
+                .collect(Collectors.joining());
+
+        if (text.isBlank()) {
+            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED);
+        }
+
+        return text;
     }
 
     private AskPart executeTool(AskPart.FunctionCallPart functionCall, Function<ToolCall, String> toolExecutor) {
         Map<String, String> args = functionCall.args() == null
                 ? Map.of()
                 : functionCall.args().entrySet().stream()
+                        .filter(entry -> entry.getValue() != null)
                         .collect(Collectors.toMap(Map.Entry::getKey, entry -> String.valueOf(entry.getValue())));
 
         String result = toolExecutor.apply(new ToolCall(functionCall.name(), args));

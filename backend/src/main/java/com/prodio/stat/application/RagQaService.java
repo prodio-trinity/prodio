@@ -55,6 +55,10 @@ public class RagQaService {
     }
 
     private String execute(ToolCall call, Set<SourceType> usedSourceTypes) {
+        if (call.name() == null) {
+            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED);
+        }
+
         return switch (call.name()) {
             case SEARCH_NOTES -> {
                 SourceType sourceType = parseSourceType(call.args().get("sourceType"));
