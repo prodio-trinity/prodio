@@ -1,9 +1,11 @@
 package com.prodio.stat.embedding.infrastructure.persistence;
 
+import com.prodio.stat.embedding.application.EmbeddingMatch;
 import com.prodio.stat.embedding.application.OrderEmbeddingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -24,5 +26,10 @@ class JpaOrderEmbeddingRepository implements OrderEmbeddingRepository {
     @Override
     public void upsert(long orderId, String noteText, float[] embedding) {
         store.upsert(TABLE, REF_COLUMN, TEXT_COLUMN, orderId, noteText, embedding);
+    }
+
+    @Override
+    public List<EmbeddingMatch> search(float[] queryVector, int topK) {
+        return store.search(TABLE, REF_COLUMN, TEXT_COLUMN, queryVector, topK);
     }
 }
