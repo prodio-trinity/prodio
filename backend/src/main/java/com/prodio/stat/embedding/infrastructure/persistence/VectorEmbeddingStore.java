@@ -1,5 +1,6 @@
 package com.prodio.stat.embedding.infrastructure.persistence;
 
+import com.prodio.stat.embedding.application.EmbeddingMatch;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -46,6 +47,22 @@ class VectorEmbeddingStore {
                 .setParameter("text", text)
                 .setParameter("embedding", toVectorLiteral(embedding))
                 .executeUpdate();
+    }
+
+    List<EmbeddingMatch> search(String table, String refColumn, String textColumn, float[] queryVector, int topK) {
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = entityManager.createNativeQuery(
+                "SELECT " + refColumn + ", " + textColumn + ", embedding <=> CAST(:queryVector AS vector) AS distance "
+                + "FROM " + table + " "
+                + "ORDER BY distance ASC "
+                + "LIMIT :topK")
+                .setParameter("queryVector", toVectorLiteral(queryVector))
+                .setParameter("topK", topK)
+                .getResultList();
+
+        return rows.stream()
+                .map(row -> new EmbeddingMatch(((Number) row[0]).longValue(), (String) row[1], ((Number) row[2]).doubleValue()))
+                .toList();
     }
 
     private static String toVectorLiteral(float[] embedding) {
