@@ -53,6 +53,18 @@ export interface ProductBulkUpsertResult {
   reason: string | null;
 }
 
+export interface ExcelUploadResultRowError {
+  row: number;
+  reason: string;
+}
+
+export interface ExcelUploadResult {
+  totalRows: number;
+  successCount: number;
+  failCount: number;
+  errors: ExcelUploadResultRowError[];
+}
+
 /**
  * 그리드 편집용 로컬 로우
  */
