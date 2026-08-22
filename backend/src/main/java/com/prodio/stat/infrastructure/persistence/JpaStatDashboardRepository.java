@@ -26,18 +26,20 @@ class JpaStatDashboardRepository implements StatDashboardRepository {
         OffsetDateTime from = toStartOfDay(filter.from());
         OffsetDateTime to = toExclusiveEnd(filter.to());
 
+        String status = filter.status() == null ? null : filter.status().name();
+
         Map<OrderViewStatus, Long> counts = new EnumMap<>(OrderViewStatus.class);
-        for (OrderViewStatus status : OrderViewStatus.values()) {
-            counts.put(status, 0L);
+        for (OrderViewStatus value : OrderViewStatus.values()) {
+            counts.put(value, 0L);
         }
         long total = 0;
-        for (OrderStatViewJpaRepository.StatusCount row : orderStatViews.countByStatus(from, to, filter.status())) {
+        for (OrderStatViewJpaRepository.StatusCount row : orderStatViews.countByStatus(from, to, status)) {
             counts.put(row.getStatus(), row.getCount());
             total += row.getCount();
         }
 
         OrderStatViewJpaRepository.CompletedAggregate completed =
-                orderStatViews.completedAggregate(from, to, filter.status());
+                orderStatViews.completedAggregate(from, to, status);
 
         return new DashboardSummary(
                 counts.get(OrderViewStatus.PENDING),
@@ -54,7 +56,9 @@ class JpaStatDashboardRepository implements StatDashboardRepository {
         OffsetDateTime from = toStartOfDay(filter.from());
         OffsetDateTime to = toExclusiveEnd(filter.to());
 
-        return orderStatViews.productDistribution(from, to, filter.status()).stream()
+        String status = filter.status() == null ? null : filter.status().name();
+
+        return orderStatViews.productDistribution(from, to, status).stream()
                 .map(row -> new ProductDistribution(
                         row.getProductId(), row.getProductName(), row.getOrderCount(), row.getTotalQuantity()))
                 .toList();

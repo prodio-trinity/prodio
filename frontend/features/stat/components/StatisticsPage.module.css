@@ -8,6 +8,7 @@
   color: var(--color-text-primary);
 }
 
-.placeholder {
-  color: var(--color-text-secondary);
+.divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
 }
