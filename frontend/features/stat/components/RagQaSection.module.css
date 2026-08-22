@@ -1,0 +1,107 @@
+.section {
+  display: grid;
+  gap: 12px;
+}
+
+.heading {
+  font-size: 15px;
+  font-weight: 700;
+}
+.subheading {
+  margin-bottom: 6px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.askForm {
+  display: flex;
+  gap: 8px;
+}
+.questionInput {
+  flex: 1;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-card-background);
+  font-size: 13px;
+}
+.askButton {
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.askButton:disabled,
+.questionInput:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
+  font-size: 13px;
+}
+.placeholder {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.resultBox {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--color-card-background);
+  border: 1px solid var(--color-border);
+}
+.badge {
+  justify-self: start;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+.resultText {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.logList {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.logRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+}
+.logRow:last-child {
+  border-bottom: none;
+}
+.logQuestion {
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.logDate {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
