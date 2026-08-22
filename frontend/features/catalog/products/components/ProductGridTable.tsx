@@ -45,8 +45,9 @@ export function ProductGridTable({
         <thead>
           <tr>
             <th style={{ width: "11%" }}>품목코드</th>
-            <th style={{ width: "27%" }}>품목명</th>
-            <th style={{ width: "19%" }}>분류</th>
+            <th style={{ width: "22%" }}>품목명</th>
+            <th style={{ width: "12%" }}>대분류</th>
+            <th style={{ width: "14%" }}>분류</th>
             <th style={{ width: "10%" }}>단위</th>
             <th style={{ width: "11%" }}>단가</th>
             <th style={{ width: "19%" }}>비고</th>
@@ -88,6 +89,11 @@ export function ProductGridTable({
                     placeholder="품목명"
                     onChange={(event) => onProductNameChange(row.id, event.target.value)}
                   />
+                </td>
+                <td>
+                  {topCategories.find(
+                    (top) => top.code === subCategories.find((sub) => sub.id === row.subCategoryId)?.topCategory,
+                  )?.displayName ?? "-"}
                 </td>
                 <td>
                   <select
