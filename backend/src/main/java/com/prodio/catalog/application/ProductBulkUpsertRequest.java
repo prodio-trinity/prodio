@@ -8,7 +8,6 @@ public record ProductBulkUpsertRequest(
         String categoryCode,
         BigDecimal unitPrice,
         String unit,
-        String description,
         String memo,
         Boolean isActive
 ) {

@@ -21,7 +21,7 @@ import java.util.List;
 public class ProductExcelWriter {
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
     private static final String[] HEADERS = {
-            "품목코드", "품목명", "분류코드", "분류명", "단위", "단가", "비고", "사용여부", "등록일"
+            "품목코드", "품목명", "대분류", "소분류", "분류코드", "단위", "단가", "비고", "사용여부", "등록일"
     };
     private static final DateTimeFormatter CREATED_AT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -52,8 +52,9 @@ public class ProductExcelWriter {
         int col = 0;
         setCell(row, col++, product.productCode());
         setCell(row, col++, product.productName());
-        setCell(row, col++, product.subCategoryCode());
+        setCell(row, col++, product.topCategoryDisplayName());
         setCell(row, col++, product.subCategoryName());
+        setCell(row, col++, product.subCategoryCode());
         setCell(row, col++, product.unit());
         setCell(row, col++, product.unitPrice() == null ? null : product.unitPrice().toPlainString());
         setCell(row, col++, product.memo());

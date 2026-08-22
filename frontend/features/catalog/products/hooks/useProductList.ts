@@ -73,6 +73,7 @@ export function useProductList() {
   const updateCategory = (id: number, subCategoryId: number | null) => patchRow(id, { subCategoryId });
   const updateUnit = (id: number, unit: string) => patchRow(id, { unit });
   const updateUnitPrice = (id: number, unitPrice: number) => patchRow(id, { unitPrice: Math.max(0, unitPrice || 0) });
+  const updateMemo = (id: number, memo: string) => patchRow(id, { memo });
   const toggleActive = (id: number, checked: boolean) => patchRow(id, { isActive: checked });
 
   const dirtyCount = rows.filter((row) => row.dirty || row.isNew).length;
@@ -162,6 +163,7 @@ export function useProductList() {
     updateCategory,
     updateUnit,
     updateUnitPrice,
+    updateMemo,
     toggleActive,
     save,
     load,

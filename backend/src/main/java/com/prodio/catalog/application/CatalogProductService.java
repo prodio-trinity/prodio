@@ -100,6 +100,6 @@ public class CatalogProductService {
 
     private ProductBulkUpsertRequest toBulkUpsertRequest(ExcelProductRow row) {
         return new ProductBulkUpsertRequest(null, row.productName(), row.categoryCode(), row.unitPrice(),
-                row.unit(), null, row.memo(), null);
+                row.unit(), row.memo(), null);
     }
 }

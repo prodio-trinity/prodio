@@ -14,6 +14,7 @@ interface ProductGridTableProps {
   onCategoryChange: (id: number, subCategoryId: number | null) => void;
   onUnitChange: (id: number, unit: string) => void;
   onUnitPriceChange: (id: number, unitPrice: number) => void;
+  onMemoChange: (id: number, value: string) => void;
   onToggleActive: (id: number, checked: boolean) => void;
   onRemoveNewRow: (id: number) => void;
 }
@@ -27,6 +28,7 @@ export function ProductGridTable({
   onCategoryChange,
   onUnitChange,
   onUnitPriceChange,
+  onMemoChange,
   onToggleActive,
   onRemoveNewRow,
 }: ProductGridTableProps) {
@@ -42,11 +44,13 @@ export function ProductGridTable({
       <table>
         <thead>
           <tr>
-            <th style={{ width: "12%" }}>품목코드</th>
-            <th style={{ width: "24%" }}>품목명</th>
-            <th style={{ width: "20%" }}>분류</th>
+            <th style={{ width: "11%" }}>품목코드</th>
+            <th style={{ width: "22%" }}>품목명</th>
+            <th style={{ width: "12%" }}>대분류</th>
+            <th style={{ width: "14%" }}>분류</th>
             <th style={{ width: "10%" }}>단위</th>
-            <th style={{ width: "14%" }}>단가</th>
+            <th style={{ width: "11%" }}>단가</th>
+            <th style={{ width: "19%" }}>비고</th>
             <th className={gridStyles.activeCol}>사용여부</th>
           </tr>
         </thead>
@@ -85,6 +89,11 @@ export function ProductGridTable({
                     placeholder="품목명"
                     onChange={(event) => onProductNameChange(row.id, event.target.value)}
                   />
+                </td>
+                <td>
+                  {topCategories.find(
+                    (top) => top.code === subCategories.find((sub) => sub.id === row.subCategoryId)?.topCategory,
+                  )?.displayName ?? "-"}
                 </td>
                 <td>
                   <select
@@ -129,6 +138,14 @@ export function ProductGridTable({
                     style={{ textAlign: "right" }}
                     value={row.unitPrice}
                     onChange={(event) => onUnitPriceChange(row.id, Number(event.target.value))}
+                  />
+                </td>
+                <td>
+                  <input
+                    className={gridStyles.cellInput}
+                    value={row.memo}
+                    placeholder="비고"
+                    onChange={(event) => onMemoChange(row.id, event.target.value)}
                   />
                 </td>
                 <td className={gridStyles.activeCol}>

@@ -41,7 +41,6 @@ export interface ProductBulkUpsertRequest {
   categoryCode: string;
   unitPrice: number;
   unit: string;
-  description: string | null;
   memo: string | null;
   isActive: boolean;
 }
@@ -52,6 +51,18 @@ export interface ProductBulkUpsertResult {
   id: number | null;
   productCode: string | null;
   reason: string | null;
+}
+
+export interface ExcelUploadResultRowError {
+  row: number;
+  reason: string;
+}
+
+export interface ExcelUploadResult {
+  totalRows: number;
+  successCount: number;
+  failCount: number;
+  errors: ExcelUploadResultRowError[];
 }
 
 /**
@@ -122,7 +133,6 @@ export function toBulkUpsertRequest(row: EditableProductRow, subCategories: Cata
     categoryCode: category?.subCategoryCode ?? "",
     unitPrice: row.unitPrice,
     unit: row.unit,
-    description: row.description.trim() || null,
     memo: row.memo.trim() || null,
     isActive: row.isActive,
   };
