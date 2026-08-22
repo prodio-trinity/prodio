@@ -21,8 +21,8 @@ import java.util.List;
 public class ClientExcelWriter {
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
     private static final String[] HEADERS = {
-            "거래처코드", "회사명", "대표자", "연락처", "주소", "담당자",
-            "사용여부", "계정연동여부", "사업자등록번호", "비고", "등록일"
+            "거래처코드", "회사명", "대표자", "사업자등록번호", "연락처", "주소", "담당자", "비고",
+            "사용여부", "계정연동여부", "등록일"
     };
     private static final DateTimeFormatter CREATED_AT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -54,13 +54,13 @@ public class ClientExcelWriter {
         setCell(row, col++, client.clientCode());
         setCell(row, col++, client.companyName());
         setCell(row, col++, client.ceoName());
+        setCell(row, col++, client.businessRegNo());
         setCell(row, col++, client.phone());
         setCell(row, col++, client.address());
         setCell(row, col++, client.managerName());
+        setCell(row, col++, client.memo());
         setCell(row, col++, client.active() ? "사용" : "미사용");
         setCell(row, col++, client.linkedToAccount() ? "연동" : "미연동");
-        setCell(row, col++, client.businessRegNo());
-        setCell(row, col++, client.memo());
         setCell(row, col, client.createdAt() == null
                 ? null
                 : CREATED_AT_FORMAT.format(client.createdAt().atZone(KST)));
