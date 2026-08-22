@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { useAiSummary } from "../hooks/useAiSummary";
 import { useStatDashboard } from "../hooks/useStatDashboard";
 import {
@@ -46,6 +46,13 @@ function formatShortDate(value: string) {
   return `${month}.${day}`;
 }
 
+function formatLogDate(value: string) {
+  return new Date(value).toLocaleString("ko-KR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+}
+
 export function DashboardSection({
   draft,
   onDraftChange,
@@ -57,8 +64,23 @@ export function DashboardSection({
   const { summary, distribution, daily, loading, loadError } =
     useStatDashboard(filters);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const historyRef = useRef<HTMLDivElement>(null);
   const aiPreviewText =
     aiSummary.result?.response ?? aiSummary.logs[0]?.response ?? null;
+
+  useEffect(() => {
+    if (!historyOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (!historyRef.current?.contains(event.target as Node)) {
+        setHistoryOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [historyOpen]);
 
   const topDistribution = [...distribution]
     .sort((a, b) => b.orderCount - a.orderCount)
@@ -260,22 +282,63 @@ export function DashboardSection({
               <div className={styles.aiCompact}>
                 <div className={styles.aiCompactHeader}>
                   <span className={styles.aiCompactLabel}>AI 요약</span>
-                  <button
-                    type="button"
-                    onClick={() => void aiSummary.generate()}
-                    disabled={aiSummary.generating}
-                    className={styles.aiCompactButton}
-                  >
-                    {aiSummary.generating ? (
-                      <>
-                        생성 중<AiGeneratingIndicator />
-                      </>
-                    ) : aiPreviewText ? (
-                      "다시 생성"
-                    ) : (
-                      "생성"
-                    )}
-                  </button>
+                  <div className={styles.aiCompactActions}>
+                    <div className={styles.aiHistoryWrapper} ref={historyRef}>
+                      <button
+                        type="button"
+                        onClick={() => setHistoryOpen((open) => !open)}
+                        className={styles.aiHistoryButton}
+                        aria-expanded={historyOpen}
+                      >
+                        이력
+                      </button>
+                      {historyOpen ? (
+                        <div className={styles.aiHistoryPopover}>
+                          {aiSummary.logsError ? (
+                            <p className={styles.error}>
+                              {aiSummary.logsError}
+                            </p>
+                          ) : null}
+                          {!aiSummary.logsError && aiSummary.logsLoading ? (
+                            <p className={styles.placeholder}>불러오는 중...</p>
+                          ) : null}
+                          {!aiSummary.logsError &&
+                          !aiSummary.logsLoading &&
+                          aiSummary.logs.length === 0 ? (
+                            <p className={styles.placeholder}>
+                              아직 생성한 요약이 없습니다.
+                            </p>
+                          ) : null}
+                          {aiSummary.logs.map((log) => (
+                            <div key={log.id} className={styles.aiHistoryItem}>
+                              <span className={styles.aiHistoryItemQuestion}>
+                                {log.question}
+                              </span>
+                              <span className={styles.aiHistoryItemDate}>
+                                {formatLogDate(log.requestedAt)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void aiSummary.generate()}
+                      disabled={aiSummary.generating}
+                      className={styles.aiCompactButton}
+                    >
+                      {aiSummary.generating ? (
+                        <>
+                          생성 중<AiGeneratingIndicator />
+                        </>
+                      ) : aiPreviewText ? (
+                        "다시 생성"
+                      ) : (
+                        "생성"
+                      )}
+                    </button>
+                  </div>
                 </div>
                 {aiSummary.generating ? (
                   <AiSummarySkeleton lines={2} />
