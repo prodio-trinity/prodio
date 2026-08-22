@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -51,6 +52,19 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
     List<ProductDistributionRow> productDistribution(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
             @Param("status") String status);
 
+    /** 일별 생산량 집계는 애플리케이션(Clock의 zone)에서 날짜로 묶는다 — 완료 건의 원본 행만 가져온다. */
+    @Query(value = """
+            select completed_at as completedAt, quantity as quantity
+            from statistics_order_view
+            where status = 'COMPLETED'
+              and completed_at is not null
+              and (cast(:from as timestamptz) is null or completed_at >= cast(:from as timestamptz))
+              and (cast(:to as timestamptz) is null or completed_at < cast(:to as timestamptz))
+              and (cast(:status as varchar) is null or status = cast(:status as varchar))
+            """, nativeQuery = true)
+    List<CompletedRow> findCompletedInRange(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
+            @Param("status") String status);
+
     interface StatusCount {
         OrderViewStatus getStatus();
         long getCount();
@@ -65,5 +79,14 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
         String getProductName();
         long getOrderCount();
         long getTotalQuantity();
+    }
+
+    /**
+     * completed_at(timestamptz)을 native projection으로 받으면 Hibernate가 OffsetDateTime이 아니라
+     * Instant로 매핑해서 넘긴다 — Spring Data가 그 둘을 자동 변환해주지 않아 Instant로 선언해야 한다.
+     */
+    interface CompletedRow {
+        Instant getCompletedAt();
+        int getQuantity();
     }
 }

@@ -2,6 +2,7 @@ import { getCsrfToken } from "@/features/shared/api/csrf";
 import type {
   AiSummaryLog,
   AiSummaryLogPage,
+  DailyProduction,
   DashboardSummary,
   ProductDistribution,
   RagQaLog,
@@ -56,6 +57,12 @@ export const statService = {
   dashboard(filters: StatFilters = {}) {
     return request<DashboardSummary>(
       `/api/admin/stats/dashboard?${toFilterParams(filters).toString()}`,
+    );
+  },
+
+  dailyProduction(filters: StatFilters = {}) {
+    return request<DailyProduction[]>(
+      `/api/admin/stats/dashboard/daily?${toFilterParams(filters).toString()}`,
     );
   },
 

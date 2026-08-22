@@ -42,6 +42,11 @@ export interface DashboardSummary {
   completedQuantity: number;
 }
 
+export interface DailyProduction {
+  date: string;
+  quantity: number;
+}
+
 export interface ProductDistribution {
   productId: string;
   productName: string;
