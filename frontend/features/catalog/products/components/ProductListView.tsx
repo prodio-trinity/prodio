@@ -48,6 +48,11 @@ interface ProductListViewProps {
   saveError: string;
   saveMessage: string;
   toastId: number;
+
+  exportError: string;
+  onOpenUpload: () => void;
+  onExport: () => void;
+  exporting: boolean;
 }
 
 export function ProductListView({
@@ -85,6 +90,10 @@ export function ProductListView({
   saveError,
   saveMessage,
   toastId,
+  exportError,
+  onOpenUpload,
+  onExport,
+  exporting,
 }: ProductListViewProps) {
   return (
     <main className={gridStyles.shell}>
@@ -120,6 +129,7 @@ export function ProductListView({
 
       {loadError ? <p className={gridStyles.error}>{loadError}</p> : null}
       {saveError ? <p className={gridStyles.error}>{saveError}</p> : null}
+      {exportError ? <p className={gridStyles.error}>{exportError}</p> : null}
 
       <section className={gridStyles.card}>
         <AdminGridHeader
@@ -148,11 +158,9 @@ export function ProductListView({
           page={page}
           totalPages={totalPages}
           onPageChange={onPageChange}
-          onOpenUpload={() => {}}
-          onExport={() => {}}
-          exporting={false}
-          uploadDisabled
-          exportDisabled
+          onOpenUpload={onOpenUpload}
+          onExport={onExport}
+          exporting={exporting}
         />
       </section>
 
