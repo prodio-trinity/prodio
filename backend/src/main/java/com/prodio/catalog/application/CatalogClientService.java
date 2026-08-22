@@ -10,10 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,24 +60,56 @@ public class CatalogClientService {
                 .filter(ExcelClientRow::isValid)
                 .toList();
 
-        Set<String> businessRegNos = validRows.stream()
+        Set<String> duplicateRegNos = findDuplicateBusinessRegNos(validRows);
+        List<ExcelClientRow> processableRows = validRows.stream()
+                .filter(row -> row.businessRegNo() == null || !duplicateRegNos.contains(row.businessRegNo()))
+                .toList();
+
+        Set<String> businessRegNos = processableRows.stream()
                 .map(ExcelClientRow::businessRegNo)
                 .filter(regNo -> regNo != null)
                 .collect(Collectors.toSet());
         Map<String, Long> existingIds = clientRepository.findIdsByBusinessRegNoIn(businessRegNos);
 
-        List<ClientBulkUpsertRequest> requests = validRows.stream()
+        List<ClientBulkUpsertRequest> requests = processableRows.stream()
                 .map(row -> toBulkUpsertRequest(row, existingIds))
                 .toList();
         List<ClientBulkUpsertResult> results = upsertRows(requests);
 
         List<ExcelUploadResult.RowError> errors = new ArrayList<>();
         errors.addAll(collectParseErrors(rows));
-        errors.addAll(collectUpsertErrors(validRows, results));
+        errors.addAll(collectDuplicateErrors(validRows, duplicateRegNos));
+        errors.addAll(collectUpsertErrors(processableRows, results));
 
         int totalRows = rows.size();
         int failCount = errors.size();
         return new ExcelUploadResult(totalRows, totalRows - failCount, failCount, errors);
+    }
+
+    private Set<String> findDuplicateBusinessRegNos(List<ExcelClientRow> rows) {
+        Set<String> seen = new HashSet<>();
+        Set<String> duplicates = new HashSet<>();
+
+        for (ExcelClientRow row : rows) {
+            String regNo = row.businessRegNo();
+            if (regNo != null && !seen.add(regNo)) {
+                duplicates.add(regNo);
+            }
+        }
+
+        return duplicates;
+    }
+
+    private List<ExcelUploadResult.RowError> collectDuplicateErrors(
+            List<ExcelClientRow> validRows, Set<String> duplicateRegNos) {
+        List<ExcelUploadResult.RowError> errors = new ArrayList<>();
+        for (ExcelClientRow row : validRows) {
+            if (row.businessRegNo() != null && duplicateRegNos.contains(row.businessRegNo())) {
+                errors.add(new ExcelUploadResult.RowError(row.rowNumber(),
+                        "사업자등록번호가 파일 내에서 중복됩니다: " + row.businessRegNo()));
+            }
+        }
+        return errors;
     }
 
     private List<ExcelUploadResult.RowError> collectParseErrors(List<ExcelClientRow> rows) {
