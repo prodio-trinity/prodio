@@ -3,6 +3,7 @@ package com.prodio.catalog.application;
 import com.prodio.catalog.domain.CatalogProduct;
 import com.prodio.catalog.exception.CatalogException;
 import com.prodio.catalog.infrastructure.excel.ProductExcelParser;
+import com.prodio.catalog.infrastructure.excel.ProductExcelWriter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -18,10 +19,16 @@ public class CatalogProductService {
     private final CatalogProductQueryRepository queryRepository;
     private final CatalogProductRowUpsertService rowUpsertService;
     private final ProductExcelParser productExcelParser;
+    private final ProductExcelWriter productExcelWriter;
 
     public Page<ProductListItem> getProductList(String keyword, Long categoryId, Boolean isActive,
             int page, int size, String sort) {
         return queryRepository.findProducts(normalize(keyword), categoryId, isActive, page, size, sort);
+    }
+
+    public byte[] exportProducts(String keyword, Long categoryId, Boolean isActive, String sort) {
+        List<ProductListItem> products = queryRepository.findAllForExport(normalize(keyword), categoryId, isActive, sort);
+        return productExcelWriter.write(products);
     }
 
     public List<ProductBulkUpsertResult> upsertRows(List<ProductBulkUpsertRequest> requests) {

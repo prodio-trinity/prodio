@@ -10,7 +10,10 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -52,6 +58,24 @@ class CatalogProductAdminController {
     @PostMapping(value = "/excel/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ApiResponse<ExcelUploadResult> uploadProductExcel(@RequestParam("file") MultipartFile file) {
         return ApiResponse.success(catalogProductService.upsertRowsFromExcel(file));
+    }
+
+    @GetMapping("/excel/export")
+    ResponseEntity<byte[]> exportProductExcel(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(defaultValue = "") String sort) {
+        byte[] excel = catalogProductService.exportProducts(keyword, categoryId, isActive, sort);
+        String filename = "[prodio]품목목록_" + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE) + ".xlsx";
+        ContentDisposition disposition = ContentDisposition.attachment()
+                .filename(filename, StandardCharsets.UTF_8)
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                .body(excel);
     }
 
     record ProductListItemResponse(long id, String productCode, String productName, Long subCategoryId,

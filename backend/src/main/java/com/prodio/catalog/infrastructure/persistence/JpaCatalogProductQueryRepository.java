@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,8 +33,23 @@ class JpaCatalogProductQueryRepository implements CatalogProductQueryRepository 
         return products.map(entity -> toListItem(entity, subCategoriesById.get(entity.getSubCategoryId())));
     }
 
+    @Override
+    public List<ProductListItem> findAllForExport(String keyword, Long categoryId, Boolean isActive, String sort) {
+        List<CatalogProductEntity> products = springDataCatalogProductRepository
+                .findProductsForExport(escapeLike(keyword), categoryId, isActive, parseSort(sort));
+
+        Map<Long, CatalogSubCategoryEntity> subCategoriesById = subCategoriesById(products);
+        return products.stream()
+                .map(entity -> toListItem(entity, subCategoriesById.get(entity.getSubCategoryId())))
+                .toList();
+    }
+
     private Map<Long, CatalogSubCategoryEntity> subCategoriesById(Page<CatalogProductEntity> products) {
-        Set<Long> subCategoryIds = products.getContent().stream()
+        return subCategoriesById(products.getContent());
+    }
+
+    private Map<Long, CatalogSubCategoryEntity> subCategoriesById(List<CatalogProductEntity> products) {
+        Set<Long> subCategoryIds = products.stream()
                 .map(CatalogProductEntity::getSubCategoryId)
                 .collect(Collectors.toSet());
         return springDataCatalogSubCategoryRepository.findAllById(subCategoryIds).stream()
