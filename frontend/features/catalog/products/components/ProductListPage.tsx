@@ -28,6 +28,7 @@ export function ProductListPage() {
       onCategoryChange={list.updateCategory}
       onUnitChange={list.updateUnit}
       onUnitPriceChange={list.updateUnitPrice}
+      onMemoChange={list.updateMemo}
       onToggleActive={list.toggleActive}
       onRemoveNewRow={list.removeNewRow}
       totalElements={list.totalElements}

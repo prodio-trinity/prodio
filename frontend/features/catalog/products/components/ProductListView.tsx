@@ -32,6 +32,7 @@ interface ProductListViewProps {
   onCategoryChange: (id: number, subCategoryId: number | null) => void;
   onUnitChange: (id: number, unit: string) => void;
   onUnitPriceChange: (id: number, unitPrice: number) => void;
+  onMemoChange: (id: number, value: string) => void;
   onToggleActive: (id: number, checked: boolean) => void;
   onRemoveNewRow: (id: number) => void;
 
@@ -70,6 +71,7 @@ export function ProductListView({
   onCategoryChange,
   onUnitChange,
   onUnitPriceChange,
+  onMemoChange,
   onToggleActive,
   onRemoveNewRow,
   totalElements,
@@ -137,6 +139,7 @@ export function ProductListView({
           onCategoryChange={onCategoryChange}
           onUnitChange={onUnitChange}
           onUnitPriceChange={onUnitPriceChange}
+          onMemoChange={onMemoChange}
           onToggleActive={onToggleActive}
           onRemoveNewRow={onRemoveNewRow}
         />
