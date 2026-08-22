@@ -69,6 +69,7 @@ class JpaCatalogProductQueryRepository implements CatalogProductQueryRepository 
                 entity.getProductCode(),
                 entity.getProductName(),
                 entity.getSubCategoryId(),
+                subCategory == null ? null : subCategory.getSubCategoryCode(),
                 subCategory == null ? null : subCategory.getName(),
                 subCategory == null ? null : subCategory.getTopCategory().name(),
                 subCategory == null ? null : subCategory.getTopCategory().displayName(),
