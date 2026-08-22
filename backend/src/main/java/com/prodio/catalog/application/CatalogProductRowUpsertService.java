@@ -35,7 +35,7 @@ class CatalogProductRowUpsertService {
     private CatalogProduct buildNewProduct(ProductBulkUpsertRequest req, CatalogSubCategory category) {
         boolean active = req.isActive() == null || req.isActive();
         return new CatalogProduct(null, null, req.productName(), category.id(),
-                req.unitPrice(), Unit.from(req.unit()), req.description(), req.memo(), active);
+                req.unitPrice(), Unit.from(req.unit()), null, req.memo(), active);
     }
 
     /**
@@ -52,6 +52,6 @@ class CatalogProductRowUpsertService {
 
         boolean active = req.isActive() == null ? existing.active() : req.isActive();
         return existing.update(req.productName(), category.id(), req.unitPrice(), Unit.from(req.unit()),
-                req.description(), req.memo(), active);
+                existing.description(), req.memo(), active);
     }
 }
