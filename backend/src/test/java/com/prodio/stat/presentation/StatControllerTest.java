@@ -2,6 +2,7 @@ package com.prodio.stat.presentation;
 
 import com.prodio.shared.ApiResponse;
 import com.prodio.stat.application.StatDashboardService;
+import com.prodio.stat.domain.DailyProduction;
 import com.prodio.stat.domain.DashboardSummary;
 import com.prodio.stat.domain.OrderViewStatus;
 import com.prodio.stat.domain.ProductDistribution;
@@ -59,6 +60,21 @@ class StatControllerTest {
 
         assertThat(response.data())
                 .containsExactly(new StatController.ProductDistributionResponse("7", "정밀 샤프트", 3, 30));
+    }
+
+    @Test
+    @DisplayName("쿼리 파라미터로 StatFilter를 만들어 일별 생산량을 조회한다")
+    void dailyProductionBuildsFilterFromQueryParams() {
+        LocalDate from = LocalDate.parse("2026-08-01");
+        LocalDate to = LocalDate.parse("2026-08-07");
+        when(statDashboardService.getDailyProduction(new StatFilter(from, to, null)))
+                .thenReturn(List.of(new DailyProduction(LocalDate.parse("2026-08-01"), 10)));
+
+        ApiResponse<List<StatController.DailyProductionResponse>> response =
+                controller.dailyProduction(from, to, null);
+
+        assertThat(response.data())
+                .containsExactly(new StatController.DailyProductionResponse(LocalDate.parse("2026-08-01"), 10));
     }
 
     @Test

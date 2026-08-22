@@ -1,5 +1,6 @@
 package com.prodio.stat.application;
 
+import com.prodio.stat.domain.DailyProduction;
 import com.prodio.stat.domain.DashboardSummary;
 import com.prodio.stat.domain.OrderViewStatus;
 import com.prodio.stat.domain.ProductDistribution;
@@ -54,6 +55,28 @@ class StatDashboardServiceTest {
         List<ProductDistribution> result = service.getProductDistribution(filter);
 
         assertThat(result).isSameAs(distributions);
+    }
+
+    @Test
+    @DisplayName("필터를 그대로 레포지토리에 전달해 일별 생산량을 조회한다")
+    void getDailyProductionDelegatesToRepository() {
+        StatFilter filter = new StatFilter(LocalDate.parse("2026-08-01"), LocalDate.parse("2026-08-07"), null);
+        List<DailyProduction> daily = List.of(new DailyProduction(LocalDate.parse("2026-08-01"), 10));
+        when(repository.dailyProduction(filter)).thenReturn(daily);
+
+        List<DailyProduction> result = service.getDailyProduction(filter);
+
+        assertThat(result).isSameAs(daily);
+    }
+
+    @Test
+    @DisplayName("from이 to보다 늦으면 일별 생산량 조회 시 예외를 던진다")
+    void getDailyProductionRejectsFromAfterTo() {
+        StatFilter filter = new StatFilter(LocalDate.parse("2026-09-01"), LocalDate.parse("2026-08-01"), null);
+
+        assertThatThrownBy(() -> service.getDailyProduction(filter))
+                .isInstanceOfSatisfying(StatException.class,
+                        exception -> assertThat(exception.getErrorCode()).isEqualTo(StatErrorCode.STAT_INVALID_FILTER));
     }
 
     @Test

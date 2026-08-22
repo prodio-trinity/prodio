@@ -2,6 +2,7 @@ package com.prodio.stat.presentation;
 
 import com.prodio.shared.ApiResponse;
 import com.prodio.stat.application.StatDashboardService;
+import com.prodio.stat.domain.DailyProduction;
 import com.prodio.stat.domain.DashboardSummary;
 import com.prodio.stat.domain.ProductDistribution;
 import com.prodio.stat.domain.StatFilter;
@@ -46,6 +47,20 @@ class StatController {
         return ApiResponse.success(response);
     }
 
+    @GetMapping("/dashboard/daily")
+    ApiResponse<List<DailyProductionResponse>> dailyProduction(
+        @RequestParam(required = false) LocalDate from,
+        @RequestParam(required = false) LocalDate to,
+        @RequestParam(required = false) String status
+    ) {
+        StatFilter filter = new StatFilter(from, to, StatFilterSupport.parseStatus(status));
+        List<DailyProductionResponse> response = statDashboardService.getDailyProduction(filter).stream()
+                .map(DailyProductionResponse::from)
+                .toList();
+
+        return ApiResponse.success(response);
+    }
+
     record DashboardResponse(
         long pendingCount,
         long inProductionCount,
@@ -65,6 +80,15 @@ class StatController {
                 summary.totalCount(),
                 summary.completedQuantity()
             );
+        }
+    }
+
+    record DailyProductionResponse(
+        LocalDate date,
+        long quantity
+    ) {
+        static DailyProductionResponse from(DailyProduction daily) {
+            return new DailyProductionResponse(daily.date(), daily.quantity());
         }
     }
 

@@ -1,0 +1,25 @@
+.skeleton {
+  display: grid;
+  gap: 8px;
+}
+.line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--color-page-background) 25%,
+    var(--color-border) 37%,
+    var(--color-page-background) 63%
+  );
+  background-size: 400% 100%;
+  animation: aiSkeletonShimmer 1.4s ease infinite;
+}
+
+@keyframes aiSkeletonShimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
