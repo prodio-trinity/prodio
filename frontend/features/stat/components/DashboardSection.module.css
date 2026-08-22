@@ -299,9 +299,9 @@
   margin-bottom: 8px;
 }
 .aiCompactLabel {
-  color: var(--color-text-secondary);
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 15px;
+  font-weight: 700;
 }
 .aiCompactButton {
   height: 28px;
@@ -322,6 +322,10 @@
   cursor: default;
 }
 .aiCompactText {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
   font-size: 13px;
   line-height: 1.6;
   color: var(--color-text-primary);
