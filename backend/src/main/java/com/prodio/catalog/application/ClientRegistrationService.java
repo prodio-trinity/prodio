@@ -10,6 +10,7 @@ import com.prodio.user.UserDirectory;
 import com.prodio.user.UserRef;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,7 +63,12 @@ public class ClientRegistrationService {
             toSave = existing.resubmit(companyName, ceoName, businessRegNo, phone, address, managerName);
         }
 
-        ClientRegistration saved = registrationRepository.save(toSave);
+        ClientRegistration saved;
+        try {
+            saved = registrationRepository.save(toSave);
+        } catch (DataIntegrityViolationException e) {
+            throw new CatalogException(CatalogErrorCode.REGISTRATION_ALREADY_SUBMITTED);
+        }
         return ClientRegistrationStatusResult.fromRequest(saved);
     }
 
@@ -121,6 +127,10 @@ public class ClientRegistrationService {
         CatalogClient created = CatalogClient.register(null, request.companyName(), request.ceoName(),
                 request.businessRegNo(), request.phone(), request.address(), request.managerName(),
                 request.userId(), null);
-        return clientRepository.save(created);
+        try {
+            return clientRepository.save(created);
+        } catch (DataIntegrityViolationException e) {
+            throw new CatalogException(CatalogErrorCode.DUPLICATE_BUSINESS_REG_NO);
+        }
     }
 }
