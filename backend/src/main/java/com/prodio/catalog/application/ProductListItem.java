@@ -8,6 +8,7 @@ public record ProductListItem(
         String productCode,
         String productName,
         Long subCategoryId,
+        String subCategoryCode,
         String subCategoryName,
         String topCategory,
         String topCategoryDisplayName,
