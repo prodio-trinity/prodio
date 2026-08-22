@@ -1,6 +1,7 @@
 package com.prodio.catalog.application;
 
 import com.prodio.catalog.domain.CatalogProduct;
+import com.prodio.catalog.domain.CatalogSubCategory;
 import com.prodio.catalog.domain.Unit;
 import com.prodio.catalog.exception.CatalogErrorCode;
 import com.prodio.catalog.exception.CatalogException;
@@ -17,27 +18,40 @@ class CatalogProductRowUpsertService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CatalogProduct upsertOne(ProductBulkUpsertRequest req) {
-        Long subCategoryId = resolveSubCategoryId(req.categoryCode());
+        CatalogSubCategory category = resolveCategory(req.categoryCode());
         CatalogProduct product = (req.id() == null)
-                ? buildNewProduct(req, subCategoryId)
-                : buildUpdatedProduct(req, subCategoryId);
+                ? buildNewProduct(req, category)
+                : buildUpdatedProduct(req, category);
         return productRepository.save(product);
     }
 
-    private Long resolveSubCategoryId(String categoryCode) {
-        return subCategoryRepository.findIdByCode(categoryCode)
+    private CatalogSubCategory resolveCategory(String categoryCode) {
+        Long id = subCategoryRepository.findIdByCode(categoryCode)
+                .orElseThrow(() -> new CatalogException(CatalogErrorCode.CATEGORY_NOT_FOUND));
+        return subCategoryRepository.findById(id)
                 .orElseThrow(() -> new CatalogException(CatalogErrorCode.CATEGORY_NOT_FOUND));
     }
 
-    private CatalogProduct buildNewProduct(ProductBulkUpsertRequest req, Long subCategoryId) {
-        return new CatalogProduct(null, null, req.productName(), subCategoryId,
-                req.unitPrice(), Unit.from(req.unit()), req.description(), req.memo(), req.isActive());
+    private CatalogProduct buildNewProduct(ProductBulkUpsertRequest req, CatalogSubCategory category) {
+        boolean active = req.isActive() == null || req.isActive();
+        return new CatalogProduct(null, null, req.productName(), category.id(),
+                req.unitPrice(), Unit.from(req.unit()), req.description(), req.memo(), active);
     }
 
-    private CatalogProduct buildUpdatedProduct(ProductBulkUpsertRequest req, Long subCategoryId) {
+    /**
+     * 대분류 변경 금지 — 소분류 변경은 같은 대분류 내에서만 허용.
+     */
+    private CatalogProduct buildUpdatedProduct(ProductBulkUpsertRequest req, CatalogSubCategory category) {
         CatalogProduct existing = productRepository.findById(req.id())
                 .orElseThrow(() -> new CatalogException(CatalogErrorCode.PRODUCT_NOT_FOUND));
-        return existing.update(req.productName(), subCategoryId, req.unitPrice(), Unit.from(req.unit()),
-                req.description(), req.memo(), req.isActive());
+        CatalogSubCategory existingCategory = subCategoryRepository.findById(existing.subCategoryId())
+                .orElseThrow(() -> new CatalogException(CatalogErrorCode.CATEGORY_NOT_FOUND));
+        if (existingCategory.topCategory() != category.topCategory()) {
+            throw new CatalogException(CatalogErrorCode.TOP_CATEGORY_CHANGE_NOT_ALLOWED);
+        }
+
+        boolean active = req.isActive() == null ? existing.active() : req.isActive();
+        return existing.update(req.productName(), category.id(), req.unitPrice(), Unit.from(req.unit()),
+                req.description(), req.memo(), active);
     }
 }
