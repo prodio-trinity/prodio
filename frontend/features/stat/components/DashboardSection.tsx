@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { useAiSummary } from "../hooks/useAiSummary";
 import { useStatDashboard } from "../hooks/useStatDashboard";
@@ -65,6 +66,7 @@ export function DashboardSection({
     useStatDashboard(filters);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const historyRef = useRef<HTMLDivElement>(null);
   const aiPreviewText =
     aiSummary.result?.response ?? aiSummary.logs[0]?.response ?? null;
@@ -309,16 +311,45 @@ export function DashboardSection({
                               아직 생성한 요약이 없습니다.
                             </p>
                           ) : null}
-                          {aiSummary.logs.map((log) => (
-                            <div key={log.id} className={styles.aiHistoryItem}>
-                              <span className={styles.aiHistoryItemQuestion}>
-                                {log.question}
-                              </span>
-                              <span className={styles.aiHistoryItemDate}>
-                                {formatLogDate(log.requestedAt)}
-                              </span>
-                            </div>
-                          ))}
+                          {aiSummary.logs.map((log) => {
+                            const isExpanded = expandedLogId === log.id;
+                            return (
+                              <div
+                                key={log.id}
+                                className={styles.aiHistoryItem}
+                                data-expanded={isExpanded}
+                              >
+                                <button
+                                  type="button"
+                                  className={styles.aiHistoryRow}
+                                  onClick={() =>
+                                    setExpandedLogId(isExpanded ? null : log.id)
+                                  }
+                                  aria-expanded={isExpanded}
+                                >
+                                  <div className={styles.aiHistoryRowText}>
+                                    <span
+                                      className={styles.aiHistoryItemQuestion}
+                                    >
+                                      {log.question}
+                                    </span>
+                                    <span className={styles.aiHistoryItemDate}>
+                                      {formatLogDate(log.requestedAt)}
+                                    </span>
+                                  </div>
+                                  <ChevronDown
+                                    size={14}
+                                    className={styles.aiHistoryChevron}
+                                  />
+                                </button>
+                                {isExpanded ? (
+                                  <p className={styles.aiHistoryAnswer}>
+                                    {log.response}
+                                  </p>
+                                ) : null}
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : null}
                     </div>
