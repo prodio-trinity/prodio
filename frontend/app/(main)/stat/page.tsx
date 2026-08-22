@@ -1,6 +1,6 @@
 import styles from "./page.module.css";
 
-export default function StatisticsPage() {
+export default function StatPage() {
   return (
     <div className={styles.shell}>
       <h1 className={styles.title}>통계</h1>
