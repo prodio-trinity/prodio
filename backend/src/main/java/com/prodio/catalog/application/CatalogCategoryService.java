@@ -5,6 +5,7 @@ import com.prodio.catalog.domain.TopCategory;
 import com.prodio.catalog.exception.CatalogErrorCode;
 import com.prodio.catalog.exception.CatalogException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +28,11 @@ public class CatalogCategoryService {
             throw new CatalogException(CatalogErrorCode.DUPLICATE_SUB_CATEGORY_CODE);
         }
         CatalogSubCategory subCategory = CatalogSubCategory.register(normalizedCode, subCategoryName, topCategory);
-        return subCategoryRepository.save(subCategory);
+        try {
+            return subCategoryRepository.save(subCategory);
+        } catch (DataIntegrityViolationException e) {
+            throw new CatalogException(CatalogErrorCode.DUPLICATE_SUB_CATEGORY_CODE);
+        }
     }
 
     @Transactional
