@@ -1,5 +1,6 @@
 "use client";
 
+import { useAiSummary } from "../hooks/useAiSummary";
 import { useStatFilters } from "../hooks/useStatFilters";
 import { AiSummarySection } from "./AiSummarySection";
 import { DashboardSection } from "./DashboardSection";
@@ -8,6 +9,7 @@ import styles from "./StatisticsPage.module.css";
 
 export function StatisticsPage() {
   const { draft, setDraft, filters, submit, applyPreset } = useStatFilters();
+  const aiSummary = useAiSummary(filters);
 
   return (
     <div className={styles.shell}>
@@ -17,9 +19,10 @@ export function StatisticsPage() {
         filters={filters}
         onSubmit={submit}
         onApplyPreset={applyPreset}
+        aiSummary={aiSummary}
       />
 
-      <AiSummarySection filters={filters} />
+      <AiSummarySection aiSummary={aiSummary} />
 
       <RagQaSection />
     </div>

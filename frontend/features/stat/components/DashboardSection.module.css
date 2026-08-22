@@ -287,6 +287,46 @@
   font-weight: 700;
 }
 
+.aiCompact {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+.aiCompactHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.aiCompactLabel {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+.aiCompactButton {
+  height: 28px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 700;
+  transition: background 120ms ease;
+}
+.aiCompactButton:hover {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+.aiCompactButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.aiCompactText {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
 /* 우측: 상태별 현황 */
 .subheading {
   margin: 0 0 14px;

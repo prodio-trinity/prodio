@@ -55,8 +55,8 @@ prodio:
     gemini:
       api-key: ${GEMINI_API_KEY:}
       base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
-      embedding-model: ${GEMINI_EMBEDDING_MODEL:text-embedding-004}
-      chat-model: ${GEMINI_CHAT_MODEL:gemini-2.0-flash}
+      embedding-model: ${GEMINI_EMBEDDING_MODEL:gemini-embedding-001}
+      chat-model: ${GEMINI_CHAT_MODEL:gemini-3.6-flash}
       connect-timeout-millis: ${GEMINI_CONNECT_TIMEOUT_MILLIS:3000}
       read-timeout-millis: ${GEMINI_READ_TIMEOUT_MILLIS:10000}
       max-retries: ${GEMINI_MAX_RETRIES:3}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { useAiSummary } from "../hooks/useAiSummary";
 import { useStatDashboard } from "../hooks/useStatDashboard";
 import {
   ORDER_VIEW_STATUS_LABELS,
@@ -12,6 +13,8 @@ import {
   thisMonthRange,
   thisWeekRange,
 } from "../utils/dateRanges";
+import { AiGeneratingIndicator } from "./AiGeneratingIndicator";
+import { AiSummarySkeleton } from "./AiSummarySkeleton";
 import styles from "./DashboardSection.module.css";
 
 interface DashboardSectionProps {
@@ -20,6 +23,7 @@ interface DashboardSectionProps {
   filters: StatFilters;
   onSubmit: () => void;
   onApplyPreset: (range: StatFilters) => void;
+  aiSummary: ReturnType<typeof useAiSummary>;
 }
 
 const TOP_N = 5;
@@ -48,10 +52,13 @@ export function DashboardSection({
   filters,
   onSubmit,
   onApplyPreset,
+  aiSummary,
 }: DashboardSectionProps) {
   const { summary, distribution, daily, loading, loadError } =
     useStatDashboard(filters);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const aiPreviewText =
+    aiSummary.result?.response ?? aiSummary.logs[0]?.response ?? null;
 
   const topDistribution = [...distribution]
     .sort((a, b) => b.orderCount - a.orderCount)
@@ -248,6 +255,37 @@ export function DashboardSection({
               <div className={styles.metricRow}>
                 <span className={styles.metricRowLabel}>전체 주문</span>
                 <span className={styles.metricRowValue}>{totalCount}건</span>
+              </div>
+
+              <div className={styles.aiCompact}>
+                <div className={styles.aiCompactHeader}>
+                  <span className={styles.aiCompactLabel}>AI 요약</span>
+                  <button
+                    type="button"
+                    onClick={() => void aiSummary.generate()}
+                    disabled={aiSummary.generating}
+                    className={styles.aiCompactButton}
+                  >
+                    {aiSummary.generating ? (
+                      <>
+                        생성 중<AiGeneratingIndicator />
+                      </>
+                    ) : aiPreviewText ? (
+                      "다시 생성"
+                    ) : (
+                      "생성"
+                    )}
+                  </button>
+                </div>
+                {aiSummary.generating ? (
+                  <AiSummarySkeleton lines={2} />
+                ) : aiPreviewText ? (
+                  <p className={styles.aiCompactText}>{aiPreviewText}</p>
+                ) : (
+                  <p className={styles.placeholder}>
+                    이 조건으로 AI 요약을 생성해보세요.
+                  </p>
+                )}
               </div>
             </div>
 

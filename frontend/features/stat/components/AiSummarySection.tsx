@@ -1,11 +1,12 @@
 "use client";
 
-import { useAiSummary } from "../hooks/useAiSummary";
-import type { StatFilters } from "../types/stat";
+import { AiGeneratingIndicator } from "./AiGeneratingIndicator";
+import { AiSummarySkeleton } from "./AiSummarySkeleton";
+import type { useAiSummary } from "../hooks/useAiSummary";
 import styles from "./AiSummarySection.module.css";
 
 interface AiSummarySectionProps {
-  filters: StatFilters;
+  aiSummary: ReturnType<typeof useAiSummary>;
 }
 
 function formatDate(value: string) {
@@ -15,7 +16,7 @@ function formatDate(value: string) {
   });
 }
 
-export function AiSummarySection({ filters }: AiSummarySectionProps) {
+export function AiSummarySection({ aiSummary }: AiSummarySectionProps) {
   const {
     result,
     generating,
@@ -24,7 +25,7 @@ export function AiSummarySection({ filters }: AiSummarySectionProps) {
     logs,
     logsLoading,
     logsError,
-  } = useAiSummary(filters);
+  } = aiSummary;
 
   return (
     <section className={styles.section}>
@@ -36,12 +37,22 @@ export function AiSummarySection({ filters }: AiSummarySectionProps) {
         disabled={generating}
         className={styles.generateButton}
       >
-        {generating ? "생성 중..." : "이 조건으로 요약 생성"}
+        {generating ? (
+          <>
+            생성 중<AiGeneratingIndicator />
+          </>
+        ) : (
+          "이 조건으로 요약 생성"
+        )}
       </button>
 
       {generateError ? <p className={styles.error}>{generateError}</p> : null}
 
-      {result ? (
+      {generating ? (
+        <div className={styles.resultBox}>
+          <AiSummarySkeleton />
+        </div>
+      ) : result ? (
         <div className={styles.resultBox}>{result.response}</div>
       ) : null}
 

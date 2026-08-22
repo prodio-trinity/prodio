@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 class GeminiClient implements AiClient {
 
     private static final int MAX_TOOL_TURNS = 4;
+    /** statistics_*_embeddings 테이블의 pgvector 컬럼이 vector(768)로 고정돼 있어 임베딩 차원도 여기 맞춘다. */
+    private static final int EMBEDDING_DIMENSIONS = 768;
 
     private final RestClient geminiRestClient;
     private final GeminiProperties properties;
@@ -47,7 +49,7 @@ class GeminiClient implements AiClient {
 
     private float[] callEmbed(String text) {
         EmbedRequest request = new EmbedRequest("models/" + properties.embeddingModel(),
-                new EmbedRequest.Content(List.of(new EmbedRequest.Part(text))));
+                new EmbedRequest.Content(List.of(new EmbedRequest.Part(text))), EMBEDDING_DIMENSIONS);
 
         EmbedResponse response = geminiRestClient.post()
                 .uri("/v1beta/models/{model}:embedContent", properties.embeddingModel())
@@ -203,7 +205,7 @@ class GeminiClient implements AiClient {
                 || exception instanceof HttpClientErrorException.TooManyRequests;
     }
 
-    private record EmbedRequest(String model, Content content) {
+    private record EmbedRequest(String model, Content content, int outputDimensionality) {
         record Content(List<Part> parts) {}
         record Part(String text) {}
     }
