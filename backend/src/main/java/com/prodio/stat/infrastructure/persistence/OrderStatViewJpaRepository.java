@@ -26,8 +26,12 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
               and (cast(:status as varchar) is null or status = cast(:status as varchar))
             group by status
             """, nativeQuery = true)
-    List<StatusCount> countByStatus(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
+    List<StatusCount> countByStatusNative(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
             @Param("status") String status);
+
+    default List<StatusCount> countByStatus(OffsetDateTime from, OffsetDateTime to, OrderViewStatus status) {
+        return countByStatusNative(from, to, status == null ? null : status.name());
+    }
 
     @Query(value = """
             select coalesce(sum(quantity), 0) as totalQuantity
@@ -35,10 +39,8 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
             where status = 'COMPLETED'
               and (cast(:from as timestamptz) is null or order_created_at >= cast(:from as timestamptz))
               and (cast(:to as timestamptz) is null or order_created_at < cast(:to as timestamptz))
-              and (cast(:status as varchar) is null or status = cast(:status as varchar))
             """, nativeQuery = true)
-    CompletedAggregate completedAggregate(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
-            @Param("status") String status);
+    CompletedAggregate completedAggregate(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
 
     @Query(value = """
             select product_id as productId, product_name as productName,
@@ -49,10 +51,13 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
               and (cast(:status as varchar) is null or status = cast(:status as varchar))
             group by product_id, product_name
             """, nativeQuery = true)
-    List<ProductDistributionRow> productDistribution(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
+    List<ProductDistributionRow> productDistributionNative(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
             @Param("status") String status);
 
-    /** 일별 생산량 집계는 애플리케이션(Clock의 zone)에서 날짜로 묶는다 — 완료 건의 원본 행만 가져온다. */
+    default List<ProductDistributionRow> productDistribution(OffsetDateTime from, OffsetDateTime to, OrderViewStatus status) {
+        return productDistributionNative(from, to, status == null ? null : status.name());
+    }
+
     @Query(value = """
             select completed_at as completedAt, quantity as quantity
             from statistics_order_view
@@ -60,10 +65,8 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
               and completed_at is not null
               and (cast(:from as timestamptz) is null or completed_at >= cast(:from as timestamptz))
               and (cast(:to as timestamptz) is null or completed_at < cast(:to as timestamptz))
-              and (cast(:status as varchar) is null or status = cast(:status as varchar))
             """, nativeQuery = true)
-    List<CompletedRow> findCompletedInRange(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
-            @Param("status") String status);
+    List<CompletedRow> findCompletedInRange(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
 
     interface StatusCount {
         OrderViewStatus getStatus();

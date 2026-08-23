@@ -43,7 +43,7 @@ class GeminiClient implements AiClient {
         try {
             return retryExecutor.execute(() -> callEmbed(text), this::isRetryable);
         } catch (RestClientException exception) {
-            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED, exception);
+            throw toInfraException(exception);
         }
     }
 
@@ -75,7 +75,7 @@ class GeminiClient implements AiClient {
         try {
             return retryExecutor.execute(() -> callGenerate(prompt), this::isRetryable);
         } catch (RestClientException exception) {
-            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED, exception);
+            throw toInfraException(exception);
         }
     }
 
@@ -151,7 +151,7 @@ class GeminiClient implements AiClient {
                 return content;
             }, this::isRetryable);
         } catch (RestClientException exception) {
-            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED, exception);
+            throw toInfraException(exception);
         }
     }
 
@@ -205,6 +205,21 @@ class GeminiClient implements AiClient {
                 || exception instanceof HttpClientErrorException.TooManyRequests;
     }
 
+    /**
+     * 재시도까지 소진한 뒤 최종적으로 실패한 원인을 구분해 서로 다른 InfraErrorCode로 매핑한다.
+     * 429는 rate limit로, 그 외 4xx(잘못된 요청/스키마 오류 등)는 요청 자체 문제로, 나머지(5xx/타임아웃/
+     * 응답 파싱 실패 등)는 일시적 장애로 안내해 프론트에서 사용자에게 다른 메시지를 보여줄 수 있게 한다.
+     */
+    private InfraException toInfraException(RestClientException exception) {
+        if (exception instanceof HttpClientErrorException.TooManyRequests) {
+            return new InfraException(InfraErrorCode.AI_RATE_LIMITED, exception);
+        }
+        if (exception instanceof HttpClientErrorException) {
+            return new InfraException(InfraErrorCode.AI_REQUEST_INVALID, exception);
+        }
+        return new InfraException(InfraErrorCode.AI_REQUEST_FAILED, exception);
+    }
+
     private record EmbedRequest(String model, Content content, int outputDimensionality) {
         record Content(List<Part> parts) {}
         record Part(String text) {}
@@ -229,14 +244,20 @@ class GeminiClient implements AiClient {
 
     private record AskContent(String role, List<AskPart> parts) {}
 
+    /**
+     * thinking 모델은 자신이 생성한 functionCall 파트의 thoughtSignature를 다음 턴에 그대로 돌려받지 못하면
+     * "missing thought_signature" 400 에러를 낸다. 그래서 모델이 준 functionCall 파트를 다음 턴 contents에
+     * 그대로 append할 때 이 값도 함께 보존해야 한다(우리가 직접 만드는 파트는 null로 둔다).
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private record AskPart(String text, FunctionCallPart functionCall, FunctionResponsePart functionResponse) {
+    private record AskPart(String text, FunctionCallPart functionCall, FunctionResponsePart functionResponse,
+            String thoughtSignature) {
         static AskPart text(String text) {
-            return new AskPart(text, null, null);
+            return new AskPart(text, null, null, null);
         }
 
         static AskPart functionResponse(String name, String result) {
-            return new AskPart(null, null, new FunctionResponsePart(name, Map.of("result", result)));
+            return new AskPart(null, null, new FunctionResponsePart(name, Map.of("result", result)), null);
         }
 
         record FunctionCallPart(String name, Map<String, Object> args) {}

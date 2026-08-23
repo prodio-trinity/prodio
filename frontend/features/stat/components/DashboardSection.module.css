@@ -349,9 +349,6 @@
   top: calc(100% + 6px);
   right: 0;
   z-index: 10;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
   width: 300px;
   max-height: min(440px, 70vh);
   overflow-y: auto;
@@ -360,70 +357,6 @@
   border-radius: 14px;
   background: var(--color-card-background);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
-}
-.aiHistoryItem {
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  overflow: hidden;
-  transition: border-color 120ms ease;
-}
-.aiHistoryItem[data-expanded="true"] {
-  border-color: color-mix(
-    in srgb,
-    var(--color-primary) 40%,
-    var(--color-border)
-  );
-}
-.aiHistoryRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 10px;
-  border: none;
-  background: var(--color-card-background);
-  text-align: left;
-  transition: background 120ms ease;
-}
-.aiHistoryRow:hover {
-  background: color-mix(in srgb, var(--color-primary) 5%, transparent);
-}
-.aiHistoryRowText {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.aiHistoryItemQuestion {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.aiHistoryItemDate {
-  font-size: 11px;
-  color: var(--color-text-secondary);
-}
-.aiHistoryChevron {
-  flex-shrink: 0;
-  color: var(--color-text-secondary);
-  transition: transform 160ms ease;
-}
-.aiHistoryItem[data-expanded="true"] .aiHistoryChevron {
-  transform: rotate(180deg);
-  color: var(--color-primary);
-}
-.aiHistoryAnswer {
-  margin: 0 10px 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--color-text-primary);
 }
 .aiCompactText {
   margin: 0;
@@ -435,7 +368,7 @@
   color: var(--color-text-primary);
 }
 
-/* 우측: 상태별 현황 */
+/* 우측: 주문 현황 */
 .subheading {
   margin: 0 0 14px;
   font-size: 15px;

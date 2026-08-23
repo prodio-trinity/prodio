@@ -1,24 +1,20 @@
 "use client";
 
-import { Bot, ChevronDown, MessageCircle, X } from "lucide-react";
-import { useState } from "react";
+import { Bot, MessageCircle, X } from "lucide-react";
+import { useRef, useState } from "react";
+import { useClickOutside } from "@/features/shared/hooks/useClickOutside";
 import { useRagQa } from "../hooks/useRagQa";
 import { SOURCE_TYPE_LABELS } from "../types/stat";
+import { AiLogAccordionList } from "./AiLogAccordionList";
+import { AiSummarySkeleton } from "./AiSummarySkeleton";
 import styles from "./RagQaSection.module.css";
 
 type Tab = "ask" | "history";
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleString("ko-KR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  });
-}
-
 export function RagQaSection() {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("ask");
-  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const {
     question,
     setQuestion,
@@ -31,8 +27,10 @@ export function RagQaSection() {
     logsError,
   } = useRagQa();
 
+  useClickOutside(containerRef, open, () => setOpen(false));
+
   return (
-    <>
+    <div ref={containerRef}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -86,109 +84,76 @@ export function RagQaSection() {
 
           {tab === "ask" ? (
             <div className={styles.tabContent}>
-              <form
-                className={styles.askForm}
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void ask();
-                }}
-              >
-                <input
-                  value={question}
-                  onChange={(event) => setQuestion(event.target.value)}
-                  placeholder="예: 지난달 매출이랑 배송 지연 이슈 같이 알려줘"
-                  className={styles.questionInput}
-                  disabled={asking}
-                />
-                <button
-                  type="submit"
-                  disabled={asking}
-                  className={styles.askButton}
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>질문</p>
+                <form
+                  className={styles.askForm}
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void ask();
+                  }}
                 >
-                  {asking ? "답변 생성 중..." : "질문"}
-                </button>
-              </form>
+                  <input
+                    value={question}
+                    onChange={(event) => setQuestion(event.target.value)}
+                    placeholder="예: 지난달 매출이랑 배송 지연 이슈 같이 알려줘"
+                    className={styles.questionInput}
+                    disabled={asking}
+                  />
+                  <button
+                    type="submit"
+                    disabled={asking}
+                    className={styles.askButton}
+                  >
+                    {asking ? "생성 중..." : "질문"}
+                  </button>
+                </form>
+              </div>
 
-              {askError ? <p className={styles.error}>{askError}</p> : null}
-
-              {result ? (
-                <div className={styles.resultBox}>
-                  {result.sourceType ? (
-                    <span className={styles.badge}>
-                      {SOURCE_TYPE_LABELS[result.sourceType]} 참고
-                    </span>
-                  ) : null}
-                  <p className={styles.resultText}>{result.response}</p>
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>답변</p>
+                <div className={styles.answerBox}>
+                  {asking ? (
+                    <AiSummarySkeleton lines={3} />
+                  ) : askError ? (
+                    <p className={styles.error}>{askError}</p>
+                  ) : result ? (
+                    <>
+                      <p className={styles.answeredQuestion}>
+                        {result.question}
+                      </p>
+                      {result.sourceType ? (
+                        <span className={styles.badge}>
+                          {SOURCE_TYPE_LABELS[result.sourceType]} 참고
+                        </span>
+                      ) : null}
+                      <p className={styles.resultText}>{result.response}</p>
+                    </>
+                  ) : (
+                    <p className={styles.placeholder}>
+                      질문을 입력하면 이곳에 답변이 표시됩니다.
+                    </p>
+                  )}
                 </div>
-              ) : (
-                <p className={styles.placeholder}>
-                  궁금한 걸 자유롭게 물어보세요.
-                </p>
-              )}
+              </div>
             </div>
           ) : (
             <div className={styles.tabContent}>
-              {logsError ? <p className={styles.error}>{logsError}</p> : null}
-              {!logsError && logsLoading ? (
-                <p className={styles.placeholder}>불러오는 중...</p>
-              ) : null}
-              {!logsError && !logsLoading && logs.length === 0 ? (
-                <p className={styles.placeholder}>
-                  아직 질의응답 이력이 없습니다.
-                </p>
-              ) : null}
-              {logs.length > 0 ? (
-                <div className={styles.logList}>
-                  {logs.map((log) => {
-                    const isExpanded = expandedLogId === log.id;
-                    return (
-                      <div
-                        key={log.id}
-                        className={styles.logItem}
-                        data-expanded={isExpanded}
-                      >
-                        <button
-                          type="button"
-                          className={styles.logRow}
-                          onClick={() =>
-                            setExpandedLogId(isExpanded ? null : log.id)
-                          }
-                          aria-expanded={isExpanded}
-                        >
-                          <div className={styles.logRowText}>
-                            <span className={styles.logQuestion}>
-                              {log.question}
-                            </span>
-                            <span className={styles.logDate}>
-                              {formatDate(log.requestedAt)}
-                            </span>
-                          </div>
-                          <ChevronDown
-                            size={16}
-                            className={styles.logChevron}
-                          />
-                        </button>
-                        {isExpanded ? (
-                          <div className={styles.logAnswer}>
-                            {log.sourceType ? (
-                              <span className={styles.badge}>
-                                {SOURCE_TYPE_LABELS[log.sourceType]} 참고
-                              </span>
-                            ) : null}
-                            <p className={styles.logAnswerText}>
-                              {log.response}
-                            </p>
-                          </div>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null}
+              <AiLogAccordionList
+                logs={logs}
+                loading={logsLoading}
+                error={logsError}
+                emptyMessage="아직 질의응답 이력이 없습니다."
+                badgeText={(log) =>
+                  log.sourceType
+                    ? `${SOURCE_TYPE_LABELS[log.sourceType]} 참고`
+                    : null
+                }
+              />
             </div>
           )}
         </div>
       ) : null}
-    </>
+    </div>
   );
 }

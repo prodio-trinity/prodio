@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
 import { RoleLayout } from "@/features/admin/components/RoleLayout";
 import {
   LayoutDashboard,
+  Activity,
   ClipboardList,
   Factory,
   ClipboardCheck,
-  BarChart2,
   Users,
   PlusCircle,
   Home,
@@ -16,13 +16,13 @@ import {
 } from "lucide-react";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "대시보드", icon: LayoutDashboard },
+  { href: "/stat", label: "대시보드", icon: LayoutDashboard },
+  { href: "/dashboard", label: "수주 현황", icon: Activity },
   { href: "/orders", label: "수주 관리", icon: ClipboardList },
   { href: "/production", label: "생산 관리", icon: Factory },
   { href: "/catalog/clients", label: "거래처 관리", icon: Building2 },
   { href: "/catalog/products", label: "품목 관리", icon: Package },
   { href: "/catalog/registration", label: "등록 신청 관리", icon: ClipboardCheck },
-  { href: "/stat", label: "통계", icon: BarChart2 },
   { href: "/admin/members", label: "멤버 관리", icon: Users },
 ];
 
