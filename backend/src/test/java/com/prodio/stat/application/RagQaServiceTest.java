@@ -3,7 +3,9 @@ package com.prodio.stat.application;
 import com.prodio.infra.exception.InfraErrorCode;
 import com.prodio.infra.exception.InfraException;
 import com.prodio.stat.domain.AiQueryLog;
+import com.prodio.stat.domain.CancelledOrderDetail;
 import com.prodio.stat.domain.DashboardSummary;
+import com.prodio.stat.domain.OrderStatView;
 import com.prodio.stat.domain.OrderViewStatus;
 import com.prodio.stat.domain.ProductDistribution;
 import com.prodio.stat.domain.QueryType;
@@ -45,6 +47,7 @@ class RagQaServiceTest {
     @Mock private ClientEmbeddingRepository clientEmbeddingRepository;
     @Mock private ProductionEmbeddingRepository productionEmbeddingRepository;
     @Mock private StatDashboardRepository statDashboardRepository;
+    @Mock private OrderStatViewRepository orderStatViewRepository;
     @Mock private AiQueryLogRepository aiQueryLogRepository;
     private RagQaService service;
 
@@ -53,7 +56,7 @@ class RagQaServiceTest {
     @BeforeEach
     void setUp() {
         service = new RagQaService(aiClient, orderEmbeddingRepository, clientEmbeddingRepository,
-                productionEmbeddingRepository, statDashboardRepository, aiQueryLogRepository);
+                productionEmbeddingRepository, statDashboardRepository, orderStatViewRepository, aiQueryLogRepository);
     }
 
     private void stubSaveReturnsArgument() {
@@ -91,6 +94,25 @@ class RagQaServiceTest {
         assertThat(captor.getValue().requestedBy()).isEqualTo(42L);
         assertThat(captor.getValue().question()).isEqualTo("납기 언제야?");
         assertThat(result.response()).isEqualTo("납기는 10월 15일입니다.");
+    }
+
+    @Test
+    @DisplayName("searchNotes가 ORDER_NOTE/PRODUCTION_MEMO 매치를 반환하면 현재 주문 상태를 조회한다")
+    void searchNotesLooksUpCurrentStatusForOrderScopedMatches() {
+        stubSaveReturnsArgument();
+        when(aiClient.embed("긴급 처리")).thenReturn(queryVector);
+        when(orderEmbeddingRepository.search(queryVector, 5))
+                .thenReturn(List.of(new EmbeddingMatch(36L, "행사 준비로 촉박합니다", 0.1)));
+        when(orderStatViewRepository.findAllByOrderId(36L)).thenReturn(List.of(
+                new OrderStatView(1L, 36L, 5L, "우리동네피씨방", 1L, "마우스", 1, 1000L,
+                        OrderViewStatus.IN_DELIVERY, true, null, null, null, null, null, null)));
+        simulateToolCalls("배송 중인 건이 있습니다.",
+                new ToolCall("searchNotes", Map.of("query", "긴급 처리", "sourceType", "ORDER_NOTE")));
+
+        service.ask(42L, "긴급 처리 요청한 주문 중에 아직 배송 안 된 거 있어?");
+
+        verify(orderStatViewRepository).findAllByOrderId(36L);
+        verifyNoInteractions(clientEmbeddingRepository, productionEmbeddingRepository);
     }
 
     @Test
@@ -144,6 +166,26 @@ class RagQaServiceTest {
         verify(statDashboardRepository).productDistribution(expectedFilter);
         verifyNoInteractions(orderEmbeddingRepository, clientEmbeddingRepository, productionEmbeddingRepository);
         assertThat(result.sourceType()).isNull();
+    }
+
+    @Test
+    @DisplayName("queryOrderStats가 status=CANCELLED로 호출되면 취소 사유 목록도 함께 조회한다")
+    void executesQueryOrderStatsIncludesCancelledDetails() {
+        stubSaveReturnsArgument();
+        StatFilter expectedFilter = new StatFilter(
+                LocalDate.parse("2026-08-01"), LocalDate.parse("2026-08-31"), OrderViewStatus.CANCELLED);
+        when(statDashboardRepository.summarize(eq(expectedFilter)))
+                .thenReturn(new DashboardSummary(0, 0, 0, 0, 2, 2, 0));
+        when(statDashboardRepository.productDistribution(eq(expectedFilter))).thenReturn(List.of());
+        when(statDashboardRepository.cancelledOrderDetails(eq(expectedFilter))).thenReturn(List.of(
+                new CancelledOrderDetail(12L, "피씨클럽 홍대점", "고객 단순 변심으로 인한 취소")));
+        simulateToolCalls("이번 달 취소는 1건입니다.",
+                new ToolCall("queryOrderStats",
+                        Map.of("from", "2026-08-01", "to", "2026-08-31", "status", "cancelled")));
+
+        service.ask(42L, "이번 달 취소된 주문 사유 알려줘");
+
+        verify(statDashboardRepository).cancelledOrderDetails(expectedFilter);
     }
 
     @Test

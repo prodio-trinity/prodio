@@ -1,5 +1,6 @@
 package com.prodio.stat.application;
 
+import com.prodio.stat.domain.CancelledOrderDetail;
 import com.prodio.stat.domain.DashboardSummary;
 import com.prodio.stat.domain.OrderViewStatus;
 import com.prodio.stat.domain.ProductDistribution;
@@ -88,7 +89,7 @@ class QueryOrderStatsSupportTest {
         DashboardSummary summary = new DashboardSummary(1, 2, 3, 4, 0, 10, 40);
         List<ProductDistribution> distribution = List.of(new ProductDistribution(7L, "정밀 샤프트", 3, 30));
 
-        String result = QueryOrderStatsSupport.format(filter, summary, distribution);
+        String result = QueryOrderStatsSupport.format(filter, summary, distribution, List.of());
 
         assertThat(result)
                 .contains("조회 조건: 2026-07-01 ~ 2026-07-31, status=COMPLETED")
@@ -105,8 +106,28 @@ class QueryOrderStatsSupportTest {
         StatFilter filter = new StatFilter(null, null, null);
         DashboardSummary summary = new DashboardSummary(0, 0, 0, 0, 0, 0, 0);
 
-        String result = QueryOrderStatsSupport.format(filter, summary, List.of());
+        String result = QueryOrderStatsSupport.format(filter, summary, List.of(), List.of());
 
         assertThat(result).contains("조회 조건: 전체 ~ 전체").doesNotContain("품목별 분포:");
+    }
+
+    @Test
+    @DisplayName("취소 사유가 있으면 주문별로 나열하고, 없으면 섹션을 생략한다")
+    void formatIncludesCancelledReasonsWhenPresent() {
+        StatFilter filter = new StatFilter(LocalDate.parse("2026-08-01"), LocalDate.parse("2026-08-31"), OrderViewStatus.CANCELLED);
+        DashboardSummary summary = new DashboardSummary(0, 0, 0, 0, 2, 2, 0);
+        List<CancelledOrderDetail> cancelledDetails = List.of(
+                new CancelledOrderDetail(12L, "피씨클럽 홍대점", "고객 단순 변심으로 인한 취소"),
+                new CancelledOrderDetail(24L, "피씨클럽 홍대점", "고객 단순 변심으로 인한 취소"));
+
+        String result = QueryOrderStatsSupport.format(filter, summary, List.of(), cancelledDetails);
+
+        assertThat(result)
+                .contains("취소 사유:")
+                .contains("- 주문 #12 (피씨클럽 홍대점): 고객 단순 변심으로 인한 취소")
+                .contains("- 주문 #24 (피씨클럽 홍대점): 고객 단순 변심으로 인한 취소");
+
+        String withoutCancelled = QueryOrderStatsSupport.format(filter, summary, List.of(), List.of());
+        assertThat(withoutCancelled).doesNotContain("취소 사유:");
     }
 }

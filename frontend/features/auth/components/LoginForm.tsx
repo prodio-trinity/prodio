@@ -43,7 +43,7 @@ export function LoginForm() {
         roles = result.roles;
       }
       const destination = roles.includes("ADMIN")
-        ? "/dashboard"
+        ? "/stat"
         : roles.includes("PENDING")
           ? "/pending"
           : "/my-orders";

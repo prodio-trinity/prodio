@@ -1,5 +1,6 @@
 package com.prodio.stat.application;
 
+import com.prodio.stat.domain.OrderViewStatus;
 import com.prodio.stat.domain.SourceType;
 import com.prodio.stat.embedding.application.EmbeddingMatch;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +47,7 @@ class SearchNotesSupportTest {
     @Test
     @DisplayName("매치가 없으면 안내 문구를 반환한다")
     void formatReturnsFallbackMessageWhenEmpty() {
-        assertThat(SearchNotesSupport.format(List.of())).isEqualTo("관련된 노트/메모를 찾지 못했습니다.");
+        assertThat(SearchNotesSupport.format(List.of(), Map.of())).isEqualTo("관련된 노트/메모를 찾지 못했습니다.");
     }
 
     @Test
@@ -56,6 +57,30 @@ class SearchNotesSupportTest {
                 new SearchNotesSupport.LabeledMatch(SourceType.ORDER_NOTE, new EmbeddingMatch(1L, "납기 요청", 0.1))
         );
 
-        assertThat(SearchNotesSupport.format(matches)).contains("[ORDER_NOTE #1] 납기 요청");
+        assertThat(SearchNotesSupport.format(matches, Map.of())).contains("[ORDER_NOTE #1] 납기 요청");
+    }
+
+    @Test
+    @DisplayName("refId에 해당하는 현재 상태가 있으면 함께 표기한다")
+    void formatIncludesCurrentStatusWhenKnown() {
+        List<SearchNotesSupport.LabeledMatch> matches = List.of(
+                new SearchNotesSupport.LabeledMatch(SourceType.ORDER_NOTE, new EmbeddingMatch(36L, "행사 준비로 촉박", 0.1))
+        );
+
+        String result = SearchNotesSupport.format(matches, Map.of(36L, OrderViewStatus.IN_DELIVERY));
+
+        assertThat(result).contains("[ORDER_NOTE #36] (현재 주문 상태: IN_DELIVERY) 행사 준비로 촉박");
+    }
+
+    @Test
+    @DisplayName("상태를 모르면 상태 표기 없이 텍스트만 남긴다")
+    void formatOmitsStatusWhenUnknown() {
+        List<SearchNotesSupport.LabeledMatch> matches = List.of(
+                new SearchNotesSupport.LabeledMatch(SourceType.CLIENT_MEMO, new EmbeddingMatch(2L, "우수 거래처", 0.1))
+        );
+
+        String result = SearchNotesSupport.format(matches, Map.of());
+
+        assertThat(result).contains("[CLIENT_MEMO #2] 우수 거래처").doesNotContain("현재 주문 상태");
     }
 }

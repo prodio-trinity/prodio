@@ -29,7 +29,7 @@ const ROLE_DESTINATIONS: Record<string, RoleDestination> = {
   },
   ADMIN: {
     label: "관리자",
-    href: "/dashboard",
+    href: "/stat",
     activeWhen: ["/dashboard", "/orders", "/production", "/catalog", "/stat", "/admin"],
   },
 };

@@ -14,6 +14,9 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,15 +30,18 @@ class GeminiClient implements AiClient {
     private static final int MAX_TOOL_TURNS = 4;
     /** statistics_*_embeddings 테이블의 pgvector 컬럼이 vector(768)로 고정돼 있어 임베딩 차원도 여기 맞춘다. */
     private static final int EMBEDDING_DIMENSIONS = 768;
+    private static final DateTimeFormatter TODAY_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd(E)");
 
     private final RestClient geminiRestClient;
     private final GeminiProperties properties;
     private final RetryExecutor retryExecutor;
+    private final Clock clock;
 
-    GeminiClient(RestClient geminiRestClient, GeminiProperties properties) {
+    GeminiClient(RestClient geminiRestClient, GeminiProperties properties, Clock clock) {
         this.geminiRestClient = geminiRestClient;
         this.properties = properties;
         this.retryExecutor = new RetryExecutor(properties.maxRetries(), properties.initialBackoffMillis());
+        this.clock = clock;
     }
 
     @Override
@@ -106,9 +112,21 @@ class GeminiClient implements AiClient {
         List<AskContent> contents = new ArrayList<>();
         contents.add(new AskContent("user", List.of(AskPart.text(question))));
         List<ToolsWrapper> toolsWrapper = List.of(new ToolsWrapper(toFunctionDeclarations(tools)));
+        SystemInstruction systemInstruction = new SystemInstruction(List.of(AskPart.text(
+                "오늘 날짜는 " + LocalDate.now(clock).format(TODAY_FORMAT) + "입니다. "
+                        + "사용자가 '이번 달', '지난달', '올해', '이번 주'처럼 상대적인 날짜를 말하면 "
+                        + "이 날짜를 기준으로 정확한 연도를 포함해 계산하세요. "
+                        + "답변은 핵심 정보만 간결하게 전달하세요. 도구 결과에 품목별 분포처럼 긴 목록이 "
+                        + "포함돼 있어도 전부 나열하지 말고, 질문에 필요한 만큼만 요약해서 답하세요. "
+                        + "이 답변은 마크다운을 지원하지 않는 화면에 그대로 표시됩니다. **, *, #, |, - 같은 "
+                        + "마크다운 기호를 절대 쓰지 말고 일반 텍스트로만 작성하세요. 항목을 나열할 때는 "
+                        + "쉼표나 기호로 이어붙이지 말고, 항목마다 줄바꿈(\\n)으로 구분해 한 줄에 하나씩 쓰세요. "
+                        + "도구 결과에 없는 값은 절대 만들어내지 마세요. 질문이 요구하는 값을 도구가 실제로 "
+                        + "반환하지 않았다면, 다른 값을 대신 추정해서 확정된 답처럼 말하지 말고 해당 데이터가 "
+                        + "없다고 명확히 답하세요.")));
 
         for (int turn = 0; turn < MAX_TOOL_TURNS; turn++) {
-            AskContent modelContent = callAsk(contents, toolsWrapper);
+            AskContent modelContent = callAsk(contents, toolsWrapper, systemInstruction);
             contents.add(new AskContent("model", modelContent.parts()));
 
             List<AskPart.FunctionCallPart> functionCalls = modelContent.parts().stream()
@@ -129,10 +147,10 @@ class GeminiClient implements AiClient {
         throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED);
     }
 
-    private AskContent callAsk(List<AskContent> contents, List<ToolsWrapper> tools) {
+    private AskContent callAsk(List<AskContent> contents, List<ToolsWrapper> tools, SystemInstruction systemInstruction) {
         try {
             return retryExecutor.execute(() -> {
-                AskRequest request = new AskRequest(contents, tools);
+                AskRequest request = new AskRequest(systemInstruction, contents, tools);
                 AskResponse response = geminiRestClient.post()
                         .uri("/v1beta/models/{model}:generateContent", properties.chatModel())
                         .body(request)
@@ -240,7 +258,9 @@ class GeminiClient implements AiClient {
         record Part(String text) {}
     }
 
-    private record AskRequest(List<AskContent> contents, List<ToolsWrapper> tools) {}
+    private record AskRequest(SystemInstruction systemInstruction, List<AskContent> contents, List<ToolsWrapper> tools) {}
+
+    private record SystemInstruction(List<AskPart> parts) {}
 
     private record AskContent(String role, List<AskPart> parts) {}
 

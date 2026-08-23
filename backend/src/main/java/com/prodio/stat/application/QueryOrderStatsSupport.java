@@ -1,5 +1,6 @@
 package com.prodio.stat.application;
 
+import com.prodio.stat.domain.CancelledOrderDetail;
 import com.prodio.stat.domain.DashboardSummary;
 import com.prodio.stat.domain.OrderViewStatus;
 import com.prodio.stat.domain.ProductDistribution;
@@ -44,7 +45,8 @@ final class QueryOrderStatsSupport {
         }
     }
 
-    static String format(StatFilter filter, DashboardSummary summary, List<ProductDistribution> distribution) {
+    static String format(StatFilter filter, DashboardSummary summary, List<ProductDistribution> distribution,
+            List<CancelledOrderDetail> cancelledDetails) {
         StringBuilder result = new StringBuilder();
         result.append("조회 조건: ").append(describeFilter(filter)).append("\n");
         result.append("대기: ").append(summary.pendingCount()).append("건\n");
@@ -54,6 +56,14 @@ final class QueryOrderStatsSupport {
         result.append("취소: ").append(summary.cancelledCount()).append("건\n");
         result.append("전체: ").append(summary.totalCount()).append("건\n");
         result.append("완료 생산량: ").append(summary.completedQuantity()).append("\n");
+
+        if (!cancelledDetails.isEmpty()) {
+            result.append("취소 사유:\n");
+            for (CancelledOrderDetail detail : cancelledDetails) {
+                result.append("- 주문 #").append(detail.orderId()).append(" (").append(detail.clientName())
+                        .append("): ").append(detail.cancellationReason()).append("\n");
+            }
+        }
 
         if (distribution.isEmpty()) {
             return result.toString();

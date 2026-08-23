@@ -3,7 +3,10 @@ package com.prodio.stat.application;
 import com.prodio.infra.exception.InfraErrorCode;
 import com.prodio.infra.exception.InfraException;
 import com.prodio.stat.domain.AiQueryLog;
+import com.prodio.stat.domain.CancelledOrderDetail;
 import com.prodio.stat.domain.DashboardSummary;
+import com.prodio.stat.domain.OrderStatView;
+import com.prodio.stat.domain.OrderViewStatus;
 import com.prodio.stat.domain.ProductDistribution;
 import com.prodio.stat.domain.QueryType;
 import com.prodio.stat.domain.SourceType;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +43,7 @@ public class RagQaService {
     private final ClientEmbeddingRepository clientEmbeddingRepository;
     private final ProductionEmbeddingRepository productionEmbeddingRepository;
     private final StatDashboardRepository statDashboardRepository;
+    private final OrderStatViewRepository orderStatViewRepository;
     private final AiQueryLogRepository aiQueryLogRepository;
 
     public AiQueryLog ask(long adminId, String question) {
@@ -79,7 +84,29 @@ public class RagQaService {
             matchesByType.put(target, repositoryFor(target).search(queryVector, SearchNotesSupport.TOP_K));
         }
 
-        return SearchNotesSupport.format(SearchNotesSupport.mergeTopK(matchesByType, SearchNotesSupport.TOP_K));
+        List<SearchNotesSupport.LabeledMatch> matches =
+                SearchNotesSupport.mergeTopK(matchesByType, SearchNotesSupport.TOP_K);
+        return SearchNotesSupport.format(matches, currentStatusByOrderId(matches));
+    }
+
+    /**
+     * ORDER_NOTE/PRODUCTION_MEMO 매치의 refId(=orderId)로 현재 주문 상태를 조회한다.
+     * 임베딩 텍스트엔 노트/메모를 남긴 시점의 문맥만 남아있어 이후 상태 변화(배송 시작, 취소 등)를
+     * 반영 못 할 수 있으니, 답변 시점에 최신 상태를 매번 새로 붙여 stale한 텍스트만으로 잘못 판단하지
+     * 않게 한다. 재임베딩 이벤트를 늘리는 대신 답변 시점 조회 쪽을 택했다 — 상태가 바뀔 때마다 다시
+     * 임베딩(=Gemini 호출)하지 않아도 항상 최신값을 보장할 수 있다. CLIENT_MEMO(refId=clientId)는 대상 아님.
+     */
+    private Map<Long, OrderViewStatus> currentStatusByOrderId(List<SearchNotesSupport.LabeledMatch> matches) {
+        Map<Long, OrderViewStatus> statusByOrderId = new HashMap<>();
+        for (SearchNotesSupport.LabeledMatch labeled : matches) {
+            if (labeled.sourceType() == SourceType.CLIENT_MEMO) {
+                continue;
+            }
+            long orderId = labeled.match().refId();
+            statusByOrderId.computeIfAbsent(orderId, id -> orderStatViewRepository.findAllByOrderId(id).stream()
+                    .findFirst().map(OrderStatView::status).orElse(null));
+        }
+        return statusByOrderId;
     }
 
     private EmbeddingRepository repositoryFor(SourceType sourceType) {
@@ -100,8 +127,9 @@ public class RagQaService {
 
         DashboardSummary summary = statDashboardRepository.summarize(filter);
         List<ProductDistribution> distribution = statDashboardRepository.productDistribution(filter);
+        List<CancelledOrderDetail> cancelledDetails = statDashboardRepository.cancelledOrderDetails(filter);
 
-        return QueryOrderStatsSupport.format(filter, summary, distribution);
+        return QueryOrderStatsSupport.format(filter, summary, distribution, cancelledDetails);
     }
 
     private SourceType parseSourceType(String value) {
@@ -127,16 +155,28 @@ public class RagQaService {
         return List.of(
                 new ToolSpec(SEARCH_NOTES,
                         "주문 노트, 고객 메모, 생산 메모 등 비정형 텍스트에서 질문과 의미적으로 관련된 내용을 검색한다. "
-                                + "과거 기록, 특이사항, 문의 내용 등 정형 통계로 답할 수 없는 질문에 사용한다.",
+                                + "과거 기록, 특이사항, 문의 내용 등 정형 통계로 답할 수 없는 질문에 사용한다. "
+                                + "ORDER_NOTE/PRODUCTION_MEMO 결과는 '(현재 주문 상태: ...)'를 함께 반환하는데, "
+                                + "이건 노트를 남긴 시점이 아니라 지금 시점의 실제 상태다 — '아직 배송 안 된', "
+                                + "'취소된 것 빼고'처럼 상태 조건이 섞인 질문은 텍스트 내용만으로 판단하지 말고 "
+                                + "이 상태값을 기준으로 걸러라.",
                         List.of(
                                 new ToolParam("query", "검색할 질문 또는 키워드", true),
                                 new ToolParam("sourceType",
                                         "검색 대상: ORDER_NOTE(주문 노트), CLIENT_MEMO(고객 메모), "
-                                                + "PRODUCTION_MEMO(생산 메모), ALL(전체) 중 하나. 생략하면 ALL로 검색한다.",
+                                                + "PRODUCTION_MEMO(생산 메모), ALL(전체) 중 하나. 생략하면 ALL로 검색한다. "
+                                                + "질문에 등장하는 단어(예: '주문', '거래처')만으로 어떤 메모 종류인지 "
+                                                + "단정하지 말 것 — 셋 중 어디에 관련 내용이 있을지 확실하지 않으면 "
+                                                + "ALL을 사용한다. 좁혀서 검색했다가 실제로는 다른 종류에 있는 내용을 "
+                                                + "놓치는 것이, ALL로 검색해 관련 없는 결과가 조금 섞이는 것보다 나쁘다.",
                                         false)
                         )),
                 new ToolSpec(QUERY_ORDER_STATS,
-                        "특정 기간/상태의 주문 건수, 생산량 등 정형 통계를 조회한다. 매출/건수/생산량 등 숫자 질문에 사용한다.",
+                        "특정 기간/상태의 주문 건수, 생산량 등 정형 통계를 조회한다. 건수/생산량 등 숫자 질문에 사용한다. "
+                                + "이 도구는 원화 매출액(금액)을 계산하지 않는다 — 건수와 생산 수량만 준다. "
+                                + "status를 CANCELLED로 지정하면 해당 기간에 취소된 개별 주문의 취소 사유 목록도 "
+                                + "함께 반환한다 — '이번 달 취소 사유 알려줘' 같은 질문은 searchNotes로 자유 검색하지 "
+                                + "말고 이 도구를 status=CANCELLED, 정확한 기간과 함께 호출해라.",
                         List.of(
                                 new ToolParam("from", "조회 시작일(YYYY-MM-DD). 생략 가능", false),
                                 new ToolParam("to", "조회 종료일(YYYY-MM-DD). 생략 가능", false),
