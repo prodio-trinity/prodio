@@ -6,6 +6,7 @@ import { useClickOutside } from "@/features/shared/hooks/useClickOutside";
 import { useRagQa } from "../hooks/useRagQa";
 import { SOURCE_TYPE_LABELS } from "../types/stat";
 import { AiLogAccordionList } from "./AiLogAccordionList";
+import { AiSummarySkeleton } from "./AiSummarySkeleton";
 import styles from "./RagQaSection.module.css";
 
 type Tab = "ask" | "history";
@@ -83,45 +84,58 @@ export function RagQaSection() {
 
           {tab === "ask" ? (
             <div className={styles.tabContent}>
-              <form
-                className={styles.askForm}
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void ask();
-                }}
-              >
-                <input
-                  value={question}
-                  onChange={(event) => setQuestion(event.target.value)}
-                  placeholder="예: 지난달 매출이랑 배송 지연 이슈 같이 알려줘"
-                  className={styles.questionInput}
-                  disabled={asking}
-                />
-                <button
-                  type="submit"
-                  disabled={asking}
-                  className={styles.askButton}
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>질문</p>
+                <form
+                  className={styles.askForm}
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void ask();
+                  }}
                 >
-                  {asking ? "답변 생성 중..." : "질문"}
-                </button>
-              </form>
+                  <input
+                    value={question}
+                    onChange={(event) => setQuestion(event.target.value)}
+                    placeholder="예: 지난달 매출이랑 배송 지연 이슈 같이 알려줘"
+                    className={styles.questionInput}
+                    disabled={asking}
+                  />
+                  <button
+                    type="submit"
+                    disabled={asking}
+                    className={styles.askButton}
+                  >
+                    {asking ? "생성 중..." : "질문"}
+                  </button>
+                </form>
+              </div>
 
-              {askError ? <p className={styles.error}>{askError}</p> : null}
-
-              {result ? (
-                <div className={styles.resultBox}>
-                  {result.sourceType ? (
-                    <span className={styles.badge}>
-                      {SOURCE_TYPE_LABELS[result.sourceType]} 참고
-                    </span>
-                  ) : null}
-                  <p className={styles.resultText}>{result.response}</p>
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>답변</p>
+                <div className={styles.answerBox}>
+                  {asking ? (
+                    <AiSummarySkeleton lines={3} />
+                  ) : askError ? (
+                    <p className={styles.error}>{askError}</p>
+                  ) : result ? (
+                    <>
+                      <p className={styles.answeredQuestion}>
+                        {result.question}
+                      </p>
+                      {result.sourceType ? (
+                        <span className={styles.badge}>
+                          {SOURCE_TYPE_LABELS[result.sourceType]} 참고
+                        </span>
+                      ) : null}
+                      <p className={styles.resultText}>{result.response}</p>
+                    </>
+                  ) : (
+                    <p className={styles.placeholder}>
+                      질문을 입력하면 이곳에 답변이 표시됩니다.
+                    </p>
+                  )}
                 </div>
-              ) : (
-                <p className={styles.placeholder}>
-                  궁금한 걸 자유롭게 물어보세요.
-                </p>
-              )}
+              </div>
             </div>
           ) : (
             <div className={styles.tabContent}>

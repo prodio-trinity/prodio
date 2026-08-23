@@ -147,6 +147,17 @@
   overflow-y: auto;
 }
 
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sectionLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
 .askForm {
   display: flex;
   gap: 8px;
@@ -187,23 +198,28 @@
 }
 
 .error {
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
   color: var(--color-danger);
   font-size: 13px;
+  line-height: 1.6;
 }
 .placeholder {
   color: var(--color-text-secondary);
   font-size: 13px;
 }
 
-.resultBox {
+.answerBox {
   display: grid;
   gap: 8px;
+  align-content: start;
+  min-height: 88px;
   padding: 16px;
   border-radius: 14px;
   background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+.answeredQuestion {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
 }
 .badge {
   justify-self: start;
