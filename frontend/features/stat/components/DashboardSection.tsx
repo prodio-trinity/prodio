@@ -108,8 +108,8 @@ export function DashboardSection({
   return (
     <>
       <header className={styles.header}>
-        <span className={styles.eyebrow}>STATISTICS</span>
-        <h1>통계 대시보드</h1>
+        <span className={styles.eyebrow}>DASHBOARD</span>
+        <h1>대시보드</h1>
         <p>기간별 주문 현황과 생산 통계를 확인합니다.</p>
       </header>
 
