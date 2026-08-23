@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useClickOutside } from "@/features/shared/hooks/useClickOutside";
 import type { useAiSummary } from "../hooks/useAiSummary";
 import { useStatDashboard } from "../hooks/useStatDashboard";
 import {
@@ -15,6 +15,7 @@ import {
   thisWeekRange,
 } from "../utils/dateRanges";
 import { AiGeneratingIndicator } from "./AiGeneratingIndicator";
+import { AiLogAccordionList } from "./AiLogAccordionList";
 import { AiSummarySkeleton } from "./AiSummarySkeleton";
 import styles from "./DashboardSection.module.css";
 
@@ -47,13 +48,6 @@ function formatShortDate(value: string) {
   return `${month}.${day}`;
 }
 
-function formatLogDate(value: string) {
-  return new Date(value).toLocaleString("ko-KR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  });
-}
-
 export function DashboardSection({
   draft,
   onDraftChange,
@@ -66,23 +60,10 @@ export function DashboardSection({
     useStatDashboard(filters);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const historyRef = useRef<HTMLDivElement>(null);
-  const aiPreviewText =
-    aiSummary.result?.response ?? aiSummary.logs[0]?.response ?? null;
+  const aiPreviewText = aiSummary.result?.response ?? null;
 
-  useEffect(() => {
-    if (!historyOpen) return;
-
-    function handleClickOutside(event: MouseEvent) {
-      if (!historyRef.current?.contains(event.target as Node)) {
-        setHistoryOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [historyOpen]);
+  useClickOutside(historyRef, historyOpen, () => setHistoryOpen(false));
 
   const topDistribution = [...distribution]
     .sort((a, b) => b.orderCount - a.orderCount)
@@ -296,60 +277,12 @@ export function DashboardSection({
                       </button>
                       {historyOpen ? (
                         <div className={styles.aiHistoryPopover}>
-                          {aiSummary.logsError ? (
-                            <p className={styles.error}>
-                              {aiSummary.logsError}
-                            </p>
-                          ) : null}
-                          {!aiSummary.logsError && aiSummary.logsLoading ? (
-                            <p className={styles.placeholder}>불러오는 중...</p>
-                          ) : null}
-                          {!aiSummary.logsError &&
-                          !aiSummary.logsLoading &&
-                          aiSummary.logs.length === 0 ? (
-                            <p className={styles.placeholder}>
-                              아직 생성한 요약이 없습니다.
-                            </p>
-                          ) : null}
-                          {aiSummary.logs.map((log) => {
-                            const isExpanded = expandedLogId === log.id;
-                            return (
-                              <div
-                                key={log.id}
-                                className={styles.aiHistoryItem}
-                                data-expanded={isExpanded}
-                              >
-                                <button
-                                  type="button"
-                                  className={styles.aiHistoryRow}
-                                  onClick={() =>
-                                    setExpandedLogId(isExpanded ? null : log.id)
-                                  }
-                                  aria-expanded={isExpanded}
-                                >
-                                  <div className={styles.aiHistoryRowText}>
-                                    <span
-                                      className={styles.aiHistoryItemQuestion}
-                                    >
-                                      {log.question}
-                                    </span>
-                                    <span className={styles.aiHistoryItemDate}>
-                                      {formatLogDate(log.requestedAt)}
-                                    </span>
-                                  </div>
-                                  <ChevronDown
-                                    size={14}
-                                    className={styles.aiHistoryChevron}
-                                  />
-                                </button>
-                                {isExpanded ? (
-                                  <p className={styles.aiHistoryAnswer}>
-                                    {log.response}
-                                  </p>
-                                ) : null}
-                              </div>
-                            );
-                          })}
+                          <AiLogAccordionList
+                            logs={aiSummary.logs}
+                            loading={aiSummary.logsLoading}
+                            error={aiSummary.logsError}
+                            emptyMessage="아직 생성한 요약이 없습니다."
+                          />
                         </div>
                       ) : null}
                     </div>

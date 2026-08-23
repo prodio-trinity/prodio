@@ -1,24 +1,19 @@
 "use client";
 
-import { Bot, ChevronDown, MessageCircle, X } from "lucide-react";
-import { useState } from "react";
+import { Bot, MessageCircle, X } from "lucide-react";
+import { useRef, useState } from "react";
+import { useClickOutside } from "@/features/shared/hooks/useClickOutside";
 import { useRagQa } from "../hooks/useRagQa";
 import { SOURCE_TYPE_LABELS } from "../types/stat";
+import { AiLogAccordionList } from "./AiLogAccordionList";
 import styles from "./RagQaSection.module.css";
 
 type Tab = "ask" | "history";
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleString("ko-KR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  });
-}
-
 export function RagQaSection() {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("ask");
-  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const {
     question,
     setQuestion,
@@ -31,8 +26,10 @@ export function RagQaSection() {
     logsError,
   } = useRagQa();
 
+  useClickOutside(containerRef, open, () => setOpen(false));
+
   return (
-    <>
+    <div ref={containerRef}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -128,67 +125,21 @@ export function RagQaSection() {
             </div>
           ) : (
             <div className={styles.tabContent}>
-              {logsError ? <p className={styles.error}>{logsError}</p> : null}
-              {!logsError && logsLoading ? (
-                <p className={styles.placeholder}>불러오는 중...</p>
-              ) : null}
-              {!logsError && !logsLoading && logs.length === 0 ? (
-                <p className={styles.placeholder}>
-                  아직 질의응답 이력이 없습니다.
-                </p>
-              ) : null}
-              {logs.length > 0 ? (
-                <div className={styles.logList}>
-                  {logs.map((log) => {
-                    const isExpanded = expandedLogId === log.id;
-                    return (
-                      <div
-                        key={log.id}
-                        className={styles.logItem}
-                        data-expanded={isExpanded}
-                      >
-                        <button
-                          type="button"
-                          className={styles.logRow}
-                          onClick={() =>
-                            setExpandedLogId(isExpanded ? null : log.id)
-                          }
-                          aria-expanded={isExpanded}
-                        >
-                          <div className={styles.logRowText}>
-                            <span className={styles.logQuestion}>
-                              {log.question}
-                            </span>
-                            <span className={styles.logDate}>
-                              {formatDate(log.requestedAt)}
-                            </span>
-                          </div>
-                          <ChevronDown
-                            size={16}
-                            className={styles.logChevron}
-                          />
-                        </button>
-                        {isExpanded ? (
-                          <div className={styles.logAnswer}>
-                            {log.sourceType ? (
-                              <span className={styles.badge}>
-                                {SOURCE_TYPE_LABELS[log.sourceType]} 참고
-                              </span>
-                            ) : null}
-                            <p className={styles.logAnswerText}>
-                              {log.response}
-                            </p>
-                          </div>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null}
+              <AiLogAccordionList
+                logs={logs}
+                loading={logsLoading}
+                error={logsError}
+                emptyMessage="아직 질의응답 이력이 없습니다."
+                badgeText={(log) =>
+                  log.sourceType
+                    ? `${SOURCE_TYPE_LABELS[log.sourceType]} 참고`
+                    : null
+                }
+              />
             </div>
           )}
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
