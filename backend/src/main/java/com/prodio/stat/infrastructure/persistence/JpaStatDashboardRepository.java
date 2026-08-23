@@ -1,6 +1,7 @@
 package com.prodio.stat.infrastructure.persistence;
 
 import com.prodio.stat.application.StatDashboardRepository;
+import com.prodio.stat.domain.CancelledOrderDetail;
 import com.prodio.stat.domain.DailyProduction;
 import com.prodio.stat.domain.DashboardSummary;
 import com.prodio.stat.domain.OrderViewStatus;
@@ -65,6 +66,20 @@ class JpaStatDashboardRepository implements StatDashboardRepository {
         return orderStatViews.productDistribution(from, to, filter.status()).stream()
                 .map(row -> new ProductDistribution(
                         row.getProductId(), row.getProductName(), row.getOrderCount(), row.getTotalQuantity()))
+                .toList();
+    }
+
+    @Override
+    public List<CancelledOrderDetail> cancelledOrderDetails(StatFilter filter) {
+        if (filter.status() != OrderViewStatus.CANCELLED) {
+            return List.of();
+        }
+
+        OffsetDateTime from = toStartOfDay(filter.from());
+        OffsetDateTime to = toExclusiveEnd(filter.to());
+
+        return orderStatViews.cancelledOrderDetails(from, to).stream()
+                .map(row -> new CancelledOrderDetail(row.getOrderId(), row.getClientName(), row.getCancellationReason()))
                 .toList();
     }
 

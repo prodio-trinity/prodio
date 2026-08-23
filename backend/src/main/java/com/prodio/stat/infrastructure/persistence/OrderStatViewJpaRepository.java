@@ -68,6 +68,17 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
             """, nativeQuery = true)
     List<CompletedRow> findCompletedInRange(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
 
+    /** 주문 하나가 다품목이라 row가 여러 개지만 client_name/cancellation_reason은 주문 단위로 동일해 distinct로 1건씩 묶는다. */
+    @Query(value = """
+            select distinct order_id as orderId, client_name as clientName, cancellation_reason as cancellationReason
+            from statistics_order_view
+            where status = 'CANCELLED'
+              and (cast(:from as timestamptz) is null or order_created_at >= cast(:from as timestamptz))
+              and (cast(:to as timestamptz) is null or order_created_at < cast(:to as timestamptz))
+            order by order_id
+            """, nativeQuery = true)
+    List<CancelledOrderRow> cancelledOrderDetails(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
+
     interface StatusCount {
         OrderViewStatus getStatus();
         long getCount();
@@ -91,5 +102,11 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
     interface CompletedRow {
         Instant getCompletedAt();
         int getQuantity();
+    }
+
+    interface CancelledOrderRow {
+        long getOrderId();
+        String getClientName();
+        String getCancellationReason();
     }
 }
