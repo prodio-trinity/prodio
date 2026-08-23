@@ -21,29 +21,35 @@ export function useStatDashboard(filters: StatFilters) {
   useEffect(() => {
     let cancelled = false;
 
-    Promise.all([
+    Promise.allSettled([
       statService.dashboard(filters),
       statService.products(filters),
       statService.dailyProduction(filters),
-    ])
-      .then(([summaryResult, distributionResult, dailyResult]) => {
-        if (cancelled) return;
-        setSummary(summaryResult);
-        setDistribution(distributionResult);
-        setDaily(dailyResult);
-        setLoadError("");
-      })
-      .catch((cause: unknown) => {
-        if (cancelled) return;
-        setLoadError(
-          cause instanceof Error
-            ? cause.message
-            : "통계를 불러오지 못했습니다.",
-        );
-      })
-      .finally(() => {
-        if (!cancelled) setLoadedFilters(filters);
-      });
+    ]).then(([summaryResult, distributionResult, dailyResult]) => {
+      if (cancelled) return;
+
+      if (summaryResult.status === "fulfilled") {
+        setSummary(summaryResult.value);
+      }
+      if (distributionResult.status === "fulfilled") {
+        setDistribution(distributionResult.value);
+      }
+      if (dailyResult.status === "fulfilled") {
+        setDaily(dailyResult.value);
+      }
+
+      const failed = [summaryResult, distributionResult, dailyResult].find(
+        (result) => result.status === "rejected",
+      );
+      setLoadError(
+        failed
+          ? failed.reason instanceof Error
+            ? failed.reason.message
+            : "통계를 불러오지 못했습니다."
+          : "",
+      );
+      setLoadedFilters(filters);
+    });
 
     return () => {
       cancelled = true;
