@@ -73,8 +73,8 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
             select distinct order_id as orderId, client_name as clientName, cancellation_reason as cancellationReason
             from statistics_order_view
             where status = 'CANCELLED'
-              and (cast(:from as timestamptz) is null or order_created_at >= cast(:from as timestamptz))
-              and (cast(:to as timestamptz) is null or order_created_at < cast(:to as timestamptz))
+              and (cast(:from as timestamptz) is null or cancelled_at >= cast(:from as timestamptz))
+              and (cast(:to as timestamptz) is null or cancelled_at < cast(:to as timestamptz))
             order by order_id
             """, nativeQuery = true)
     List<CancelledOrderRow> cancelledOrderDetails(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
