@@ -6,12 +6,15 @@ import com.prodio.stat.domain.DashboardSummary;
 import com.prodio.stat.domain.OrderViewStatus;
 import com.prodio.stat.domain.ProductDistribution;
 import com.prodio.stat.domain.StatFilter;
+import com.prodio.stat.exception.StatErrorCode;
+import com.prodio.stat.exception.StatException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +25,7 @@ import java.util.TreeMap;
 class JpaStatDashboardRepository implements StatDashboardRepository {
     /** 일별 생산량 차트에서 from/to가 둘 다 없을 때 기본으로 보여줄 범위(오늘 포함 최근 N일). */
     private static final int DEFAULT_DAILY_RANGE_DAYS = 14;
+    private static final long MAX_DAILY_RANGE_DAYS = 366;
 
     private final OrderStatViewJpaRepository orderStatViews;
     private final Clock clock;
@@ -31,20 +35,17 @@ class JpaStatDashboardRepository implements StatDashboardRepository {
         OffsetDateTime from = toStartOfDay(filter.from());
         OffsetDateTime to = toExclusiveEnd(filter.to());
 
-        String status = filter.status() == null ? null : filter.status().name();
-
         Map<OrderViewStatus, Long> counts = new EnumMap<>(OrderViewStatus.class);
         for (OrderViewStatus value : OrderViewStatus.values()) {
             counts.put(value, 0L);
         }
         long total = 0;
-        for (OrderStatViewJpaRepository.StatusCount row : orderStatViews.countByStatus(from, to, status)) {
+        for (OrderStatViewJpaRepository.StatusCount row : orderStatViews.countByStatus(from, to, filter.status())) {
             counts.put(row.getStatus(), row.getCount());
             total += row.getCount();
         }
 
-        OrderStatViewJpaRepository.CompletedAggregate completed =
-                orderStatViews.completedAggregate(from, to, status);
+        OrderStatViewJpaRepository.CompletedAggregate completed = orderStatViews.completedAggregate(from, to);
 
         return new DashboardSummary(
                 counts.get(OrderViewStatus.PENDING),
@@ -61,9 +62,7 @@ class JpaStatDashboardRepository implements StatDashboardRepository {
         OffsetDateTime from = toStartOfDay(filter.from());
         OffsetDateTime to = toExclusiveEnd(filter.to());
 
-        String status = filter.status() == null ? null : filter.status().name();
-
-        return orderStatViews.productDistribution(from, to, status).stream()
+        return orderStatViews.productDistribution(from, to, filter.status()).stream()
                 .map(row -> new ProductDistribution(
                         row.getProductId(), row.getProductName(), row.getOrderCount(), row.getTotalQuantity()))
                 .toList();
@@ -74,7 +73,9 @@ class JpaStatDashboardRepository implements StatDashboardRepository {
         LocalDate to = filter.to() != null ? filter.to() : LocalDate.now(clock);
         LocalDate from = filter.from() != null ? filter.from() : to.minusDays(DEFAULT_DAILY_RANGE_DAYS - 1L);
 
-        String status = filter.status() == null ? null : filter.status().name();
+        if (ChronoUnit.DAYS.between(from, to) > MAX_DAILY_RANGE_DAYS) {
+            throw new StatException(StatErrorCode.STAT_DATE_RANGE_TOO_WIDE);
+        }
 
         Map<LocalDate, Long> quantityByDate = new TreeMap<>();
         for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
@@ -82,7 +83,7 @@ class JpaStatDashboardRepository implements StatDashboardRepository {
         }
 
         List<OrderStatViewJpaRepository.CompletedRow> rows =
-                orderStatViews.findCompletedInRange(toStartOfDay(from), toExclusiveEnd(to), status);
+                orderStatViews.findCompletedInRange(toStartOfDay(from), toExclusiveEnd(to));
         for (OrderStatViewJpaRepository.CompletedRow row : rows) {
             LocalDate date = row.getCompletedAt().atZone(clock.getZone()).toLocalDate();
             quantityByDate.merge(date, (long) row.getQuantity(), Long::sum);

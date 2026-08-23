@@ -196,7 +196,7 @@ export function DashboardSection({
         ) : (
           <div className={styles.body}>
             <div className={styles.column}>
-              <p className={styles.metricLabel}>기간 내 총 생산량</p>
+              <p className={styles.metricLabel}>기간 내 완료 생산량</p>
               <p className={styles.metricValue}>
                 {(summary?.completedQuantity ?? 0).toLocaleString()}
                 <span className={styles.metricUnit}>EA</span>
@@ -384,7 +384,7 @@ export function DashboardSection({
             </div>
 
             <div className={styles.column}>
-              <h3 className={styles.subheading}>상태별 현황</h3>
+              <h3 className={styles.subheading}>주문 현황</h3>
 
               {totalCount === 0 ? (
                 <div className={styles.stackedBar}>

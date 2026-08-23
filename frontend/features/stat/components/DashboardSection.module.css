@@ -435,7 +435,7 @@
   color: var(--color-text-primary);
 }
 
-/* 우측: 상태별 현황 */
+/* 우측: 주문 현황 */
 .subheading {
   margin: 0 0 14px;
   font-size: 15px;
