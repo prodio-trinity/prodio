@@ -132,7 +132,11 @@ public class RagQaService {
                                 new ToolParam("query", "검색할 질문 또는 키워드", true),
                                 new ToolParam("sourceType",
                                         "검색 대상: ORDER_NOTE(주문 노트), CLIENT_MEMO(고객 메모), "
-                                                + "PRODUCTION_MEMO(생산 메모), ALL(전체) 중 하나. 생략하면 ALL로 검색한다.",
+                                                + "PRODUCTION_MEMO(생산 메모), ALL(전체) 중 하나. 생략하면 ALL로 검색한다. "
+                                                + "질문에 등장하는 단어(예: '주문', '거래처')만으로 어떤 메모 종류인지 "
+                                                + "단정하지 말 것 — 셋 중 어디에 관련 내용이 있을지 확실하지 않으면 "
+                                                + "ALL을 사용한다. 좁혀서 검색했다가 실제로는 다른 종류에 있는 내용을 "
+                                                + "놓치는 것이, ALL로 검색해 관련 없는 결과가 조금 섞이는 것보다 나쁘다.",
                                         false)
                         )),
                 new ToolSpec(QUERY_ORDER_STATS,
