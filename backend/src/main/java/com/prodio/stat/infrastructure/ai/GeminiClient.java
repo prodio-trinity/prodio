@@ -229,14 +229,20 @@ class GeminiClient implements AiClient {
 
     private record AskContent(String role, List<AskPart> parts) {}
 
+    /**
+     * thinking 모델은 자신이 생성한 functionCall 파트의 thoughtSignature를 다음 턴에 그대로 돌려받지 못하면
+     * "missing thought_signature" 400 에러를 낸다. 그래서 모델이 준 functionCall 파트를 다음 턴 contents에
+     * 그대로 append할 때 이 값도 함께 보존해야 한다(우리가 직접 만드는 파트는 null로 둔다).
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private record AskPart(String text, FunctionCallPart functionCall, FunctionResponsePart functionResponse) {
+    private record AskPart(String text, FunctionCallPart functionCall, FunctionResponsePart functionResponse,
+            String thoughtSignature) {
         static AskPart text(String text) {
-            return new AskPart(text, null, null);
+            return new AskPart(text, null, null, null);
         }
 
         static AskPart functionResponse(String name, String result) {
-            return new AskPart(null, null, new FunctionResponsePart(name, Map.of("result", result)));
+            return new AskPart(null, null, new FunctionResponsePart(name, Map.of("result", result)), null);
         }
 
         record FunctionCallPart(String name, Map<String, Object> args) {}
