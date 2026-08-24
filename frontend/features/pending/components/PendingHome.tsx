@@ -2,24 +2,32 @@ import Link from "next/link";
 import styles from "./Pending.module.css";
 
 const PRODUCTS = [
-  { badge: "정밀 가공", name: "맞춤형 금속 부품", description: "도면과 요구 규격에 맞춘 정밀 부품 생산을 지원합니다." },
-  { badge: "소량 생산", name: "시제품 제작", description: "개발 단계의 시제품부터 반복 생산까지 유연하게 대응합니다." },
-  { badge: "품질 관리", name: "생산 이력 관리", description: "주문부터 생산·납품까지 진행 이력을 한곳에서 확인할 수 있습니다." },
+  {
+    badge: "품목 카탈로그",
+    name: "필요한 품목을 간편하게",
+    description: "다양한 품목을 카탈로그에서 확인하고 원하는 품목을 선택해 주문할 수 있습니다.",
+  },
+  {
+    badge: "생산 관리",
+    name: "주문부터 납품까지 한눈에",
+    description: "주문한 품목의 생산 진행 상황과 납품 상태를 단계별로 확인하고, 상태가 변경될 때마다 알림을 받을 수 있습니다.",
+  },
+  {
+    badge: "배송 관리",
+    name: "배송까지 편리하게",
+    description: "자주 사용하는 배송지를 등록해두고 주문할 때마다 간편하게 선택할 수 있습니다.",
+  },
 ];
 
 export function PendingHome() {
   return <div className={styles.page}>
-    <section className={styles.notice}>
-      <strong>거래처 등록이 필요합니다.</strong>
-      <p>주문과 납품 서비스를 이용하려면 먼저 사업자 정보를 등록해 주세요.</p>
-    </section>
     <section className={styles.hero}>
       <div className={styles.heroCopy}>
         <span className={styles.eyebrow}>PRODIO FOR BUSINESS</span>
         <h1>생산 주문을 더 간단하고 정확하게</h1>
         <p>거래처 등록 후 품목별 주문, 생산 진행 확인, 배송 정보 관리를 이용할 수 있습니다.</p>
       </div>
-      <div className={styles.heroAction}><Link className={styles.primary} href="/pending/registration">거래처 등록 정보 입력</Link></div>
+      <div className={styles.heroAction}><Link className={styles.primary} href="/pending/registration">거래처 등록 신청</Link></div>
     </section>
     <section className={styles.section}>
       <h2>Prodio 주요 서비스</h2>
