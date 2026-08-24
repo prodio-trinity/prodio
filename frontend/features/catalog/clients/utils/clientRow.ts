@@ -82,7 +82,7 @@ export function validateClientRow(row: EditableClientRow): string | null {
     return "사업자등록번호는 000-00-00000 형식으로 입력해 주세요.";
   }
   if (row.phone && !PHONE_PATTERN.test(row.phone)) {
-    return "연락처는 010-0000-0000 또는 02-0000-0000 형식으로 입력해 주세요.";
+    return "전화번호 형식이 올바르지 않습니다. 하이픈(-)을 포함하여 입력해주세요.";
   }
   return null;
 }

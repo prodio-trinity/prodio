@@ -22,7 +22,7 @@ export function validateRegistration(values: RegistrationSubmitRequest): Registr
   }
 
   if (values.phone && !PHONE_PATTERN.test(values.phone)) {
-    errors.phone = "010-0000-0000 또는 02-0000-0000 형식으로 입력해 주세요.";
+    errors.phone = "전화번호 형식이 올바르지 않습니다. 하이픈(-)을 포함하여 입력해주세요.";
   }
 
   return errors;

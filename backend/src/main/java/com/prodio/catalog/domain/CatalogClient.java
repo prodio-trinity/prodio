@@ -15,7 +15,7 @@ public record CatalogClient(
 ) {
     public CatalogClient {
         if (companyName == null || companyName.isBlank()) {
-            throw new IllegalArgumentException("companyName은 비어 있을 수 없습니다.");
+            throw new IllegalArgumentException("회사명은 비어 있을 수 없습니다.");
         }
     }
 

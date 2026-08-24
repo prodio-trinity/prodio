@@ -9,7 +9,7 @@ public record CatalogSubCategory(
 ) {
     public CatalogSubCategory {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("name은 비어 있을 수 없습니다.");
+            throw new IllegalArgumentException("소분류 이름은 비어 있을 수 없습니다.");
         }
     }
 

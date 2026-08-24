@@ -15,10 +15,10 @@ public record CatalogProduct(
 ) {
     public CatalogProduct {
         if (productName == null || productName.isBlank()) {
-            throw new IllegalArgumentException("productName은 비어 있을 수 없습니다.");
+            throw new IllegalArgumentException("품목명은 비어 있을 수 없습니다.");
         }
         if (unitPrice == null || unitPrice.signum() < 0) {
-            throw new IllegalArgumentException("unitPrice는 0 이상이어야 합니다.");
+            throw new IllegalArgumentException("단가는 0 이상이어야 합니다.");
         }
     }
 
