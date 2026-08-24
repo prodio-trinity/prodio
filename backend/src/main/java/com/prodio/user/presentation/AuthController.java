@@ -10,6 +10,7 @@ import com.prodio.user.domain.UserAccount;
 import com.prodio.user.infrastructure.security.ProdioPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +34,7 @@ class AuthController {
     private final SignupService signupService;
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
+    private final SessionRegistry sessionRegistry;
 
     record SignupRequest(String email, String password, String name) {}
 
@@ -64,6 +67,12 @@ class AuthController {
         securityContextRepository.saveContext(context, httpRequest, httpResponse);
 
         ProdioPrincipal principal = (ProdioPrincipal) authenticated.getPrincipal();
+
+        HttpSession session = httpRequest.getSession(false);
+        if (session != null) {
+            sessionRegistry.registerNewSession(session.getId(), principal);
+        }
+
         Set<String> roles = new LinkedHashSet<>(authenticated.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .filter(Objects::nonNull)

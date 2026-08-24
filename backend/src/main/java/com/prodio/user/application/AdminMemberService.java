@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminMemberService {
     private final AdminMemberQueryRepository queryRepository;
     private final UserRoleRepository userRoleRepository;
+    private final UserSessionInvalidator sessionInvalidator;
 
     public AdminMemberPage list(String query, int page, int size) {
         return queryRepository.findMembers(query, page, size);
@@ -31,6 +32,7 @@ public class AdminMemberService {
         }
 
         userRoleRepository.replaceRoles(targetUserId, roles.codes());
+        sessionInvalidator.invalidateSessionsOf(targetUserId);
 
         return new AdminMember(target.id(), target.email(), target.name(), target.status(), roles.codes());
     }
