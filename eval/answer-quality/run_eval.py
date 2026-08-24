@@ -128,9 +128,12 @@ def judge(question: str, rubric: str, answer: str, api_key: str, retries: int = 
 
 
 def run(base_url: str, dataset_path: Path, email: str, password: str, api_key: str,
-        limit: int = None, category: str = None):
+        limit: int = None, category: str = None, ids: list = None):
     dataset = json.loads(dataset_path.read_text(encoding="utf-8"))
     cases = dataset["cases"]
+    if ids:
+        wanted = set(ids)
+        cases = [c for c in cases if c["id"] in wanted]
     if category:
         cases = [c for c in cases if c["category"] == category]
     if limit:
@@ -231,6 +234,7 @@ def main():
     parser.add_argument("--limit", type=int, default=None, help="앞에서부터 N개 케이스만 실행 (디버깅용)")
     parser.add_argument("--category", default=None,
                          help="특정 카테고리만 실행: structured/unstructured/mixed/edge")
+    parser.add_argument("--ids", default=None, help="특정 케이스 id만 콤마로 구분해서 실행 (예: U04,U08)")
     args = parser.parse_args()
 
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -238,8 +242,9 @@ def main():
         print("GEMINI_API_KEY 환경변수가 없습니다. `export GEMINI_API_KEY=...` 후 다시 실행하세요.", file=sys.stderr)
         sys.exit(1)
 
+    ids = [i.strip() for i in args.ids.split(",")] if args.ids else None
     result = run(args.base_url, Path(args.dataset), args.email, args.password, api_key,
-                 args.limit, args.category)
+                 args.limit, args.category, ids)
     print_summary(result)
 
     out_path = Path(args.out) if args.out else Path(__file__).parent / "results" / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
