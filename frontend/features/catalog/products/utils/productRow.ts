@@ -1,6 +1,6 @@
 import type { CatalogSubCategory } from "./product";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 
 export interface ProductListItem {
   id: number;

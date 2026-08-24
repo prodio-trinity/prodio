@@ -10,7 +10,7 @@ export type EditableTextField =
   | "managerName"
   | "memo";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 
 export function initialFilters(): ClientFilters {
   return { keyword: "", isActive: null, page: 0, size: PAGE_SIZE };
