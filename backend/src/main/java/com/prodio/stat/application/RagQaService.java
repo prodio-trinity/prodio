@@ -19,6 +19,7 @@ import com.prodio.stat.embedding.application.ProductionEmbeddingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -53,6 +54,20 @@ public class RagQaService {
 
         AiQueryLog log = AiQueryLog.ragQa(adminId, resolveSourceType(usedSourceTypes), question, response);
         return aiQueryLogRepository.save(log);
+    }
+
+    /**
+     * 함수 호출 라우팅만 평가하기 위한 dry-run. Gemini가 어떤 tool을 어떤 인자로 부르는지만 기록하고,
+     * 실제 검색/조회(DB, 임베딩)는 전혀 실행하지 않는다 — 그래서 검색 품질과 무관하게 라우팅 정확도만
+     * 순수하게 잰다. AiQueryLog에도 남기지 않는다(실사용 질의가 아니라 평가용 호출이므로).
+     */
+    public List<ToolCall> route(String question) {
+        List<ToolCall> recordedCalls = new ArrayList<>();
+        aiClient.ask(question, tools(), toolCall -> {
+            recordedCalls.add(toolCall);
+            return "[평가용 응답] 요청하신 내용을 확인했습니다.";
+        });
+        return recordedCalls;
     }
 
     public AiQueryLogPage getAskLogs(long adminId, int page, int size) {

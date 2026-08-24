@@ -259,4 +259,27 @@ class RagQaServiceTest {
 
         assertThat(result).isSameAs(page);
     }
+
+    @Test
+    @DisplayName("route는 실제 검색/조회 없이 어떤 tool이 어떤 인자로 호출됐는지만 기록해 반환한다")
+    void routeRecordsToolCallsWithoutExecutingThem() {
+        ToolCall call = new ToolCall("queryOrderStats", Map.of("status", "cancelled"));
+        simulateToolCalls("[평가용 응답] 요청하신 내용을 확인했습니다.", call);
+
+        List<ToolCall> result = service.route("이번 달 취소된 주문 사유 알려줘");
+
+        assertThat(result).containsExactly(call);
+        verifyNoInteractions(orderEmbeddingRepository, clientEmbeddingRepository, productionEmbeddingRepository,
+                statDashboardRepository, orderStatViewRepository, aiQueryLogRepository);
+    }
+
+    @Test
+    @DisplayName("route는 tool을 전혀 안 쓰면 빈 목록을 반환한다")
+    void routeReturnsEmptyWhenNoToolUsed() {
+        simulateToolCalls("안녕하세요! 무엇을 도와드릴까요?");
+
+        List<ToolCall> result = service.route("안녕");
+
+        assertThat(result).isEmpty();
+    }
 }
