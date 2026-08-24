@@ -64,8 +64,8 @@ public class ProductionService {
     }
 
     @Transactional(readOnly = true)
-    public ProductionRecord getProductionInfo(Long productionId) {
-        return repository.findProductionInfo(productionId);
+    public ProductionRecord getProductionInfoByOrderId(Long orderId) {
+        return repository.findProductionInfoByOrderId(orderId);
     }
 
     @Transactional

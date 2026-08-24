@@ -62,8 +62,8 @@ public class JpaProductionRepository implements ProductionRepository {
     }
 
     @Override
-    public ProductionRecord findProductionInfo(Long productionId) {
-        ProductionRecordEntity entity = springDataProductionRepository.findById(productionId)
+    public ProductionRecord findProductionInfoByOrderId(Long orderId) {
+        ProductionRecordEntity entity = springDataProductionRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ProductionException(ProductionErrorCode.PRODUCTION_NOT_FOUND));
         return entity.toDomain();
     }
