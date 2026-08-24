@@ -20,6 +20,12 @@ class JpaCatalogSubCategoryRepository implements CatalogSubCategoryRepository {
     }
 
     @Override
+    public Optional<CatalogSubCategory> findById(Long id) {
+        return springDataCatalogSubCategoryRepository.findById(id)
+                .map(CatalogSubCategoryEntity::toDomain);
+    }
+
+    @Override
     public List<CatalogSubCategory> findAll(Boolean isActive) {
         List<CatalogSubCategoryEntity> entities = Boolean.TRUE.equals(isActive)
                 ? springDataCatalogSubCategoryRepository.findByActiveTrue()

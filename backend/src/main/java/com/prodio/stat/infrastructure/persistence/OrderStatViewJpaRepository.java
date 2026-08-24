@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -12,39 +13,71 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
     List<OrderStatViewEntity> findAllByOrderId(long orderId);
     void deleteAllByOrderId(long orderId);
 
-    @Query("""
-            select v.status as status, count(v) as count
-            from OrderStatViewEntity v
-            where (:from is null or v.orderCreatedAt >= :from)
-              and (:to is null or v.orderCreatedAt < :to)
-              and (:status is null or v.status = :status)
-            group by v.status
-            """)
-    List<StatusCount> countByStatus(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
-            @Param("status") OrderViewStatus status);
+    /**
+     * from/to/status 파라미터를 JPQL에 두 번(is null 체크 + 비교) 쓰면 Hibernate가 이를 서로 다른
+     * JDBC 파라미터로 각각 바인딩하는데, is null 쪽은 타입을 유추할 문맥이 없어 PostgreSQL이
+     * "could not determine data type of parameter"를 던진다. native SQL로 CAST를 명시해 우회한다.
+     */
+    @Query(value = """
+            select status, count(id) as count
+            from statistics_order_view
+            where (cast(:from as timestamptz) is null or order_created_at >= cast(:from as timestamptz))
+              and (cast(:to as timestamptz) is null or order_created_at < cast(:to as timestamptz))
+              and (cast(:status as varchar) is null or status = cast(:status as varchar))
+            group by status
+            """, nativeQuery = true)
+    List<StatusCount> countByStatusNative(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
+            @Param("status") String status);
 
-    @Query("""
-            select coalesce(sum(v.quantity), 0) as totalQuantity
-            from OrderStatViewEntity v
-            where v.status = com.prodio.stat.domain.OrderViewStatus.COMPLETED
-              and (:from is null or v.orderCreatedAt >= :from)
-              and (:to is null or v.orderCreatedAt < :to)
-              and (:status is null or v.status = :status)
-            """)
-    CompletedAggregate completedAggregate(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
-            @Param("status") OrderViewStatus status);
+    default List<StatusCount> countByStatus(OffsetDateTime from, OffsetDateTime to, OrderViewStatus status) {
+        return countByStatusNative(from, to, status == null ? null : status.name());
+    }
 
-    @Query("""
-            select v.productId as productId, v.productName as productName,
-                   count(v) as orderCount, coalesce(sum(v.quantity), 0) as totalQuantity
-            from OrderStatViewEntity v
-            where (:from is null or v.orderCreatedAt >= :from)
-              and (:to is null or v.orderCreatedAt < :to)
-              and (:status is null or v.status = :status)
-            group by v.productId, v.productName
-            """)
-    List<ProductDistributionRow> productDistribution(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
-            @Param("status") OrderViewStatus status);
+    @Query(value = """
+            select coalesce(sum(quantity), 0) as totalQuantity
+            from statistics_order_view
+            where status = 'COMPLETED'
+              and (cast(:from as timestamptz) is null or order_created_at >= cast(:from as timestamptz))
+              and (cast(:to as timestamptz) is null or order_created_at < cast(:to as timestamptz))
+            """, nativeQuery = true)
+    CompletedAggregate completedAggregate(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
+
+    @Query(value = """
+            select product_id as productId, product_name as productName,
+                   count(id) as orderCount, coalesce(sum(quantity), 0) as totalQuantity
+            from statistics_order_view
+            where (cast(:from as timestamptz) is null or order_created_at >= cast(:from as timestamptz))
+              and (cast(:to as timestamptz) is null or order_created_at < cast(:to as timestamptz))
+              and (cast(:status as varchar) is null or status = cast(:status as varchar))
+            group by product_id, product_name
+            """, nativeQuery = true)
+    List<ProductDistributionRow> productDistributionNative(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
+            @Param("status") String status);
+
+    default List<ProductDistributionRow> productDistribution(OffsetDateTime from, OffsetDateTime to, OrderViewStatus status) {
+        return productDistributionNative(from, to, status == null ? null : status.name());
+    }
+
+    @Query(value = """
+            select completed_at as completedAt, quantity as quantity
+            from statistics_order_view
+            where status = 'COMPLETED'
+              and completed_at is not null
+              and (cast(:from as timestamptz) is null or completed_at >= cast(:from as timestamptz))
+              and (cast(:to as timestamptz) is null or completed_at < cast(:to as timestamptz))
+            """, nativeQuery = true)
+    List<CompletedRow> findCompletedInRange(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
+
+    /** 주문 하나가 다품목이라 row가 여러 개지만 client_name/cancellation_reason은 주문 단위로 동일해 distinct로 1건씩 묶는다. */
+    @Query(value = """
+            select distinct order_id as orderId, client_name as clientName, cancellation_reason as cancellationReason
+            from statistics_order_view
+            where status = 'CANCELLED'
+              and (cast(:from as timestamptz) is null or cancelled_at >= cast(:from as timestamptz))
+              and (cast(:to as timestamptz) is null or cancelled_at < cast(:to as timestamptz))
+            order by order_id
+            """, nativeQuery = true)
+    List<CancelledOrderRow> cancelledOrderDetails(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
 
     interface StatusCount {
         OrderViewStatus getStatus();
@@ -60,5 +93,20 @@ interface OrderStatViewJpaRepository extends JpaRepository<OrderStatViewEntity, 
         String getProductName();
         long getOrderCount();
         long getTotalQuantity();
+    }
+
+    /**
+     * completed_at(timestamptz)을 native projection으로 받으면 Hibernate가 OffsetDateTime이 아니라
+     * Instant로 매핑해서 넘긴다 — Spring Data가 그 둘을 자동 변환해주지 않아 Instant로 선언해야 한다.
+     */
+    interface CompletedRow {
+        Instant getCompletedAt();
+        int getQuantity();
+    }
+
+    interface CancelledOrderRow {
+        long getOrderId();
+        String getClientName();
+        String getCancellationReason();
     }
 }

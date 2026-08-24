@@ -1,4 +1,4 @@
-import { categoryDisplayName, type CatalogProductSearchItem, type CatalogSubCategory, type CatalogTopCategory } from "../utils/product";
+import type { CatalogProductSearchItem, CatalogSubCategory, CatalogTopCategory } from "../utils/product";
 import styles from "./ProductPicker.module.css";
 
 interface ProductSearchPanelProps {
@@ -15,8 +15,6 @@ interface ProductSearchPanelProps {
 
   results: CatalogProductSearchItem[];
   searching: boolean;
-  dropdownOpen: boolean;
-  onFocus: () => void;
   onSelect: (product: CatalogProductSearchItem) => void;
 }
 
@@ -32,8 +30,6 @@ export function ProductSearchPanel({
   onSubmit,
   results,
   searching,
-  dropdownOpen,
-  onFocus,
   onSelect,
 }: ProductSearchPanelProps) {
   return (
@@ -58,46 +54,56 @@ export function ProductSearchPanel({
       </div>
 
       <div className={styles.searchRow}>
-        <div className={styles.searchInputWrap}>
-          <input
-            value={keyword}
-            onChange={(event) => onKeywordChange(event.target.value)}
-            onFocus={onFocus}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                onSubmit();
-              }
-            }}
-            placeholder="품목명 또는 품목코드로 검색"
-          />
-          {dropdownOpen ? (
-            <div className={styles.dropdown}>
-              {results.length > 0
-                ? results.map((product) => (
-                    <button
-                      type="button"
-                      key={product.id}
-                      className={styles.resultCard}
-                      onClick={() => onSelect(product)}
-                    >
-                      <div className={styles.resultHead}>
-                        <span className={styles.resultName}>{product.productName}</span>
-                        <span className={styles.resultBadge}>{categoryDisplayName(product)}</span>
-                      </div>
-                      <div className={styles.resultFoot}>
-                        <span>{product.productCode}</span>
-                        <span>{product.unitPrice.toLocaleString("ko-KR")}원</span>
-                      </div>
-                    </button>
-                  ))
-                : !searching && <p className={styles.emptyResult}>일치하는 품목이 없습니다.</p>}
-            </div>
-          ) : null}
-        </div>
+        <input
+          className={styles.searchInput}
+          value={keyword}
+          onChange={(event) => onKeywordChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              onSubmit();
+            }
+          }}
+          placeholder="품목명 또는 품목코드로 검색"
+        />
         <button type="button" onClick={onSubmit}>
           검색
         </button>
+      </div>
+
+      <div className={styles.resultsWrap}>
+        {results.length === 0 ? (
+          <p className={styles.emptyResult}>{searching ? "불러오는 중..." : "일치하는 품목이 없습니다."}</p>
+        ) : (
+          <table className={styles.resultsTable}>
+            <thead>
+              <tr>
+                <th>품목코드</th>
+                <th>품목명</th>
+                <th>대분류</th>
+                <th>소분류</th>
+                <th>단가</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {results.map((product) => (
+                <tr key={product.id} className={styles.resultRow} onClick={() => onSelect(product)}>
+                  <td>{product.productCode}</td>
+                  <td>{product.productName}</td>
+                  <td>{product.topCategoryDisplayName ?? "-"}</td>
+                  <td>{product.subCategoryName ?? "-"}</td>
+                  <td>{product.unitPrice.toLocaleString("ko-KR")}원</td>
+                  <td>
+                    <button type="button" className={styles.selectBtn} onClick={() => onSelect(product)}>
+                      선택
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </>
   );

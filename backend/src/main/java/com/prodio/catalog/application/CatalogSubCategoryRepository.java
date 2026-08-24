@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface CatalogSubCategoryRepository {
     Optional<Long> findIdByCode(String subCategoryCode);
 
+    Optional<CatalogSubCategory> findById(Long id);
+
     List<CatalogSubCategory> findAll(Boolean isActive);
 
     CatalogSubCategory save(CatalogSubCategory subCategory);

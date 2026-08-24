@@ -1,5 +1,6 @@
 package com.prodio.stat.application;
 
+import com.prodio.stat.domain.DailyProduction;
 import com.prodio.stat.domain.DashboardSummary;
 import com.prodio.stat.domain.ProductDistribution;
 import com.prodio.stat.domain.StatFilter;
@@ -27,6 +28,12 @@ public class StatDashboardService {
     public List<ProductDistribution> getProductDistribution(StatFilter filter) {
         validate(filter);
         return repository.productDistribution(filter);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DailyProduction> getDailyProduction(StatFilter filter) {
+        validate(filter);
+        return repository.dailyProduction(filter);
     }
 
     private void validate(StatFilter filter) {

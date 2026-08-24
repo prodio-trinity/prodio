@@ -5,6 +5,7 @@ import com.prodio.catalog.domain.CatalogSubCategory;
 import com.prodio.catalog.domain.TopCategory;
 import com.prodio.shared.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/catalog/categories")
+@PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
 @RequiredArgsConstructor
 class CatalogCategoryController {
     private final CatalogCategoryService catalogCategoryService;

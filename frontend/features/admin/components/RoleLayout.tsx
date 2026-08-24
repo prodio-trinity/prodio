@@ -25,6 +25,8 @@ interface RoleLayoutProps {
   storageKey: string;
   /** 권한이 없을 때 돌려보낼 경로. */
   deniedRedirect?: string;
+  /** ADMIN 전용 경로 prefix 목록. CLIENT 등 ADMIN이 아닌 권한이 여기로 들어오면 clientNavItems 첫 메뉴로 되돌린다. */
+  adminOnlyPrefixes?: string[];
 }
 
 /**
@@ -41,6 +43,7 @@ export function RoleLayout({
   pendingNavItems,
   storageKey,
   deniedRedirect = "/",
+  adminOnlyPrefixes,
 }: RoleLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -72,6 +75,11 @@ export function RoleLayout({
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 
+  // ADMIN 전용으로 지정된 경로인지 판단 — CLIENT 등 ADMIN이 아닌 권한은 접근 불가
+  const isInAdminOnlyArea = (adminOnlyPrefixes ?? []).some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+
   // 경로 기준으로 사이드바 결정: CLIENT 영역 → clientNavItems, 그 외 → navItems
   const activeNavItems =
     hasPendingRole && isInPendingArea && pendingNavItems
@@ -87,9 +95,11 @@ export function RoleLayout({
     else if (authStatus === "authenticated" && !hasRequiredRole) router.replace(deniedRedirect);
     else if (authStatus === "authenticated" && isRestrictedPending && !isInPendingArea) {
       router.replace(pendingNavItems?.[0]?.href ?? "/pending");
+    } else if (authStatus === "authenticated" && !isAdmin && isInAdminOnlyArea) {
+      router.replace(clientNavItems?.[0]?.href ?? deniedRedirect);
     }
-  }, [authStatus, hasRequiredRole, isInPendingArea, isRestrictedPending,
-    router, deniedRedirect, pendingNavItems]);
+  }, [authStatus, hasRequiredRole, isInPendingArea, isRestrictedPending, isAdmin,
+    isInAdminOnlyArea, router, deniedRedirect, pendingNavItems, clientNavItems]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -120,7 +130,7 @@ export function RoleLayout({
           <p className={styles.stateTitle}>로그인 상태를 확인할 수 없습니다.</p>
           <p className={styles.stateDetail}>{authError}</p>
         </div>
-      ) : !hasRequiredRole || (isRestrictedPending && !isInPendingArea) ? (
+      ) : !hasRequiredRole || (isRestrictedPending && !isInPendingArea) || (!isAdmin && isInAdminOnlyArea) ? (
         <div className={styles.state}>다른 화면으로 이동 중...</div>
       ) : (
         <>

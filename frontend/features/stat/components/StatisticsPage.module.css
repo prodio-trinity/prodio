@@ -1,0 +1,3 @@
+.shell {
+  composes: shell from "@/features/shared/styles/pageShell.module.css";
+}

@@ -54,7 +54,8 @@
 .mutedCell { color: var(--color-text-secondary); font-size: 11px; white-space: nowrap; }
 .rowErrorMsg { margin-top: 3px; color: var(--color-danger); font-size: 10px; font-weight: 700; }
 
-.activeCol { text-align: center; width: 92px; white-space: nowrap; }
+.activeCol { width: 92px; white-space: nowrap; }
+.tableWrap tbody td.activeCol { padding-right: 12px; }
 .activeBadge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; cursor: pointer; user-select: none; white-space: nowrap; background: var(--color-card-background); border: 1px solid var(--color-border); }
 .activeBadge input { width: 13px; height: 13px; margin: 0; cursor: pointer; accent-color: var(--color-primary); }
 .activeBadgeOn { color: var(--color-success); }

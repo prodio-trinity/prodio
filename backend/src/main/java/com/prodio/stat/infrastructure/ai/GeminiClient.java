@@ -14,6 +14,9 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,15 +28,20 @@ import java.util.stream.Collectors;
 class GeminiClient implements AiClient {
 
     private static final int MAX_TOOL_TURNS = 4;
+    /** statistics_*_embeddings 테이블의 pgvector 컬럼이 vector(768)로 고정돼 있어 임베딩 차원도 여기 맞춘다. */
+    private static final int EMBEDDING_DIMENSIONS = 768;
+    private static final DateTimeFormatter TODAY_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd(E)");
 
     private final RestClient geminiRestClient;
     private final GeminiProperties properties;
     private final RetryExecutor retryExecutor;
+    private final Clock clock;
 
-    GeminiClient(RestClient geminiRestClient, GeminiProperties properties) {
+    GeminiClient(RestClient geminiRestClient, GeminiProperties properties, Clock clock) {
         this.geminiRestClient = geminiRestClient;
         this.properties = properties;
         this.retryExecutor = new RetryExecutor(properties.maxRetries(), properties.initialBackoffMillis());
+        this.clock = clock;
     }
 
     @Override
@@ -41,13 +49,13 @@ class GeminiClient implements AiClient {
         try {
             return retryExecutor.execute(() -> callEmbed(text), this::isRetryable);
         } catch (RestClientException exception) {
-            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED, exception);
+            throw toInfraException(exception);
         }
     }
 
     private float[] callEmbed(String text) {
         EmbedRequest request = new EmbedRequest("models/" + properties.embeddingModel(),
-                new EmbedRequest.Content(List.of(new EmbedRequest.Part(text))));
+                new EmbedRequest.Content(List.of(new EmbedRequest.Part(text))), EMBEDDING_DIMENSIONS);
 
         EmbedResponse response = geminiRestClient.post()
                 .uri("/v1beta/models/{model}:embedContent", properties.embeddingModel())
@@ -73,7 +81,7 @@ class GeminiClient implements AiClient {
         try {
             return retryExecutor.execute(() -> callGenerate(prompt), this::isRetryable);
         } catch (RestClientException exception) {
-            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED, exception);
+            throw toInfraException(exception);
         }
     }
 
@@ -104,9 +112,21 @@ class GeminiClient implements AiClient {
         List<AskContent> contents = new ArrayList<>();
         contents.add(new AskContent("user", List.of(AskPart.text(question))));
         List<ToolsWrapper> toolsWrapper = List.of(new ToolsWrapper(toFunctionDeclarations(tools)));
+        SystemInstruction systemInstruction = new SystemInstruction(List.of(AskPart.text(
+                "오늘 날짜는 " + LocalDate.now(clock).format(TODAY_FORMAT) + "입니다. "
+                        + "사용자가 '이번 달', '지난달', '올해', '이번 주'처럼 상대적인 날짜를 말하면 "
+                        + "이 날짜를 기준으로 정확한 연도를 포함해 계산하세요. "
+                        + "답변은 핵심 정보만 간결하게 전달하세요. 도구 결과에 품목별 분포처럼 긴 목록이 "
+                        + "포함돼 있어도 전부 나열하지 말고, 질문에 필요한 만큼만 요약해서 답하세요. "
+                        + "이 답변은 마크다운을 지원하지 않는 화면에 그대로 표시됩니다. **, *, #, |, - 같은 "
+                        + "마크다운 기호를 절대 쓰지 말고 일반 텍스트로만 작성하세요. 항목을 나열할 때는 "
+                        + "쉼표나 기호로 이어붙이지 말고, 항목마다 줄바꿈(\\n)으로 구분해 한 줄에 하나씩 쓰세요. "
+                        + "도구 결과에 없는 값은 절대 만들어내지 마세요. 질문이 요구하는 값을 도구가 실제로 "
+                        + "반환하지 않았다면, 다른 값을 대신 추정해서 확정된 답처럼 말하지 말고 해당 데이터가 "
+                        + "없다고 명확히 답하세요.")));
 
         for (int turn = 0; turn < MAX_TOOL_TURNS; turn++) {
-            AskContent modelContent = callAsk(contents, toolsWrapper);
+            AskContent modelContent = callAsk(contents, toolsWrapper, systemInstruction);
             contents.add(new AskContent("model", modelContent.parts()));
 
             List<AskPart.FunctionCallPart> functionCalls = modelContent.parts().stream()
@@ -127,10 +147,10 @@ class GeminiClient implements AiClient {
         throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED);
     }
 
-    private AskContent callAsk(List<AskContent> contents, List<ToolsWrapper> tools) {
+    private AskContent callAsk(List<AskContent> contents, List<ToolsWrapper> tools, SystemInstruction systemInstruction) {
         try {
             return retryExecutor.execute(() -> {
-                AskRequest request = new AskRequest(contents, tools);
+                AskRequest request = new AskRequest(systemInstruction, contents, tools);
                 AskResponse response = geminiRestClient.post()
                         .uri("/v1beta/models/{model}:generateContent", properties.chatModel())
                         .body(request)
@@ -149,7 +169,7 @@ class GeminiClient implements AiClient {
                 return content;
             }, this::isRetryable);
         } catch (RestClientException exception) {
-            throw new InfraException(InfraErrorCode.AI_REQUEST_FAILED, exception);
+            throw toInfraException(exception);
         }
     }
 
@@ -203,7 +223,22 @@ class GeminiClient implements AiClient {
                 || exception instanceof HttpClientErrorException.TooManyRequests;
     }
 
-    private record EmbedRequest(String model, Content content) {
+    /**
+     * 재시도까지 소진한 뒤 최종적으로 실패한 원인을 구분해 서로 다른 InfraErrorCode로 매핑한다.
+     * 429는 rate limit로, 그 외 4xx(잘못된 요청/스키마 오류 등)는 요청 자체 문제로, 나머지(5xx/타임아웃/
+     * 응답 파싱 실패 등)는 일시적 장애로 안내해 프론트에서 사용자에게 다른 메시지를 보여줄 수 있게 한다.
+     */
+    private InfraException toInfraException(RestClientException exception) {
+        if (exception instanceof HttpClientErrorException.TooManyRequests) {
+            return new InfraException(InfraErrorCode.AI_RATE_LIMITED, exception);
+        }
+        if (exception instanceof HttpClientErrorException) {
+            return new InfraException(InfraErrorCode.AI_REQUEST_INVALID, exception);
+        }
+        return new InfraException(InfraErrorCode.AI_REQUEST_FAILED, exception);
+    }
+
+    private record EmbedRequest(String model, Content content, int outputDimensionality) {
         record Content(List<Part> parts) {}
         record Part(String text) {}
     }
@@ -223,18 +258,26 @@ class GeminiClient implements AiClient {
         record Part(String text) {}
     }
 
-    private record AskRequest(List<AskContent> contents, List<ToolsWrapper> tools) {}
+    private record AskRequest(SystemInstruction systemInstruction, List<AskContent> contents, List<ToolsWrapper> tools) {}
+
+    private record SystemInstruction(List<AskPart> parts) {}
 
     private record AskContent(String role, List<AskPart> parts) {}
 
+    /**
+     * thinking 모델은 자신이 생성한 functionCall 파트의 thoughtSignature를 다음 턴에 그대로 돌려받지 못하면
+     * "missing thought_signature" 400 에러를 낸다. 그래서 모델이 준 functionCall 파트를 다음 턴 contents에
+     * 그대로 append할 때 이 값도 함께 보존해야 한다(우리가 직접 만드는 파트는 null로 둔다).
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private record AskPart(String text, FunctionCallPart functionCall, FunctionResponsePart functionResponse) {
+    private record AskPart(String text, FunctionCallPart functionCall, FunctionResponsePart functionResponse,
+            String thoughtSignature) {
         static AskPart text(String text) {
-            return new AskPart(text, null, null);
+            return new AskPart(text, null, null, null);
         }
 
         static AskPart functionResponse(String name, String result) {
-            return new AskPart(null, null, new FunctionResponsePart(name, Map.of("result", result)));
+            return new AskPart(null, null, new FunctionResponsePart(name, Map.of("result", result)), null);
         }
 
         record FunctionCallPart(String name, Map<String, Object> args) {}

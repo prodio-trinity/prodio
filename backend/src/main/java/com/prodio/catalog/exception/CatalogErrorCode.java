@@ -16,7 +16,9 @@ public enum CatalogErrorCode {
     REGISTRATION_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "등록 신청을 찾을 수 없습니다."),
     REGISTRATION_ALREADY_LINKED(HttpStatus.CONFLICT, "이미 다른 계정에 연결된 거래처입니다."),
     CLIENT_ACCOUNT_NOT_FOUND(HttpStatus.UNAUTHORIZED, "계정 정보를 확인할 수 없습니다."),
-    INVALID_REGISTRATION_STATUS(HttpStatus.BAD_REQUEST, "존재하지 않는 신청 상태입니다.");
+    INVALID_REGISTRATION_STATUS(HttpStatus.BAD_REQUEST, "존재하지 않는 신청 상태입니다."),
+    TOP_CATEGORY_CHANGE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "카테고리 변경은 같은 대분류 내에서만 가능합니다."),
+    REGISTRATION_ALREADY_SUBMITTED(HttpStatus.CONFLICT, "이미 처리 중인 신청이 있습니다. 잠시 후 다시 시도해주세요.");
 
     private final HttpStatus status;
     private final String message;
