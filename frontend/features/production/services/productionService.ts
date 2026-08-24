@@ -1,5 +1,10 @@
 import { getCsrfToken } from "@/features/shared/api/csrf";
-import type { ProductionActionResult, ProductionFilters, ProductionPage } from "../types/production";
+import type {
+  ProductionActionResult,
+  ProductionFilters,
+  ProductionPage,
+  ProductionRecord,
+} from "../types/production";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
@@ -65,5 +70,10 @@ export const productionService = {
     return request<void>(`/api/admin/production/${id}/memo`, {
       method: "DELETE",
     });
+  },
+
+  /** 고객 화면(내 수주 현황 등)에서 주문번호로 배송 현황을 조회한다. 생산 레코드가 아직 없으면(주문 미확정) 404. */
+  getByOrderId(orderId: string) {
+    return request<ProductionRecord>(`/api/production/${orderId}`);
   },
 };

@@ -13,7 +13,7 @@ public interface ProductionRepository {
 
     PageResult<ProductionRecord> findAll(ProductionStatus status, int page, int size);
 
-    ProductionRecord findProductionInfo(Long productionId);
+    ProductionRecord findProductionInfoByOrderId(Long orderId);
 
     ProductionRecord addMemo(Long productionId, String memo);
 

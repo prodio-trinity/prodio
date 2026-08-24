@@ -24,11 +24,11 @@ public class ProductionController {
     private final UserDirectory userDirectory;
     private final CatalogOrderLookup catalogOrderLookup;
 
-    @GetMapping("/{productionId}")
+    @GetMapping("/{orderId}")
     @PreAuthorize("hasRole('CLIENT')")
-    ApiResponse<ProductionResponse> productionInfo(@PathVariable String productionId, Authentication authentication) {
+    ApiResponse<ProductionResponse> productionInfo(@PathVariable String orderId, Authentication authentication) {
+        ProductionRecord productionInfo = service.getProductionInfoByOrderId(parseId(orderId));
         long clientId = currentClientId(authentication);
-        ProductionRecord productionInfo = service.getProductionInfo(parseId(productionId));
         if (productionInfo.clientId() == null || productionInfo.clientId() != clientId) {
             throw new ProductionException(ProductionErrorCode.PRODUCTION_NOT_FOUND);
         }
