@@ -27,7 +27,7 @@ interface ProductSearchParams {
 }
 
 export const productSearchService = {
-  async search({ keyword, categoryId, size = 8 }: ProductSearchParams): Promise<CatalogProductSearchItem[]> {
+  async search({ keyword, categoryId, size = 100 }: ProductSearchParams): Promise<CatalogProductSearchItem[]> {
     const params = new URLSearchParams();
     if (keyword.trim()) params.set("keyword", keyword.trim());
     if (categoryId) params.set("categoryId", String(categoryId));

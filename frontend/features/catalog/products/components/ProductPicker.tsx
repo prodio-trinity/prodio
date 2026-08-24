@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useProductPicker } from "../hooks/useProductPicker";
 import { removeItem, updateItemQuantity, type SelectedProduct } from "../utils/product";
 import { ProductSearchPanel } from "./ProductSearchPanel";
@@ -25,28 +24,11 @@ export function ProductPicker({ items, onItemsChange }: ProductPickerProps) {
     submitSearch,
     results,
     searching,
-    dropdownOpen,
-    openDropdownIfResults,
-    closeDropdown,
     selectProduct,
   } = useProductPicker(items, onItemsChange);
 
-  const wrapRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    function closeOnOutsideClick(event: MouseEvent) {
-      if (!wrapRef.current?.contains(event.target as Node)) {
-        closeDropdown();
-      }
-    }
-    document.addEventListener("mousedown", closeOnOutsideClick);
-    return () => {
-      document.removeEventListener("mousedown", closeOnOutsideClick);
-    };
-  }, [closeDropdown]);
-
   return (
-    <div className={styles.wrap} ref={wrapRef}>
+    <div className={styles.wrap}>
       <div className={styles.subheading}>품목 선택</div>
       <ProductSearchPanel
         topCategories={topCategories}
@@ -60,8 +42,6 @@ export function ProductPicker({ items, onItemsChange }: ProductPickerProps) {
         onSubmit={submitSearch}
         results={results}
         searching={searching}
-        dropdownOpen={dropdownOpen}
-        onFocus={openDropdownIfResults}
         onSelect={selectProduct}
       />
       <SelectedProductTable

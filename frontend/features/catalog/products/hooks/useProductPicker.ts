@@ -21,7 +21,6 @@ export function useProductPicker(items: SelectedProduct[], onItemsChange: (items
   // 검색 상태
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState<CatalogProductSearchItem[]>([]);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searching, setSearching] = useState(false);
 
   const debounceTimer = useRef<number | undefined>(undefined);
@@ -34,6 +33,12 @@ export function useProductPicker(items: SelectedProduct[], onItemsChange: (items
     });
   }, []);
 
+  useEffect(() => {
+    // 검색/필터 없이도 처음부터 전체 목록을 상시 노출한다.
+    runSearch("", "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // 화면에 보여줄 소분류 결정
   const visibleSubCategories = subCategories.filter(
     (sub) => sub.active &&
@@ -42,18 +47,11 @@ export function useProductPicker(items: SelectedProduct[], onItemsChange: (items
 
   function runSearch(nextKeyword: string, categoryId: string) {
     window.clearTimeout(debounceTimer.current);
-    if (!nextKeyword.trim()) {
-      setResults([]);
-      setDropdownOpen(false);
-      return;
-    }
-    // 검색 시작
     setSearching(true);
     productSearchService
       .search({ keyword: nextKeyword, categoryId: categoryId ? Number(categoryId) : undefined })
       .then((products) => {
         setResults(products);
-        setDropdownOpen(true);
       })
       .finally(() => setSearching(false));
   }
@@ -62,11 +60,6 @@ export function useProductPicker(items: SelectedProduct[], onItemsChange: (items
     // 입력한 검색어 상태 저장
     setKeyword(value);
     window.clearTimeout(debounceTimer.current);
-    if (!value.trim()) {
-      setResults([]);
-      setDropdownOpen(false);
-      return;
-    }
     debounceTimer.current = window.setTimeout(() => runSearch(value, selectedSubId), DEBOUNCE_MS);
   }
 
@@ -87,17 +80,6 @@ export function useProductPicker(items: SelectedProduct[], onItemsChange: (items
 
   function selectProduct(product: CatalogProductSearchItem) {
     onItemsChange(addOrIncrementItem(items, product));
-    setKeyword("");
-    setResults([]);
-    setDropdownOpen(false);
-  }
-
-  function openDropdownIfResults() {
-    if (results.length > 0) setDropdownOpen(true);
-  }
-
-  function closeDropdown() {
-    setDropdownOpen(false);
   }
 
   return {
@@ -112,9 +94,6 @@ export function useProductPicker(items: SelectedProduct[], onItemsChange: (items
     submitSearch,
     results,
     searching,
-    dropdownOpen,
-    openDropdownIfResults,
-    closeDropdown,
     selectProduct,
   };
 }
