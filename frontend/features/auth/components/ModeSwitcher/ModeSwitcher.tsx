@@ -30,7 +30,7 @@ const ROLE_DESTINATIONS: Record<string, RoleDestination> = {
   ADMIN: {
     label: "관리자",
     href: "/stat",
-    activeWhen: ["/dashboard", "/orders", "/production", "/catalog", "/stat", "/admin"],
+    activeWhen: ["/orders", "/production", "/catalog", "/stat", "/admin"],
   },
 };
 

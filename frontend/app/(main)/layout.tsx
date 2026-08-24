@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { RoleLayout } from "@/features/admin/components/RoleLayout";
 import {
   LayoutDashboard,
-  Activity,
   ClipboardList,
   Factory,
   ClipboardCheck,
@@ -17,7 +16,6 @@ import {
 
 const NAV_ITEMS = [
   { href: "/stat", label: "대시보드", icon: LayoutDashboard },
-  { href: "/dashboard", label: "수주 현황", icon: Activity },
   { href: "/orders", label: "수주 관리", icon: ClipboardList },
   { href: "/production", label: "생산 관리", icon: Factory },
   { href: "/catalog/clients", label: "거래처 관리", icon: Building2 },
