@@ -103,7 +103,7 @@ export function ExcelUploadModal({ onClose, onUploaded }: ExcelUploadModalProps)
           <button
             type="button"
             className={`${gridStyles.btn} ${gridStyles.btnPrimary}`}
-            disabled={!file || uploading}
+            disabled={!file || uploading || result !== null}
             onClick={() => void handleUpload()}
           >
             {uploading ? "업로드 중..." : "업로드"}
