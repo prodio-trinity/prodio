@@ -25,14 +25,22 @@ public class ProductionController {
     private final CatalogOrderLookup catalogOrderLookup;
 
     @GetMapping("/{orderId}")
-    @PreAuthorize("hasRole('CLIENT')")
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     ApiResponse<ProductionResponse> productionInfo(@PathVariable String orderId, Authentication authentication) {
         ProductionRecord productionInfo = service.getProductionInfoByOrderId(parseId(orderId));
-        long clientId = currentClientId(authentication);
-        if (productionInfo.clientId() == null || productionInfo.clientId() != clientId) {
-            throw new ProductionException(ProductionErrorCode.PRODUCTION_NOT_FOUND);
+        // 관리자는 소유권 상관없이 전체 열람 가능. 고객은 본인 소유 주문인지 검증.
+        if (!isAdmin(authentication)) {
+            long clientId = currentClientId(authentication);
+            if (productionInfo.clientId() == null || productionInfo.clientId() != clientId) {
+                throw new ProductionException(ProductionErrorCode.PRODUCTION_NOT_FOUND);
+            }
         }
         return ApiResponse.success(ProductionResponse.from(productionInfo));
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
     }
 
     /** 로그인 계정 → 연결된 거래처 id. 계정이 거래처랑 연결 안 돼있으면 자기 소유가 있을 수 없으니 바로 막는다. */
