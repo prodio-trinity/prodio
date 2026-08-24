@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/** 거래처 엑셀 업로드 파싱. 컬럼 순서(A~G): 회사명*, 대표자, 사업자등록번호, 연락처, 주소, 담당자, 비고. */
+/** 거래처 엑셀 업로드 파싱. 컬럼 순서(A~G): 회사명*, 대표자, 사업자등록번호*, 연락처, 주소, 담당자, 비고. */
 @Component
 public class ClientExcelParser {
     private static final DataFormatter FORMATTER = new DataFormatter();
@@ -72,7 +72,8 @@ public class ClientExcelParser {
             return null;
         }
 
-        String parseError = (companyName == null) ? "회사명은 필수입니다." : null;
+        String parseError = (companyName == null) ? "회사명은 필수입니다."
+                : (businessRegNo == null) ? "사업자등록번호는 필수입니다." : null;
         return new ExcelClientRow(rowNumber, companyName, ceoName, businessRegNo, phone, address,
                 managerName, memo, parseError);
     }

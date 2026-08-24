@@ -44,8 +44,8 @@ export function ExcelUploadModal({ onClose, onUploaded }: ExcelUploadModalProps)
         </div>
         <div className={styles.modalBody}>
           <p style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>
-            컬럼 순서: 회사명(필수), 대표자, 사업자등록번호, 연락처, 주소, 담당자, 비고. 사업자등록번호가 기존 거래처와
-            일치하면 해당 거래처 정보가 갱신됩니다.
+            컬럼 순서: 회사명(필수), 대표자, 사업자등록번호(필수), 연락처, 주소, 담당자, 비고. 사업자등록번호가 기존
+            거래처와 일치하면 해당 거래처 정보가 갱신됩니다.
           </p>
           <input
             className={styles.fileInput}

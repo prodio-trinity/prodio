@@ -22,8 +22,10 @@ public record CatalogClient(
         if (companyName == null || companyName.isBlank()) {
             throw new IllegalArgumentException("회사명은 비어 있을 수 없습니다.");
         }
-        if (businessRegNo != null && !businessRegNo.isBlank()
-                && !BUSINESS_REG_NO_PATTERN.matcher(businessRegNo).matches()) {
+        if (businessRegNo == null || businessRegNo.isBlank()) {
+            throw new IllegalArgumentException("사업자등록번호는 비어 있을 수 없습니다.");
+        }
+        if (!BUSINESS_REG_NO_PATTERN.matcher(businessRegNo).matches()) {
             throw new IllegalArgumentException("사업자등록번호 형식이 올바르지 않습니다. 000-00-00000 형식으로 입력해주세요.");
         }
         if (phone != null && !phone.isBlank() && !PHONE_PATTERN.matcher(phone).matches()) {
