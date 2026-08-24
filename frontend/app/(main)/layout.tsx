@@ -36,6 +36,14 @@ const PENDING_NAV_ITEMS = [
   { href: "/pending/registration", label: "거래처 등록", icon: Building2 },
 ];
 
+// catalog 모듈의 ADMIN 전용 화면
+const CATALOG_ADMIN_ONLY_PREFIXES = [
+  "/catalog/clients",
+  "/catalog/products",
+  "/catalog/registration",
+  "/catalog/categories",
+];
+
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
     <RoleLayout
@@ -45,6 +53,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       clientNavItems={CLIENT_NAV_ITEMS}
       pendingNavItems={PENDING_NAV_ITEMS}
       storageKey="prodio-sidebar-collapsed"
+      adminOnlyPrefixes={CATALOG_ADMIN_ONLY_PREFIXES}
     >
       {children}
     </RoleLayout>

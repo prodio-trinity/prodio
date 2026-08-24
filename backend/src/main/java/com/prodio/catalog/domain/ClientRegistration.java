@@ -18,10 +18,10 @@ public record ClientRegistration(
 ) {
     public ClientRegistration {
         if (companyName == null || companyName.isBlank()) {
-            throw new IllegalArgumentException("companyName은 비어 있을 수 없습니다.");
+            throw new IllegalArgumentException("회사명은 비어 있을 수 없습니다.");
         }
         if (businessRegNo == null || businessRegNo.isBlank()) {
-            throw new IllegalArgumentException("businessRegNo는 비어 있을 수 없습니다.");
+            throw new IllegalArgumentException("사업자등록번호는 비어 있을 수 없습니다.");
         }
     }
 
