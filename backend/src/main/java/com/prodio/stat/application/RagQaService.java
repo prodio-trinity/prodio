@@ -19,6 +19,7 @@ import com.prodio.stat.embedding.application.ProductionEmbeddingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -53,6 +54,20 @@ public class RagQaService {
 
         AiQueryLog log = AiQueryLog.ragQa(adminId, resolveSourceType(usedSourceTypes), question, response);
         return aiQueryLogRepository.save(log);
+    }
+
+    /**
+     * 함수 호출 라우팅만 평가하기 위한 dry-run. Gemini가 어떤 tool을 어떤 인자로 부르는지만 기록하고,
+     * 실제 검색/조회(DB, 임베딩)는 전혀 실행하지 않는다 — 그래서 검색 품질과 무관하게 라우팅 정확도만
+     * 순수하게 잰다. AiQueryLog에도 남기지 않는다(실사용 질의가 아니라 평가용 호출이므로).
+     */
+    public List<ToolCall> route(String question) {
+        List<ToolCall> recordedCalls = new ArrayList<>();
+        aiClient.ask(question, tools(), toolCall -> {
+            recordedCalls.add(toolCall);
+            return "[평가용 응답] 요청하신 내용을 확인했습니다.";
+        });
+        return recordedCalls;
     }
 
     public AiQueryLogPage getAskLogs(long adminId, int page, int size) {
@@ -173,7 +188,11 @@ public class RagQaService {
                         )),
                 new ToolSpec(QUERY_ORDER_STATS,
                         "특정 기간/상태의 주문 건수, 생산량 등 정형 통계를 조회한다. 건수/생산량 등 숫자 질문에 사용한다. "
-                                + "이 도구는 원화 매출액(금액)을 계산하지 않는다 — 건수와 생산 수량만 준다. "
+                                + "'매출', '얼마'처럼 금액을 묻는 질문이어도 기간/상태가 관련돼 있으면 이 도구를 "
+                                + "먼저 호출해라 — 이 도구는 원화 매출액(금액)은 주지 않지만 건수와 생산 수량은 준다. "
+                                + "질문에 금액 관련 단어가 있다고 해서 호출을 건너뛰고 바로 '데이터가 없다'고 답하지 "
+                                + "말 것 — 일단 호출해서 건수/수량을 받아온 뒤, 답변에 '금액(매출액) 데이터는 없다'는 "
+                                + "점만 함께 안내해라. "
                                 + "status를 CANCELLED로 지정하면 해당 기간에 취소된 개별 주문의 취소 사유 목록도 "
                                 + "함께 반환한다 — '이번 달 취소 사유 알려줘' 같은 질문은 searchNotes로 자유 검색하지 "
                                 + "말고 이 도구를 status=CANCELLED, 정확한 기간과 함께 호출해라.",

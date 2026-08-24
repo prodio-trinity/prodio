@@ -3,6 +3,7 @@ package com.prodio.stat.presentation;
 import com.prodio.shared.ApiResponse;
 import com.prodio.stat.application.AiQueryLogPage;
 import com.prodio.stat.application.RagQaService;
+import com.prodio.stat.application.ToolCall;
 import com.prodio.stat.domain.AiQueryLog;
 import com.prodio.stat.domain.SourceType;
 import com.prodio.stat.exception.StatErrorCode;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -37,6 +39,15 @@ class RagQaController {
         long adminId = currentAdmin(authentication).id();
 
         return ApiResponse.success(AskResponse.from(ragQaService.ask(adminId, request.question())));
+    }
+
+    /**
+     * 함수 호출 라우팅 평가 전용 — 실제 검색/조회는 하지 않고 Gemini가 어떤 tool을 어떤 인자로
+     * 부르는지만 반환한다. 관리자만 호출 가능(경로가 /api/admin/**), 로그도 남기지 않는다.
+     */
+    @PostMapping("/route-eval")
+    ApiResponse<RouteEvalResponse> routeEval(@Valid @RequestBody AskRequest request) {
+        return ApiResponse.success(RouteEvalResponse.from(ragQaService.route(request.question())));
     }
 
     @GetMapping("/ask/logs")
@@ -67,6 +78,18 @@ class RagQaController {
     ) {
         static AskResponse from(AiQueryLog log) {
             return new AskResponse(log.id(), log.sourceType(), log.question(), log.response(), log.requestedAt());
+        }
+    }
+
+    record RouteEvalResponse(List<ToolCallResponse> calls) {
+        static RouteEvalResponse from(List<ToolCall> calls) {
+            return new RouteEvalResponse(calls.stream().map(ToolCallResponse::from).toList());
+        }
+    }
+
+    record ToolCallResponse(String name, Map<String, String> args) {
+        static ToolCallResponse from(ToolCall call) {
+            return new ToolCallResponse(call.name(), call.args());
         }
     }
 
