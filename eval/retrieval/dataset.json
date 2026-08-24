@@ -1,0 +1,2461 @@
+{
+  "description": "searchNotes 검색 품질(recall@k/precision@k) 평가 데이터셋. sourceType별 refId 의미: ORDER_NOTE/PRODUCTION_MEMO는 order_id, CLIENT_MEMO는 client_id. expected는 {sourceType: [refId, ...]} 형태 — ALL 케이스는 여러 sourceType에 걸쳐 있고, negative 케이스는 expected가 빈 객체({})로 '정답이 아예 없어야 함'을 뜻한다. 같은 cluster에 속한 케이스들은 표현만 다르고 정답(expected)은 동일하다 — 정답은 로컬 DB(prodio-db-local)의 실제 note/memo 코퍼스를 사람이 직접 읽고 클러스터당 한 번만 검증했다.",
+  "cases": [
+    {
+      "id": "ON001",
+      "cluster": "택배_파손",
+      "source_type": "ORDER_NOTE",
+      "question": "택배 파손 이력 있는 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          1,
+          43
+        ]
+      }
+    },
+    {
+      "id": "ON002",
+      "cluster": "택배_파손",
+      "source_type": "ORDER_NOTE",
+      "question": "배송 중 파손된 적 있는 주문 알려줘",
+      "expected": {
+        "ORDER_NOTE": [
+          1,
+          43
+        ]
+      }
+    },
+    {
+      "id": "ON003",
+      "cluster": "택배_파손",
+      "source_type": "ORDER_NOTE",
+      "question": "포장 신경써달라고 요청한 주문 뭐가 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          1,
+          43
+        ]
+      }
+    },
+    {
+      "id": "ON004",
+      "cluster": "택배_파손",
+      "source_type": "ORDER_NOTE",
+      "question": "물건 깨진 적 있어서 조심해달라고 한 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          1,
+          43
+        ]
+      }
+    },
+    {
+      "id": "ON005",
+      "cluster": "택배_파손",
+      "source_type": "ORDER_NOTE",
+      "question": "파손 클레임 이력 있는 주문 목록",
+      "expected": {
+        "ORDER_NOTE": [
+          1,
+          43
+        ]
+      }
+    },
+    {
+      "id": "ON006",
+      "cluster": "택배_파손",
+      "source_type": "ORDER_NOTE",
+      "question": "배송 중 손상 우려로 특별 요청한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          1,
+          43
+        ]
+      }
+    },
+    {
+      "id": "ON007",
+      "cluster": "택배_파손",
+      "source_type": "ORDER_NOTE",
+      "question": "예전에 상품이 파손돼서 온 적 있다는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          1,
+          43
+        ]
+      }
+    },
+    {
+      "id": "ON008",
+      "cluster": "택배_파손",
+      "source_type": "ORDER_NOTE",
+      "question": "포장 보강 요청한 주문 있나요",
+      "expected": {
+        "ORDER_NOTE": [
+          1,
+          43
+        ]
+      }
+    },
+    {
+      "id": "ON009",
+      "cluster": "택배_파손",
+      "source_type": "ORDER_NOTE",
+      "question": "택배 사고 이력 언급된 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          1,
+          43
+        ]
+      }
+    },
+    {
+      "id": "ON010",
+      "cluster": "택배_파손",
+      "source_type": "ORDER_NOTE",
+      "question": "부서질까봐 걱정된다는 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          1,
+          43
+        ]
+      }
+    },
+    {
+      "id": "ON011",
+      "cluster": "박스_단위_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "박스 단위로 배송해달라고 한 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          2,
+          9,
+          15,
+          17,
+          38
+        ]
+      }
+    },
+    {
+      "id": "ON012",
+      "cluster": "박스_단위_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "낱개 말고 박스채로 보내달라는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          2,
+          9,
+          15,
+          17,
+          38
+        ]
+      }
+    },
+    {
+      "id": "ON013",
+      "cluster": "박스_단위_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "박스 단위 배송 요청한 거 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          2,
+          9,
+          15,
+          17,
+          38
+        ]
+      }
+    },
+    {
+      "id": "ON014",
+      "cluster": "박스_단위_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "포장을 박스로 묶어서 보내달라고 한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          2,
+          9,
+          15,
+          17,
+          38
+        ]
+      }
+    },
+    {
+      "id": "ON015",
+      "cluster": "박스_단위_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "매장 진열 편의를 위해 박스 단위로 요청한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          2,
+          9,
+          15,
+          17,
+          38
+        ]
+      }
+    },
+    {
+      "id": "ON016",
+      "cluster": "박스_단위_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "박스로만 배송해달라는 요청 있었어?",
+      "expected": {
+        "ORDER_NOTE": [
+          2,
+          9,
+          15,
+          17,
+          38
+        ]
+      }
+    },
+    {
+      "id": "ON017",
+      "cluster": "박스_단위_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "낱개 배송 대신 박스 단위 원하는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          2,
+          9,
+          15,
+          17,
+          38
+        ]
+      }
+    },
+    {
+      "id": "ON018",
+      "cluster": "박스_단위_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "박스 포장 단위 배송 요청 목록",
+      "expected": {
+        "ORDER_NOTE": [
+          2,
+          9,
+          15,
+          17,
+          38
+        ]
+      }
+    },
+    {
+      "id": "ON019",
+      "cluster": "박스_단위_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "물건을 박스채로 받고 싶다는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          2,
+          9,
+          15,
+          17,
+          38
+        ]
+      }
+    },
+    {
+      "id": "ON020",
+      "cluster": "박스_단위_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "박스단위 배송 희망하는 주문 있나요",
+      "expected": {
+        "ORDER_NOTE": [
+          2,
+          9,
+          15,
+          17,
+          38
+        ]
+      }
+    },
+    {
+      "id": "ON021",
+      "cluster": "창고_경비실_전달",
+      "source_type": "ORDER_NOTE",
+      "question": "1층 창고로 배송해달라는 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          3,
+          5,
+          35,
+          44,
+          50
+        ]
+      }
+    },
+    {
+      "id": "ON022",
+      "cluster": "창고_경비실_전달",
+      "source_type": "ORDER_NOTE",
+      "question": "경비실 통해서 전달해달라고 한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          3,
+          5,
+          35,
+          44,
+          50
+        ]
+      }
+    },
+    {
+      "id": "ON023",
+      "cluster": "창고_경비실_전달",
+      "source_type": "ORDER_NOTE",
+      "question": "1층에 맡겨달라는 배송 요청",
+      "expected": {
+        "ORDER_NOTE": [
+          3,
+          5,
+          35,
+          44,
+          50
+        ]
+      }
+    },
+    {
+      "id": "ON024",
+      "cluster": "창고_경비실_전달",
+      "source_type": "ORDER_NOTE",
+      "question": "경비실 경유 배송 원하는 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          3,
+          5,
+          35,
+          44,
+          50
+        ]
+      }
+    },
+    {
+      "id": "ON025",
+      "cluster": "창고_경비실_전달",
+      "source_type": "ORDER_NOTE",
+      "question": "창고로 직접 배송해달라는 요청",
+      "expected": {
+        "ORDER_NOTE": [
+          3,
+          5,
+          35,
+          44,
+          50
+        ]
+      }
+    },
+    {
+      "id": "ON026",
+      "cluster": "창고_경비실_전달",
+      "source_type": "ORDER_NOTE",
+      "question": "수령 장소를 1층 창고로 지정한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          3,
+          5,
+          35,
+          44,
+          50
+        ]
+      }
+    },
+    {
+      "id": "ON027",
+      "cluster": "창고_경비실_전달",
+      "source_type": "ORDER_NOTE",
+      "question": "경비실에 맡겨달라고 요청한 주문 있나요",
+      "expected": {
+        "ORDER_NOTE": [
+          3,
+          5,
+          35,
+          44,
+          50
+        ]
+      }
+    },
+    {
+      "id": "ON028",
+      "cluster": "창고_경비실_전달",
+      "source_type": "ORDER_NOTE",
+      "question": "1층 창고 인수인계 요청한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          3,
+          5,
+          35,
+          44,
+          50
+        ]
+      }
+    },
+    {
+      "id": "ON029",
+      "cluster": "지점_분할_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "지점별로 나눠서 배송해달라고 한 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          4,
+          18
+        ]
+      }
+    },
+    {
+      "id": "ON030",
+      "cluster": "지점_분할_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "여러 지점에 분할 배송 요청한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          4,
+          18
+        ]
+      }
+    },
+    {
+      "id": "ON031",
+      "cluster": "지점_분할_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "지점 나눠서 보내달라는 요청",
+      "expected": {
+        "ORDER_NOTE": [
+          4,
+          18
+        ]
+      }
+    },
+    {
+      "id": "ON032",
+      "cluster": "지점_분할_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "분할 배송 원하는 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          4,
+          18
+        ]
+      }
+    },
+    {
+      "id": "ON033",
+      "cluster": "지점_분할_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "지점마다 따로 배송해달라고 한 주문 있나요",
+      "expected": {
+        "ORDER_NOTE": [
+          4,
+          18
+        ]
+      }
+    },
+    {
+      "id": "ON034",
+      "cluster": "지점_분할_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "한 곳이 아니라 지점별로 배송해달라는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          4,
+          18
+        ]
+      }
+    },
+    {
+      "id": "ON035",
+      "cluster": "검수_요청_불량이력",
+      "source_type": "ORDER_NOTE",
+      "question": "예전에 불량 있었다고 검수 요청한 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          6,
+          8
+        ]
+      }
+    },
+    {
+      "id": "ON036",
+      "cluster": "검수_요청_불량이력",
+      "source_type": "ORDER_NOTE",
+      "question": "불량 이력 있어서 검수 부탁한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          6,
+          8
+        ]
+      }
+    },
+    {
+      "id": "ON037",
+      "cluster": "검수_요청_불량이력",
+      "source_type": "ORDER_NOTE",
+      "question": "제품 검수 요청한 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          6,
+          8
+        ]
+      }
+    },
+    {
+      "id": "ON038",
+      "cluster": "검수_요청_불량이력",
+      "source_type": "ORDER_NOTE",
+      "question": "이전 불량 때문에 다시 확인해달라는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          6,
+          8
+        ]
+      }
+    },
+    {
+      "id": "ON039",
+      "cluster": "검수_요청_불량이력",
+      "source_type": "ORDER_NOTE",
+      "question": "출고 전 검수 요청 있었던 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          6,
+          8
+        ]
+      }
+    },
+    {
+      "id": "ON040",
+      "cluster": "검수_요청_불량이력",
+      "source_type": "ORDER_NOTE",
+      "question": "불량 재발 우려로 검수 요청한 주문 있나요",
+      "expected": {
+        "ORDER_NOTE": [
+          6,
+          8
+        ]
+      }
+    },
+    {
+      "id": "ON041",
+      "cluster": "설연휴_전_도착",
+      "source_type": "ORDER_NOTE",
+      "question": "설 연휴 전에 도착해야 한다는 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          7,
+          20,
+          37,
+          46,
+          49
+        ]
+      }
+    },
+    {
+      "id": "ON042",
+      "cluster": "설연휴_전_도착",
+      "source_type": "ORDER_NOTE",
+      "question": "명절 전 배송 완료 요청한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          7,
+          20,
+          37,
+          46,
+          49
+        ]
+      }
+    },
+    {
+      "id": "ON043",
+      "cluster": "설연휴_전_도착",
+      "source_type": "ORDER_NOTE",
+      "question": "설날 전까지 받아야 한다는 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          7,
+          20,
+          37,
+          46,
+          49
+        ]
+      }
+    },
+    {
+      "id": "ON044",
+      "cluster": "설연휴_전_도착",
+      "source_type": "ORDER_NOTE",
+      "question": "연휴 시작 전 배송 원하는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          7,
+          20,
+          37,
+          46,
+          49
+        ]
+      }
+    },
+    {
+      "id": "ON045",
+      "cluster": "설연휴_전_도착",
+      "source_type": "ORDER_NOTE",
+      "question": "설 연휴 전 필수 도착 요청 있었나요",
+      "expected": {
+        "ORDER_NOTE": [
+          7,
+          20,
+          37,
+          46,
+          49
+        ]
+      }
+    },
+    {
+      "id": "ON046",
+      "cluster": "설연휴_전_도착",
+      "source_type": "ORDER_NOTE",
+      "question": "명절 전 급하게 받아야 하는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          7,
+          20,
+          37,
+          46,
+          49
+        ]
+      }
+    },
+    {
+      "id": "ON047",
+      "cluster": "세금계산서_담당자앞",
+      "source_type": "ORDER_NOTE",
+      "question": "세금계산서를 담당자 앞으로 발행해달라는 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          12,
+          26
+        ]
+      }
+    },
+    {
+      "id": "ON048",
+      "cluster": "세금계산서_담당자앞",
+      "source_type": "ORDER_NOTE",
+      "question": "계산서 발행 대상자 지정한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          12,
+          26
+        ]
+      }
+    },
+    {
+      "id": "ON049",
+      "cluster": "세금계산서_담당자앞",
+      "source_type": "ORDER_NOTE",
+      "question": "세금계산서 수신자 요청 있었던 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          12,
+          26
+        ]
+      }
+    },
+    {
+      "id": "ON050",
+      "cluster": "세금계산서_담당자앞",
+      "source_type": "ORDER_NOTE",
+      "question": "담당자 명의로 계산서 발행 요청한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          12,
+          26
+        ]
+      }
+    },
+    {
+      "id": "ON051",
+      "cluster": "세금계산서_담당자앞",
+      "source_type": "ORDER_NOTE",
+      "question": "세금계산서 발행 관련 요청 있나요",
+      "expected": {
+        "ORDER_NOTE": [
+          12,
+          26
+        ]
+      }
+    },
+    {
+      "id": "ON052",
+      "cluster": "화요일까지_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "다음주 화요일까지 배송해달라는 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          10,
+          13,
+          22,
+          42
+        ]
+      }
+    },
+    {
+      "id": "ON053",
+      "cluster": "화요일까지_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "화요일까지 도착해야 하는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          10,
+          13,
+          22,
+          42
+        ]
+      }
+    },
+    {
+      "id": "ON054",
+      "cluster": "화요일까지_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "특정 요일까지 배송 요청한 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          10,
+          13,
+          22,
+          42
+        ]
+      }
+    },
+    {
+      "id": "ON055",
+      "cluster": "화요일까지_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "다음주 화요일 마감으로 요청한 주문 있나요",
+      "expected": {
+        "ORDER_NOTE": [
+          10,
+          13,
+          22,
+          42
+        ]
+      }
+    },
+    {
+      "id": "ON056",
+      "cluster": "화요일까지_배송",
+      "source_type": "ORDER_NOTE",
+      "question": "화요일 전까지 받아야 한다는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          10,
+          13,
+          22,
+          42
+        ]
+      }
+    },
+    {
+      "id": "ON057",
+      "cluster": "설치기사_동행_주문",
+      "source_type": "ORDER_NOTE",
+      "question": "설치 기사 동행 가능한지 물어본 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          14,
+          28,
+          41
+        ]
+      }
+    },
+    {
+      "id": "ON058",
+      "cluster": "설치기사_동행_주문",
+      "source_type": "ORDER_NOTE",
+      "question": "설치까지 필요한 주문 있나요",
+      "expected": {
+        "ORDER_NOTE": [
+          14,
+          28,
+          41
+        ]
+      }
+    },
+    {
+      "id": "ON059",
+      "cluster": "설치기사_동행_주문",
+      "source_type": "ORDER_NOTE",
+      "question": "기사님 동행 요청한 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          14,
+          28,
+          41
+        ]
+      }
+    },
+    {
+      "id": "ON060",
+      "cluster": "설치기사_동행_주문",
+      "source_type": "ORDER_NOTE",
+      "question": "설치 지원 문의한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          14,
+          28,
+          41
+        ]
+      }
+    },
+    {
+      "id": "ON061",
+      "cluster": "설치기사_동행_주문",
+      "source_type": "ORDER_NOTE",
+      "question": "설치기사 동반 배송 원하는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          14,
+          28,
+          41
+        ]
+      }
+    },
+    {
+      "id": "ON062",
+      "cluster": "설치기사_동행_주문",
+      "source_type": "ORDER_NOTE",
+      "question": "설치 서비스 필요하다고 한 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          14,
+          28,
+          41
+        ]
+      }
+    },
+    {
+      "id": "ON063",
+      "cluster": "동일제품_재주문_사양확인",
+      "source_type": "ORDER_NOTE",
+      "question": "동일 제품 재주문이라 사양 확인 요청한 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          19,
+          24,
+          27,
+          31
+        ]
+      }
+    },
+    {
+      "id": "ON064",
+      "cluster": "동일제품_재주문_사양확인",
+      "source_type": "ORDER_NOTE",
+      "question": "이전과 같은 사양인지 확인해달라는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          19,
+          24,
+          27,
+          31
+        ]
+      }
+    },
+    {
+      "id": "ON065",
+      "cluster": "동일제품_재주문_사양확인",
+      "source_type": "ORDER_NOTE",
+      "question": "재주문 건이라 스펙 확인 부탁한 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          19,
+          24,
+          27,
+          31
+        ]
+      }
+    },
+    {
+      "id": "ON066",
+      "cluster": "동일제품_재주문_사양확인",
+      "source_type": "ORDER_NOTE",
+      "question": "같은 제품 다시 주문하면서 사양 확인한 경우",
+      "expected": {
+        "ORDER_NOTE": [
+          19,
+          24,
+          27,
+          31
+        ]
+      }
+    },
+    {
+      "id": "ON067",
+      "cluster": "동일제품_재주문_사양확인",
+      "source_type": "ORDER_NOTE",
+      "question": "재구매 시 사양 동일한지 물어본 주문 있나요",
+      "expected": {
+        "ORDER_NOTE": [
+          19,
+          24,
+          27,
+          31
+        ]
+      }
+    },
+    {
+      "id": "ON068",
+      "cluster": "매장오픈_최대한빨리",
+      "source_type": "ORDER_NOTE",
+      "question": "매장 오픈 준비로 최대한 빨리 요청한 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          23,
+          29
+        ]
+      }
+    },
+    {
+      "id": "ON069",
+      "cluster": "매장오픈_최대한빨리",
+      "source_type": "ORDER_NOTE",
+      "question": "오픈 준비 때문에 급하게 요청한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          23,
+          29
+        ]
+      }
+    },
+    {
+      "id": "ON070",
+      "cluster": "매장오픈_최대한빨리",
+      "source_type": "ORDER_NOTE",
+      "question": "매장 개점 준비로 서둘러달라는 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          23,
+          29
+        ]
+      }
+    },
+    {
+      "id": "ON071",
+      "cluster": "매장오픈_최대한빨리",
+      "source_type": "ORDER_NOTE",
+      "question": "오픈 일정 때문에 빠른 배송 요청한 주문 있나요",
+      "expected": {
+        "ORDER_NOTE": [
+          23,
+          29
+        ]
+      }
+    },
+    {
+      "id": "ON072",
+      "cluster": "행사준비_시간촉박",
+      "source_type": "ORDER_NOTE",
+      "question": "행사 준비 때문에 시간이 촉박하다는 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          25,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "id": "ON073",
+      "cluster": "행사준비_시간촉박",
+      "source_type": "ORDER_NOTE",
+      "question": "행사 일정 때문에 확인 즉시 발송 요청한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          25,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "id": "ON074",
+      "cluster": "행사준비_시간촉박",
+      "source_type": "ORDER_NOTE",
+      "question": "행사 대비로 급하게 요청한 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          25,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "id": "ON075",
+      "cluster": "행사준비_시간촉박",
+      "source_type": "ORDER_NOTE",
+      "question": "촉박한 일정으로 즉시 발송 요청 있었나요",
+      "expected": {
+        "ORDER_NOTE": [
+          25,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "id": "ON076",
+      "cluster": "행사준비_시간촉박",
+      "source_type": "ORDER_NOTE",
+      "question": "행사 전에 급히 필요하다는 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          25,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "id": "ON077",
+      "cluster": "야간배송_주문",
+      "source_type": "ORDER_NOTE",
+      "question": "야간 배송 가능한지 물어본 주문 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          48
+        ]
+      }
+    },
+    {
+      "id": "ON078",
+      "cluster": "야간배송_주문",
+      "source_type": "ORDER_NOTE",
+      "question": "매장이 낮에 문을 닫아서 야간 배송 요청한 주문",
+      "expected": {
+        "ORDER_NOTE": [
+          48
+        ]
+      }
+    },
+    {
+      "id": "ON079",
+      "cluster": "야간배송_주문",
+      "source_type": "ORDER_NOTE",
+      "question": "저녁에 배송해달라고 한 주문 찾아줘",
+      "expected": {
+        "ORDER_NOTE": [
+          48
+        ]
+      }
+    },
+    {
+      "id": "ON080",
+      "cluster": "야간배송_주문",
+      "source_type": "ORDER_NOTE",
+      "question": "밤에 받고 싶다는 배송 요청 있었나요",
+      "expected": {
+        "ORDER_NOTE": [
+          48
+        ]
+      }
+    },
+    {
+      "id": "PM001",
+      "cluster": "긴급건_우선처리",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "긴급 건으로 우선 처리된 생산 있어?",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          3,
+          4,
+          13,
+          17,
+          18,
+          26,
+          38
+        ]
+      }
+    },
+    {
+      "id": "PM002",
+      "cluster": "긴급건_우선처리",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "생산 우선순위 높여서 처리한 건 찾아줘",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          3,
+          4,
+          13,
+          17,
+          18,
+          26,
+          38
+        ]
+      }
+    },
+    {
+      "id": "PM003",
+      "cluster": "긴급건_우선처리",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "급하게 먼저 처리한 생산 건 있나요",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          3,
+          4,
+          13,
+          17,
+          18,
+          26,
+          38
+        ]
+      }
+    },
+    {
+      "id": "PM004",
+      "cluster": "긴급건_우선처리",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "우선 처리 요청 반영된 생산",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          3,
+          4,
+          13,
+          17,
+          18,
+          26,
+          38
+        ]
+      }
+    },
+    {
+      "id": "PM005",
+      "cluster": "긴급건_우선처리",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "생산 순서를 당겨서 처리한 건",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          3,
+          4,
+          13,
+          17,
+          18,
+          26,
+          38
+        ]
+      }
+    },
+    {
+      "id": "PM006",
+      "cluster": "긴급건_우선처리",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "긴급 처리된 생산 기록 알려줘",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          3,
+          4,
+          13,
+          17,
+          18,
+          26,
+          38
+        ]
+      }
+    },
+    {
+      "id": "PM007",
+      "cluster": "긴급건_우선처리",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "다른 것보다 먼저 만든 생산 건 있어?",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          3,
+          4,
+          13,
+          17,
+          18,
+          26,
+          38
+        ]
+      }
+    },
+    {
+      "id": "PM008",
+      "cluster": "스크래치_발견_교체",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "검수 중 스크래치 발견된 생산 건 있어?",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          8,
+          23,
+          35,
+          43
+        ]
+      }
+    },
+    {
+      "id": "PM009",
+      "cluster": "스크래치_발견_교체",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "제품에 흠집 있어서 교체한 생산",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          8,
+          23,
+          35,
+          43
+        ]
+      }
+    },
+    {
+      "id": "PM010",
+      "cluster": "스크래치_발견_교체",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "검수하다가 긁힘 발견한 건 찾아줘",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          8,
+          23,
+          35,
+          43
+        ]
+      }
+    },
+    {
+      "id": "PM011",
+      "cluster": "스크래치_발견_교체",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "스크래치 때문에 재작업한 생산 있나요",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          8,
+          23,
+          35,
+          43
+        ]
+      }
+    },
+    {
+      "id": "PM012",
+      "cluster": "스크래치_발견_교체",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "표면 흠집으로 교체 진행한 생산 건",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          8,
+          23,
+          35,
+          43
+        ]
+      }
+    },
+    {
+      "id": "PM013",
+      "cluster": "스크래치_발견_교체",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "생산 중 외관 불량 발견된 케이스",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          8,
+          23,
+          35,
+          43
+        ]
+      }
+    },
+    {
+      "id": "PM014",
+      "cluster": "설치기사_동행_생산",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "설치 기사 동행 필요한 생산 건 있어?",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          9,
+          28,
+          40
+        ]
+      }
+    },
+    {
+      "id": "PM015",
+      "cluster": "설치기사_동행_생산",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "배송 시 기사 동반해야 하는 생산",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          9,
+          28,
+          40
+        ]
+      }
+    },
+    {
+      "id": "PM016",
+      "cluster": "설치기사_동행_생산",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "설치 지원 필요한 생산 건 찾아줘",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          9,
+          28,
+          40
+        ]
+      }
+    },
+    {
+      "id": "PM017",
+      "cluster": "설치기사_동행_생산",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "기사 동행 배송으로 조율된 생산 있나요",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          9,
+          28,
+          40
+        ]
+      }
+    },
+    {
+      "id": "PM018",
+      "cluster": "설치기사_동행_생산",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "설치까지 필요해서 일정 조율한 생산",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          9,
+          28,
+          40
+        ]
+      }
+    },
+    {
+      "id": "PM019",
+      "cluster": "재포장_요청",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "재포장 요청으로 시간 추가된 생산 있어?",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          11,
+          14,
+          29,
+          42,
+          44
+        ]
+      }
+    },
+    {
+      "id": "PM020",
+      "cluster": "재포장_요청",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "포장 다시 한 생산 건 찾아줘",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          11,
+          14,
+          29,
+          42,
+          44
+        ]
+      }
+    },
+    {
+      "id": "PM021",
+      "cluster": "재포장_요청",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "재포장 작업 진행한 생산 있나요",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          11,
+          14,
+          29,
+          42,
+          44
+        ]
+      }
+    },
+    {
+      "id": "PM022",
+      "cluster": "재포장_요청",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "포장 재작업으로 지연된 생산",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          11,
+          14,
+          29,
+          42,
+          44
+        ]
+      }
+    },
+    {
+      "id": "PM023",
+      "cluster": "재포장_요청",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "다시 포장해달라는 요청 있었던 생산",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          11,
+          14,
+          29,
+          42,
+          44
+        ]
+      }
+    },
+    {
+      "id": "PM024",
+      "cluster": "부품수급_지연",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "부품 수급 지연 있었던 생산 건 있어?",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          19,
+          31,
+          36,
+          49
+        ]
+      }
+    },
+    {
+      "id": "PM025",
+      "cluster": "부품수급_지연",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "생산 중 부품이 늦게 와서 지연된 건",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          19,
+          31,
+          36,
+          49
+        ]
+      }
+    },
+    {
+      "id": "PM026",
+      "cluster": "부품수급_지연",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "부품 조달 문제로 늦어진 생산 찾아줘",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          19,
+          31,
+          36,
+          49
+        ]
+      }
+    },
+    {
+      "id": "PM027",
+      "cluster": "부품수급_지연",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "부품 수급 문제 있었던 생산 있나요",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          19,
+          31,
+          36,
+          49
+        ]
+      }
+    },
+    {
+      "id": "PM028",
+      "cluster": "부품수급_지연",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "자재 수급 지연으로 하루 늦어진 생산",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          19,
+          31,
+          36,
+          49
+        ]
+      }
+    },
+    {
+      "id": "PM029",
+      "cluster": "부품수급_지연",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "부품이 제때 안 와서 생산 미뤄진 건",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          19,
+          31,
+          36,
+          49
+        ]
+      }
+    },
+    {
+      "id": "PM030",
+      "cluster": "박스_이중포장",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "고객 요청으로 이중 포장 진행한 생산 있어?",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          21,
+          25,
+          32,
+          47,
+          50
+        ]
+      }
+    },
+    {
+      "id": "PM031",
+      "cluster": "박스_이중포장",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "박스 두 겹으로 포장한 생산 건 찾아줘",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          21,
+          25,
+          32,
+          47,
+          50
+        ]
+      }
+    },
+    {
+      "id": "PM032",
+      "cluster": "박스_이중포장",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "이중 포장 요청 반영된 생산 있나요",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          21,
+          25,
+          32,
+          47,
+          50
+        ]
+      }
+    },
+    {
+      "id": "PM033",
+      "cluster": "박스_이중포장",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "포장을 겹으로 한 생산",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          21,
+          25,
+          32,
+          47,
+          50
+        ]
+      }
+    },
+    {
+      "id": "PM034",
+      "cluster": "박스_이중포장",
+      "source_type": "PRODUCTION_MEMO",
+      "question": "박스 이중포장 진행 건",
+      "expected": {
+        "PRODUCTION_MEMO": [
+          21,
+          25,
+          32,
+          47,
+          50
+        ]
+      }
+    },
+    {
+      "id": "CM001",
+      "cluster": "넥스트피씨방_강남점_우수거래처",
+      "source_type": "CLIENT_MEMO",
+      "question": "매달 정기 발주하는 우수 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "CM002",
+      "cluster": "넥스트피씨방_강남점_우수거래처",
+      "source_type": "CLIENT_MEMO",
+      "question": "결제 항상 당일 처리되는 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "CM003",
+      "cluster": "넥스트피씨방_강남점_우수거래처",
+      "source_type": "CLIENT_MEMO",
+      "question": "우수 거래처로 분류된 곳 알려줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "CM004",
+      "cluster": "넥스트피씨방_강남점_우수거래처",
+      "source_type": "CLIENT_MEMO",
+      "question": "신뢰도 높은 단골 거래처 있나요",
+      "expected": {
+        "CLIENT_MEMO": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "CM005",
+      "cluster": "조이스틱게이밍센터_신규개점",
+      "source_type": "CLIENT_MEMO",
+      "question": "신규 개점 준비 중인 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "CM006",
+      "cluster": "조이스틱게이밍센터_신규개점",
+      "source_type": "CLIENT_MEMO",
+      "question": "새로 매장 여는 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "CM007",
+      "cluster": "조이스틱게이밍센터_신규개점",
+      "source_type": "CLIENT_MEMO",
+      "question": "초기 장비 대량 발주 예정인 거래처",
+      "expected": {
+        "CLIENT_MEMO": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "CM008",
+      "cluster": "조이스틱게이밍센터_신규개점",
+      "source_type": "CLIENT_MEMO",
+      "question": "오픈 준비 중인 거래처 있나요",
+      "expected": {
+        "CLIENT_MEMO": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "CM009",
+      "cluster": "한빛전자유통_소규모재판매",
+      "source_type": "CLIENT_MEMO",
+      "question": "소규모 재판매업체인 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          3
+        ]
+      }
+    },
+    {
+      "id": "CM010",
+      "cluster": "한빛전자유통_소규모재판매",
+      "source_type": "CLIENT_MEMO",
+      "question": "단가 문의 잦은 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          3
+        ]
+      }
+    },
+    {
+      "id": "CM011",
+      "cluster": "한빛전자유통_소규모재판매",
+      "source_type": "CLIENT_MEMO",
+      "question": "소량 다품종 위주로 주문하는 거래처",
+      "expected": {
+        "CLIENT_MEMO": [
+          3
+        ]
+      }
+    },
+    {
+      "id": "CM012",
+      "cluster": "스마트오피스솔루션_세금계산서",
+      "source_type": "CLIENT_MEMO",
+      "question": "세금계산서를 항상 담당자 앞으로 요청하는 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          4
+        ]
+      }
+    },
+    {
+      "id": "CM013",
+      "cluster": "스마트오피스솔루션_세금계산서",
+      "source_type": "CLIENT_MEMO",
+      "question": "계산서 발행 방식 정해진 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          4
+        ]
+      }
+    },
+    {
+      "id": "CM014",
+      "cluster": "스마트오피스솔루션_세금계산서",
+      "source_type": "CLIENT_MEMO",
+      "question": "사무용 기기 위주 거래처 있나요",
+      "expected": {
+        "CLIENT_MEMO": [
+          4
+        ]
+      }
+    },
+    {
+      "id": "CM015",
+      "cluster": "피씨클럽_홍대점_야간배송",
+      "source_type": "CLIENT_MEMO",
+      "question": "야간 배송 선호하는 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          5
+        ]
+      }
+    },
+    {
+      "id": "CM016",
+      "cluster": "피씨클럽_홍대점_야간배송",
+      "source_type": "CLIENT_MEMO",
+      "question": "새벽 배송 요청 잦은 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          5
+        ]
+      }
+    },
+    {
+      "id": "CM017",
+      "cluster": "피씨클럽_홍대점_야간배송",
+      "source_type": "CLIENT_MEMO",
+      "question": "매장 오픈 전 배송 원하는 거래처",
+      "expected": {
+        "CLIENT_MEMO": [
+          5
+        ]
+      }
+    },
+    {
+      "id": "CM018",
+      "cluster": "대성컴퓨터상사_장기파트너",
+      "source_type": "CLIENT_MEMO",
+      "question": "10년 이상 거래한 장기 파트너사 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          6
+        ]
+      }
+    },
+    {
+      "id": "CM019",
+      "cluster": "대성컴퓨터상사_장기파트너",
+      "source_type": "CLIENT_MEMO",
+      "question": "월말 정산 조건으로 거래하는 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          6
+        ]
+      }
+    },
+    {
+      "id": "CM020",
+      "cluster": "대성컴퓨터상사_장기파트너",
+      "source_type": "CLIENT_MEMO",
+      "question": "오래된 장기 거래처 알려줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          6
+        ]
+      }
+    },
+    {
+      "id": "CM021",
+      "cluster": "대성컴퓨터상사_장기파트너",
+      "source_type": "CLIENT_MEMO",
+      "question": "결제 조건이 월말 정산인 거래처",
+      "expected": {
+        "CLIENT_MEMO": [
+          6
+        ]
+      }
+    },
+    {
+      "id": "CM022",
+      "cluster": "이지웨어샵_온라인셀러",
+      "source_type": "CLIENT_MEMO",
+      "question": "배송지가 자주 바뀌는 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          7
+        ]
+      }
+    },
+    {
+      "id": "CM023",
+      "cluster": "이지웨어샵_온라인셀러",
+      "source_type": "CLIENT_MEMO",
+      "question": "온라인 셀러인 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          7
+        ]
+      }
+    },
+    {
+      "id": "CM024",
+      "cluster": "이지웨어샵_온라인셀러",
+      "source_type": "CLIENT_MEMO",
+      "question": "물류센터로 배송지 바뀌는 거래처 있나요",
+      "expected": {
+        "CLIENT_MEMO": [
+          7
+        ]
+      }
+    },
+    {
+      "id": "CM025",
+      "cluster": "코어테크유통_대량벌크",
+      "source_type": "CLIENT_MEMO",
+      "question": "대량 벌크 주문 위주인 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          8
+        ]
+      }
+    },
+    {
+      "id": "CM026",
+      "cluster": "코어테크유통_대량벌크",
+      "source_type": "CLIENT_MEMO",
+      "question": "박스 단위 발주만 하는 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          8
+        ]
+      }
+    },
+    {
+      "id": "CM027",
+      "cluster": "코어테크유통_대량벌크",
+      "source_type": "CLIENT_MEMO",
+      "question": "대용량 주문하는 거래처 있나요",
+      "expected": {
+        "CLIENT_MEMO": [
+          8
+        ]
+      }
+    },
+    {
+      "id": "CM028",
+      "cluster": "게임팩토리스토어_게이밍기어",
+      "source_type": "CLIENT_MEMO",
+      "question": "게이밍 기어 전문 소매점인 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          9
+        ]
+      }
+    },
+    {
+      "id": "CM029",
+      "cluster": "게임팩토리스토어_게이밍기어",
+      "source_type": "CLIENT_MEMO",
+      "question": "신제품 입고시 우선 안내 원하는 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          9
+        ]
+      }
+    },
+    {
+      "id": "CM030",
+      "cluster": "게임팩토리스토어_게이밍기어",
+      "source_type": "CLIENT_MEMO",
+      "question": "게임 관련 용품 취급하는 거래처",
+      "expected": {
+        "CLIENT_MEMO": [
+          9
+        ]
+      }
+    },
+    {
+      "id": "CM031",
+      "cluster": "우리동네피씨방_예산제한",
+      "source_type": "CLIENT_MEMO",
+      "question": "예산이 제한적인 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          10
+        ]
+      }
+    },
+    {
+      "id": "CM032",
+      "cluster": "우리동네피씨방_예산제한",
+      "source_type": "CLIENT_MEMO",
+      "question": "가성비 위주로 구매하는 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          10
+        ]
+      }
+    },
+    {
+      "id": "CM033",
+      "cluster": "우리동네피씨방_예산제한",
+      "source_type": "CLIENT_MEMO",
+      "question": "소형 매장이라 예산 빠듯한 거래처 있나요",
+      "expected": {
+        "CLIENT_MEMO": [
+          10
+        ]
+      }
+    },
+    {
+      "id": "CM034",
+      "cluster": "테크노마트_도매거래처",
+      "source_type": "CLIENT_MEMO",
+      "question": "도매로 재판매하는 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          11
+        ]
+      }
+    },
+    {
+      "id": "CM035",
+      "cluster": "테크노마트_도매거래처",
+      "source_type": "CLIENT_MEMO",
+      "question": "여러 매장에 다시 파는 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          11
+        ]
+      }
+    },
+    {
+      "id": "CM036",
+      "cluster": "테크노마트_도매거래처",
+      "source_type": "CLIENT_MEMO",
+      "question": "도매 거래처 알려줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          11
+        ]
+      }
+    },
+    {
+      "id": "CM037",
+      "cluster": "아이티프렌즈_IT유지보수",
+      "source_type": "CLIENT_MEMO",
+      "question": "IT 유지보수 업체인 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          12
+        ]
+      }
+    },
+    {
+      "id": "CM038",
+      "cluster": "아이티프렌즈_IT유지보수",
+      "source_type": "CLIENT_MEMO",
+      "question": "예비 부품 재고 확보 목적인 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          12
+        ]
+      }
+    },
+    {
+      "id": "CM039",
+      "cluster": "아이티프렌즈_IT유지보수",
+      "source_type": "CLIENT_MEMO",
+      "question": "고장 대응용으로 주문하는 거래처 있나요",
+      "expected": {
+        "CLIENT_MEMO": [
+          12
+        ]
+      }
+    },
+    {
+      "id": "CM040",
+      "cluster": "청년컴퓨터협동조합_비영리",
+      "source_type": "CLIENT_MEMO",
+      "question": "비영리 조합인 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          13
+        ]
+      }
+    },
+    {
+      "id": "CM041",
+      "cluster": "청년컴퓨터협동조합_비영리",
+      "source_type": "CLIENT_MEMO",
+      "question": "예산 승인 절차 때문에 결제 늦는 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          13
+        ]
+      }
+    },
+    {
+      "id": "CM042",
+      "cluster": "청년컴퓨터협동조합_비영리",
+      "source_type": "CLIENT_MEMO",
+      "question": "견적서 요청 잦은 거래처 있나요",
+      "expected": {
+        "CLIENT_MEMO": [
+          13
+        ]
+      }
+    },
+    {
+      "id": "CM043",
+      "cluster": "한울전산학원_학기초발주",
+      "source_type": "CLIENT_MEMO",
+      "question": "학기 시작 전 집중 발주하는 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          14
+        ]
+      }
+    },
+    {
+      "id": "CM044",
+      "cluster": "한울전산학원_학기초발주",
+      "source_type": "CLIENT_MEMO",
+      "question": "학원 전산실 리뉴얼 목적인 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          14
+        ]
+      }
+    },
+    {
+      "id": "CM045",
+      "cluster": "스타피씨방_체인본부",
+      "source_type": "CLIENT_MEMO",
+      "question": "전국에 여러 지점 있는 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          15
+        ]
+      }
+    },
+    {
+      "id": "CM046",
+      "cluster": "스타피씨방_체인본부",
+      "source_type": "CLIENT_MEMO",
+      "question": "지점별 분할 배송 요청 잦은 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          15
+        ]
+      }
+    },
+    {
+      "id": "CM047",
+      "cluster": "스타피씨방_체인본부",
+      "source_type": "CLIENT_MEMO",
+      "question": "체인 매장 운영하는 거래처 있나요",
+      "expected": {
+        "CLIENT_MEMO": [
+          15
+        ]
+      }
+    },
+    {
+      "id": "CM048",
+      "cluster": "오피스디포코리아_계약단가",
+      "source_type": "CLIENT_MEMO",
+      "question": "계약 단가로 정기 발주하는 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          16
+        ]
+      }
+    },
+    {
+      "id": "CM049",
+      "cluster": "오피스디포코리아_계약단가",
+      "source_type": "CLIENT_MEMO",
+      "question": "대기업 사무용품 납품업체인 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          16
+        ]
+      }
+    },
+    {
+      "id": "CM050",
+      "cluster": "지오디지털_조립PC",
+      "source_type": "CLIENT_MEMO",
+      "question": "조립PC 전문점인 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          17
+        ]
+      }
+    },
+    {
+      "id": "CM051",
+      "cluster": "지오디지털_조립PC",
+      "source_type": "CLIENT_MEMO",
+      "question": "부품 단품 소량 주문하는 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          17
+        ]
+      }
+    },
+    {
+      "id": "CM052",
+      "cluster": "지오디지털_조립PC",
+      "source_type": "CLIENT_MEMO",
+      "question": "지오디지털 관련 메모 보여줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          17
+        ]
+      }
+    },
+    {
+      "id": "CM053",
+      "cluster": "넷허브인터넷카페_24시간무인",
+      "source_type": "CLIENT_MEMO",
+      "question": "24시간 무인으로 운영하는 거래처 있어?",
+      "expected": {
+        "CLIENT_MEMO": [
+          18
+        ]
+      }
+    },
+    {
+      "id": "CM054",
+      "cluster": "넷허브인터넷카페_24시간무인",
+      "source_type": "CLIENT_MEMO",
+      "question": "설치 지원 요청 자주 동반되는 거래처 찾아줘",
+      "expected": {
+        "CLIENT_MEMO": [
+          18
+        ]
+      }
+    },
+    {
+      "id": "CM055",
+      "cluster": "넷허브인터넷카페_24시간무인",
+      "source_type": "CLIENT_MEMO",
+      "question": "무인 매장인 거래처 있나요",
+      "expected": {
+        "CLIENT_MEMO": [
+          18
+        ]
+      }
+    },
+    {
+      "id": "ALL001",
+      "cluster": "지오디지털_전체",
+      "source_type": "ALL",
+      "question": "지오디지털 관련해서 뭐 참고할 거 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          5,
+          13,
+          26,
+          39
+        ],
+        "PRODUCTION_MEMO": [
+          11,
+          13,
+          26
+        ],
+        "CLIENT_MEMO": [
+          17
+        ]
+      }
+    },
+    {
+      "id": "ALL002",
+      "cluster": "지오디지털_전체",
+      "source_type": "ALL",
+      "question": "지오디지털 주문이나 메모 다 보여줘",
+      "expected": {
+        "ORDER_NOTE": [
+          5,
+          13,
+          26,
+          39
+        ],
+        "PRODUCTION_MEMO": [
+          11,
+          13,
+          26
+        ],
+        "CLIENT_MEMO": [
+          17
+        ]
+      }
+    },
+    {
+      "id": "ALL003",
+      "cluster": "지오디지털_전체",
+      "source_type": "ALL",
+      "question": "지오디지털 관련 특이사항 정리해줘",
+      "expected": {
+        "ORDER_NOTE": [
+          5,
+          13,
+          26,
+          39
+        ],
+        "PRODUCTION_MEMO": [
+          11,
+          13,
+          26
+        ],
+        "CLIENT_MEMO": [
+          17
+        ]
+      }
+    },
+    {
+      "id": "ALL004",
+      "cluster": "지오디지털_전체",
+      "source_type": "ALL",
+      "question": "지오디지털 거래 이력 관련 메모 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          5,
+          13,
+          26,
+          39
+        ],
+        "PRODUCTION_MEMO": [
+          11,
+          13,
+          26
+        ],
+        "CLIENT_MEMO": [
+          17
+        ]
+      }
+    },
+    {
+      "id": "ALL005",
+      "cluster": "코어테크유통_전체",
+      "source_type": "ALL",
+      "question": "코어테크 유통 관련 참고할 내용 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          9,
+          44,
+          49,
+          50
+        ],
+        "PRODUCTION_MEMO": [
+          44,
+          49,
+          50
+        ],
+        "CLIENT_MEMO": [
+          8
+        ]
+      }
+    },
+    {
+      "id": "ALL006",
+      "cluster": "코어테크유통_전체",
+      "source_type": "ALL",
+      "question": "코어테크 유통 주문/메모 다 정리해줘",
+      "expected": {
+        "ORDER_NOTE": [
+          9,
+          44,
+          49,
+          50
+        ],
+        "PRODUCTION_MEMO": [
+          44,
+          49,
+          50
+        ],
+        "CLIENT_MEMO": [
+          8
+        ]
+      }
+    },
+    {
+      "id": "ALL007",
+      "cluster": "코어테크유통_전체",
+      "source_type": "ALL",
+      "question": "코어테크 유통 관련 특이사항 알려줘",
+      "expected": {
+        "ORDER_NOTE": [
+          9,
+          44,
+          49,
+          50
+        ],
+        "PRODUCTION_MEMO": [
+          44,
+          49,
+          50
+        ],
+        "CLIENT_MEMO": [
+          8
+        ]
+      }
+    },
+    {
+      "id": "ALL008",
+      "cluster": "우리동네피씨방_전체",
+      "source_type": "ALL",
+      "question": "우리동네피씨방 관련 메모나 특이사항 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          23,
+          29,
+          36,
+          37
+        ],
+        "PRODUCTION_MEMO": [
+          23,
+          29,
+          36
+        ],
+        "CLIENT_MEMO": [
+          10
+        ]
+      }
+    },
+    {
+      "id": "ALL009",
+      "cluster": "우리동네피씨방_전체",
+      "source_type": "ALL",
+      "question": "우리동네피씨방 주문 이력 참고할 거 있어?",
+      "expected": {
+        "ORDER_NOTE": [
+          23,
+          29,
+          36,
+          37
+        ],
+        "PRODUCTION_MEMO": [
+          23,
+          29,
+          36
+        ],
+        "CLIENT_MEMO": [
+          10
+        ]
+      }
+    },
+    {
+      "id": "ALL010",
+      "cluster": "우리동네피씨방_전체",
+      "source_type": "ALL",
+      "question": "우리동네피씨방 관련 내용 다 보여줘",
+      "expected": {
+        "ORDER_NOTE": [
+          23,
+          29,
+          36,
+          37
+        ],
+        "PRODUCTION_MEMO": [
+          23,
+          29,
+          36
+        ],
+        "CLIENT_MEMO": [
+          10
+        ]
+      }
+    },
+    {
+      "id": "NEG001",
+      "cluster": "no_match",
+      "source_type": "ALL",
+      "question": "해외 배송 가능한 주문 있어?",
+      "expected": {}
+    },
+    {
+      "id": "NEG002",
+      "cluster": "no_match",
+      "source_type": "ALL",
+      "question": "환불 처리된 주문 있나요",
+      "expected": {}
+    },
+    {
+      "id": "NEG003",
+      "cluster": "no_match",
+      "source_type": "ALL",
+      "question": "드론으로 배송해달라는 요청 있었어?",
+      "expected": {}
+    },
+    {
+      "id": "NEG004",
+      "cluster": "no_match",
+      "source_type": "ALL",
+      "question": "암호화폐로 결제하겠다는 거래처 있어?",
+      "expected": {}
+    },
+    {
+      "id": "NEG005",
+      "cluster": "no_match",
+      "source_type": "ALL",
+      "question": "반려동물 동반 방문한 거래처 있나요",
+      "expected": {}
+    },
+    {
+      "id": "NEG006",
+      "cluster": "no_match",
+      "source_type": "ALL",
+      "question": "제품에 워런티 연장 요청한 주문 있어?",
+      "expected": {}
+    },
+    {
+      "id": "NEG007",
+      "cluster": "no_match",
+      "source_type": "ALL",
+      "question": "다국어 매뉴얼 요청한 주문 있나요",
+      "expected": {}
+    },
+    {
+      "id": "NEG008",
+      "cluster": "no_match",
+      "source_type": "ALL",
+      "question": "탄소중립 포장 요청한 주문 있어?",
+      "expected": {}
+    },
+    {
+      "id": "NEG009",
+      "cluster": "no_match",
+      "source_type": "ALL",
+      "question": "AS 방문 일정 조율한 생산 건 있어?",
+      "expected": {}
+    },
+    {
+      "id": "NEG010",
+      "cluster": "no_match",
+      "source_type": "ALL",
+      "question": "직원 채용 관련 문의한 거래처 있어?",
+      "expected": {}
+    }
+  ]
+}

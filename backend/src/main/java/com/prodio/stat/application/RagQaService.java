@@ -70,6 +70,25 @@ public class RagQaService {
         return recordedCalls;
     }
 
+    /**
+     * searchNotes 검색 품질만 평가하기 위한 dry-run. 임베딩 검색은 실제로 수행하되(embed 호출 비용 발생),
+     * ask()처럼 최종 답변 생성까지 가지는 않고 매치된 refId/sourceType/distance를 그대로 반환한다 —
+     * recall@k/precision@k를 정답 ID 집합과 직접 비교해 계산할 수 있도록.
+     */
+    public List<SearchMatch> searchNotesEval(String query, String sourceTypeParam) {
+        SourceType sourceType = parseSourceType(sourceTypeParam);
+        float[] queryVector = aiClient.embed(query);
+
+        Map<SourceType, List<EmbeddingMatch>> matchesByType = new EnumMap<>(SourceType.class);
+        for (SourceType target : SearchNotesSupport.targetsFor(sourceType)) {
+            matchesByType.put(target, repositoryFor(target).search(queryVector, SearchNotesSupport.TOP_K));
+        }
+
+        return SearchNotesSupport.mergeTopK(matchesByType, SearchNotesSupport.TOP_K).stream()
+                .map(labeled -> new SearchMatch(labeled.sourceType().name(), labeled.match().refId(), labeled.match().distance()))
+                .toList();
+    }
+
     public AiQueryLogPage getAskLogs(long adminId, int page, int size) {
         return aiQueryLogRepository.findPage(adminId, QueryType.RAG_QA, page, size);
     }
