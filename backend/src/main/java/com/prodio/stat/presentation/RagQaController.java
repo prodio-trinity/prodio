@@ -3,6 +3,7 @@ package com.prodio.stat.presentation;
 import com.prodio.shared.ApiResponse;
 import com.prodio.stat.application.AiQueryLogPage;
 import com.prodio.stat.application.RagQaService;
+import com.prodio.stat.application.SearchMatch;
 import com.prodio.stat.application.ToolCall;
 import com.prodio.stat.domain.AiQueryLog;
 import com.prodio.stat.domain.SourceType;
@@ -50,6 +51,15 @@ class RagQaController {
         return ApiResponse.success(RouteEvalResponse.from(ragQaService.route(request.question())));
     }
 
+    /**
+     * searchNotes 검색 품질 평가 전용 — 답변 생성은 하지 않고 매치된 refId/sourceType/distance만
+     * 반환한다. 관리자만 호출 가능(경로가 /api/admin/**), 로그도 남기지 않는다.
+     */
+    @PostMapping("/search-eval")
+    ApiResponse<SearchEvalResponse> searchEval(@Valid @RequestBody SearchEvalRequest request) {
+        return ApiResponse.success(SearchEvalResponse.from(ragQaService.searchNotesEval(request.query(), request.sourceType())));
+    }
+
     @GetMapping("/ask/logs")
     ApiResponse<AskLogPageResponse> askLogs(
         @RequestParam(defaultValue = "0") int page,
@@ -68,6 +78,20 @@ class RagQaController {
     }
 
     record AskRequest(@NotBlank String question) {}
+
+    record SearchEvalRequest(@NotBlank String query, String sourceType) {}
+
+    record SearchEvalResponse(List<SearchMatchResponse> matches) {
+        static SearchEvalResponse from(List<SearchMatch> matches) {
+            return new SearchEvalResponse(matches.stream().map(SearchMatchResponse::from).toList());
+        }
+    }
+
+    record SearchMatchResponse(String sourceType, long refId, double distance) {
+        static SearchMatchResponse from(SearchMatch match) {
+            return new SearchMatchResponse(match.sourceType(), match.refId(), match.distance());
+        }
+    }
 
     record AskResponse(
         UUID id,
