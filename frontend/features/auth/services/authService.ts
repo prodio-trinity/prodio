@@ -101,7 +101,8 @@ export const authService = {
     return data;
   },
 
-  async logout(signal?: AbortSignal): Promise<void> {
+  async logout(signal?: AbortSignal): Promise<null> {
     await csrfProtectedRequest("/auth/logout", { method: "POST" }, signal);
+    return null;
   },
 };

@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +45,22 @@ class AdminMemberServiceTest {
 
         // Assert
         verify(sessionInvalidator).invalidateSessionsOf(targetId);
+    }
+
+    @Test
+    @DisplayName("본인 권한 변경 시 본인 세션은 무효화하지 않는다")
+    void updateRoles_본인_권한변경_세션_무효화_안함() {
+        // Arrange
+        long actorId = 1L;
+        AdminMember target = new AdminMember(actorId, "admin@prodio.com", "관리자",
+                UserAccount.Status.ACTIVE, Set.of(UserRole.ADMIN));
+        when(queryRepository.findById(actorId)).thenReturn(Optional.of(target));
+
+        // Act
+        service.updateRoles(actorId, Set.of(UserRole.ADMIN, UserRole.CLIENT), actorId);
+
+        // Assert
+        verify(sessionInvalidator, never()).invalidateSessionsOf(actorId);
     }
 
     @Test
