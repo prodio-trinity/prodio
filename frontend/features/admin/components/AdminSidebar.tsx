@@ -51,10 +51,10 @@ export function AdminSidebar({
           <div className={styles.logoArea}>
             <div className={styles.logoGroup}>
               <div className={styles.logoBadge}>P</div>
-              <span className={styles.collapsible}>
-                <span className={styles.logoBrand}>Prodio</span>
+              <div className={`${styles.collapsible} ${styles.logoText}`}>
+                <span className={styles.logoBrand}>PRODIO</span>
                 <span className={styles.logoSub}>{brandSub}</span>
-              </span>
+              </div>
             </div>
             <button
               type="button"

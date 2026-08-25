@@ -1,4 +1,5 @@
 import React from "react";
+import { LogOut } from "lucide-react";
 import styles from "./AdminHeader.module.css";
 import { CurrentUser } from "../../auth/types/auth";
 import { ModeSwitcher } from "../../auth/components/ModeSwitcher";
@@ -54,6 +55,7 @@ export function AdminHeader({ onMenuToggle, user, onLogout }: AdminHeaderProps) 
             onClick={onLogout}
             className={styles.logoutButton}
           >
+            <LogOut size={14} />
             로그아웃
           </button>
           <ThemeToggle />

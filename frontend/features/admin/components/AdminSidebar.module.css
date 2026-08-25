@@ -44,6 +44,7 @@
   .logoText {
     display: flex;
     flex-direction: column;
+    gap: 3px;
   }
 
   /* 접었을 때 숨겨지는 글자 */
@@ -88,6 +89,32 @@
     margin-top: auto;
     padding-top: 16px;
     border-top: 1px solid rgb(255 255 255 / 0.08);
+  }
+
+  .logoutButton {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 200ms ease, color 200ms ease;
+
+    &:hover {
+      background: rgb(239 68 68 / 0.08);
+      color: #ef4444;
+    }
+
+    &:focus {
+      outline: none;
+    }
   }
 
   .logoBadge {
@@ -252,6 +279,13 @@
       .bottom {
         display: flex;
         justify-content: center;
+      }
+
+      .logoutButton {
+        gap: 0;
+        justify-content: center;
+        padding-right: 0;
+        padding-left: 0;
       }
     }
   }

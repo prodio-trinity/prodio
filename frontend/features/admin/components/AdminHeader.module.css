@@ -101,20 +101,27 @@
   }
 
   .logoutButton {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     margin-left: 4px;
     padding: 6px 12px;
-    border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-text-secondary) 20%, transparent);
     border-radius: 8px;
     background: transparent;
-    color: var(--color-primary);
+    color: var(--color-text-secondary);
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
     transition: color 150ms ease, border-color 150ms ease;
 
     &:hover {
-      border-color: color-mix(in srgb, var(--color-text-primary) 20%, transparent);
-      color: var(--color-text-primary);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    &:focus {
+      outline: none;
     }
   }
 }
