@@ -9,6 +9,7 @@ import type {
 } from "../types/member";
 
 const membersApi = baseApi.injectEndpoints({
+  overrideExisting: process.env.NODE_ENV !== "production",
   endpoints: (build) => ({
     getMembers: build.query<AdminMemberPage, MemberFilters>({
       queryFn: (filters, api) =>

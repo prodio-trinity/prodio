@@ -32,7 +32,9 @@ public class AdminMemberService {
         }
 
         userRoleRepository.replaceRoles(targetUserId, roles.codes());
-        sessionInvalidator.invalidateSessionsOf(targetUserId);
+        if (targetUserId != actorUserId) {
+            sessionInvalidator.invalidateSessionsOf(targetUserId);
+        }
 
         return new AdminMember(target.id(), target.email(), target.name(), target.status(), roles.codes());
     }

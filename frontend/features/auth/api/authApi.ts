@@ -4,6 +4,7 @@ import { authService } from "../services/authService";
 import type { CurrentUser } from "../types/auth";
 
 const authApi = baseApi.injectEndpoints({
+  overrideExisting: process.env.NODE_ENV !== "production",
   endpoints: (build) => ({
     getCurrentUser: build.query<CurrentUser | null, void>({
       queryFn: (_argument, api) =>
@@ -20,7 +21,7 @@ const authApi = baseApi.injectEndpoints({
         queryResult(authService.signup(email, password, name, api.signal)),
       invalidatesTags: ["Auth"],
     }),
-    logout: build.mutation<void, void>({
+    logout: build.mutation<null, void>({
       queryFn: (_argument, api) => queryResult(authService.logout(api.signal)),
       invalidatesTags: ["Auth"],
     }),

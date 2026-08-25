@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLoginMutation, useSignupMutation } from "../api/authApi";
 import { queryErrorMessage } from "@/features/store/api/queryError";
@@ -56,8 +57,15 @@ export function LoginForm() {
   return (
     <div className={styles.card}>
       <div className={styles.logoArea}>
-        <div className={styles.logoBadge}>P</div>
-        <h1 className={styles.brand}>Prodio</h1>
+        <Image
+          src="/logo.png"
+          alt="Prodio 로고"
+          width={72}
+          height={72}
+          className={styles.logoImage}
+          priority
+        />
+        <h1 className={styles.brand}>PRODIO</h1>
       </div>
 
       <div className={styles.tabs} role="tablist" aria-label="로그인 방식 선택">
